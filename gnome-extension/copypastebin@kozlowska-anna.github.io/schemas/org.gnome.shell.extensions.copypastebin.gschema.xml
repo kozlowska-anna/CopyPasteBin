@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.copypastebin"
+          path="/org/gnome/shell/extensions/copypastebin/">
+    <key name="safe-paste" type="as">
+      <default><![CDATA[['<Super><Shift>v']]]></default>
+      <summary>Check the clipboard before pasting</summary>
+      <description>Runs the explicit CopyPasteBin safe-paste check without simulating a paste.</description>
+    </key>
+  </schema>
+</schemalist>

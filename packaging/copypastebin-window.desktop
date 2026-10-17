@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=CopyPasteBin
+Comment=CopyPasteBin window
+Comment[pl]=Okno CopyPasteBin
+Exec=/usr/bin/gnome-extensions enable copypastebin@kozlowska-anna.github.io
+Icon=copypastebin
+Terminal=false
+NoDisplay=true
+StartupNotify=false

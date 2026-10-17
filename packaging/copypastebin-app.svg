@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="green-paper" x1="28" y1="20" x2="82" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#50db76"/>
+      <stop offset="0.55" stop-color="#35c759"/>
+      <stop offset="1" stop-color="#209744"/>
+    </linearGradient>
+    <linearGradient id="graphite-paper" x1="53" y1="39" x2="106" y2="113" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5b5d63"/>
+      <stop offset="1" stop-color="#3a3b40"/>
+    </linearGradient>
+    <filter id="rear-shadow" x="12" y="7" width="92" height="108" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="1.6" flood-color="#101915" flood-opacity=".34"/>
+    </filter>
+    <filter id="front-shadow" x="35" y="25" width="91" height="103" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="1.5" flood-color="#0b0c0d" flood-opacity=".42"/>
+    </filter>
+  </defs>
+
+  <g transform="rotate(-7 55 58)" filter="url(#rear-shadow)">
+    <rect x="21" y="16" width="66" height="84" rx="13" fill="url(#green-paper)"/>
+    <rect x="21.75" y="16.75" width="64.5" height="82.5" rx="12.25" fill="none" stroke="#ffffff" stroke-opacity=".2" stroke-width="1.5"/>
+    <g fill="#f7faf8">
+      <rect x="35" y="38" width="37" height="5" rx="2.5"/>
+      <rect x="35" y="51" width="37" height="5" rx="2.5" opacity=".9"/>
+      <rect x="35" y="64" width="24" height="5" rx="2.5" opacity=".74"/>
+    </g>
+  </g>
+
+  <g transform="rotate(3 78 76)" filter="url(#front-shadow)">
+    <rect x="45" y="34" width="66" height="84" rx="12" fill="url(#graphite-paper)"/>
+    <rect x="45.75" y="34.75" width="64.5" height="82.5" rx="11.25" fill="none" stroke="#ffffff" stroke-opacity=".25" stroke-width="1.5"/>
+    <g fill="#f7faf8">
+      <rect x="59" y="57" width="37" height="5" rx="2.5"/>
+      <rect x="59" y="70" width="37" height="5" rx="2.5" opacity=".9"/>
+      <rect x="59" y="83" width="24" height="5" rx="2.5" opacity=".74"/>
+    </g>
+  </g>
+</svg>

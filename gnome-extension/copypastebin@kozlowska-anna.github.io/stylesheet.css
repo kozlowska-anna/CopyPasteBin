@@ -1,0 +1,18 @@
+.cpb-banner-action {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.58);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-weight: bold;
+}
+
+.cpb-banner-action:hover,
+.cpb-banner-action:focus {
+    background-color: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.9);
+}
+
+.cpb-banner-action:active {
+    background-color: rgba(255, 255, 255, 0.42);
+}
