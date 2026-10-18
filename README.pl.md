@@ -6,6 +6,8 @@
 
 [English](README.md) | **Polski**
 
+[Pobieranie / Instalacja](#instalacja-wersji-100)
+
 ## Więcej kontroli zanim wkleisz
 
 CopyPasteBin pomaga zauważyć dane wrażliwe w skopiowanym tekście, zanim trafią

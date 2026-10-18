@@ -46,8 +46,8 @@ Run the read-only compatibility check first:
 ./install.sh --check-only
 ```
 
-This command does not install or modify CopyPasteBin. If it reports
-`Kontrola zgodności: OK`, install the application for the current user:
+This command does not install or modify CopyPasteBin. If the compatibility
+check succeeds, install the application for the current user:
 
 ```sh
 ./install.sh

@@ -6,6 +6,8 @@
 
 **English** | [Polski](README.pl.md)
 
+[Download / Installation](#install-version-100)
+
 ## More control before you paste
 
 CopyPasteBin helps you notice sensitive information in copied text before it
@@ -151,8 +153,8 @@ Run the read-only compatibility check:
 ./install.sh --check-only
 ```
 
-If the check reports `Kontrola zgodności: OK`, install CopyPasteBin for the
-current user:
+If the compatibility check succeeds, install CopyPasteBin for the current
+user:
 
 ```sh
 ./install.sh

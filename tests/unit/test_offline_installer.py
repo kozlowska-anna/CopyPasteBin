@@ -160,6 +160,9 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn(f"sha256sum --check {archive}.sha256", guide)
         self.assertIn(f"tar -xzf {archive}", guide)
         self.assertIn("./install.sh --check-only", guide)
+        self.assertIn("[Download / Installation](#install-version-100)", readme)
+        self.assertNotIn("Kontrola zgodności", readme)
+        self.assertNotIn("Kontrola zgodności", guide)
 
     def test_polish_readme_is_a_product_page_with_a_clear_download_path(self):
         readme = POLISH_README.read_text(encoding="utf-8")
@@ -181,6 +184,10 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("## Kod legacy", technical_overview)
         self.assertIn("## Frazy BIP-39", technical_overview)
         self.assertIn("## Granice", technical_overview)
+        self.assertIn(
+            "[Pobieranie / Instalacja](#instalacja-wersji-100)",
+            readme,
+        )
 
     def test_security_model_has_english_default_and_linked_polish_version(self):
         english = SECURITY_MODEL.read_text(encoding="utf-8")
