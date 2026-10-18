@@ -18,6 +18,7 @@ OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.md"
 ENGLISH_OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.en.md"
 README = ROOT / "README.md"
 POLISH_README = ROOT / "README.pl.md"
+POLISH_TECHNICAL_OVERVIEW = ROOT / "docs" / "technical-overview.pl.md"
 LICENSE = ROOT / "LICENSE"
 NOTICE = ROOT / "NOTICE"
 INSTALLER = ROOT / "packaging" / "offline" / "install.sh"
@@ -157,6 +158,27 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn(f"sha256sum --check {archive}.sha256", guide)
         self.assertIn(f"tar -xzf {archive}", guide)
         self.assertIn("./install.sh --check-only", guide)
+
+    def test_polish_readme_is_a_product_page_with_a_clear_download_path(self):
+        readme = POLISH_README.read_text(encoding="utf-8")
+        technical_overview = POLISH_TECHNICAL_OVERVIEW.read_text(encoding="utf-8")
+        archive = "CopyPasteBin-offline-linux-1.0.0.tar.gz"
+        release_download = (
+            "https://github.com/kozlowska-anna/CopyPasteBin/releases/"
+            f"download/v1.0.0/{archive}"
+        )
+
+        download_label = "⬇ Pobierz CopyPasteBin 1.0.0 dla Linuksa (.tar.gz)"
+        self.assertIn(f"[{download_label}]({release_download})", readme)
+        self.assertIn(
+            "[Szczegółowy opis techniczny](docs/technical-overview.pl.md)",
+            readme,
+        )
+        self.assertNotIn("## Kod legacy", readme)
+        self.assertNotIn("## Frazy BIP-39", readme)
+        self.assertIn("## Kod legacy", technical_overview)
+        self.assertIn("## Frazy BIP-39", technical_overview)
+        self.assertIn("## Granice", technical_overview)
 
     def test_both_readmes_use_the_versioned_screenshot_set(self):
         screenshot_paths = (

@@ -41,447 +41,200 @@ Brak ostrzeżenia oznacza tylko, że program nie wykrył znanego, aktywnego
 wzorca. CopyPasteBin pomaga ograniczać ryzyko, ale nie gwarantuje wykrycia
 wszystkich danych wrażliwych i nie blokuje wklejania.
 
+## Najważniejsze funkcje
+
+- **Wykrywanie danych wrażliwych:** obsługiwane wzorce obejmują między innymi
+  klucze API, tokeny dostępu, klucze odzyskiwania, dane płatnicze,
+  identyfikatory osobowe, adresy sieciowe, prywatne ścieżki i ciągi połączeń
+  baz danych.
+- **Cztery poziomy ryzyka:** niski, średni, wysoki i krytyczny.
+- **Sprawdzanie i anonimizacja:** możesz obejrzeć wykryte dane i jawnie
+  zastąpić schowek dopiero po sprawdzeniu wyniku.
+- **Bezpieczne wklejenie:** skrót `Super+Shift+V` sprawdza tekst bez
+  automatycznego wklejania go do aktywnej aplikacji.
+- **Dokładne wykluczenia:** znane trafienie niskiego lub średniego ryzyka można
+  wyciszyć bez wyłączania całej kategorii. Trafień wysokiego i krytycznego
+  ryzyka nie można trwale wykluczać.
+- **Lokalny model historii:** trwała historia zawiera ograniczone metadane i
+  HMAC, a nie treść schowka. Do 15 ostatnich tekstów może być przechowywanych
+  w pamięci bieżącej sesji.
+- **Konfigurowalna ochrona:** można zmieniać kategorie detekcji, dodawać własne
+  reguły dosłowne, wstrzymać monitorowanie albo świadomie włączyć czyszczenie
+  niezmienionego ostrzegającego schowka po 1, 5 lub 15 minutach.
+- **Polski i angielski interfejs.**
+
+CopyPasteBin nie przejmuje `Ctrl+V`, nie podsłuchuje globalnie klawiatury i
+nie wkleja tekstu w imieniu użytkownika.
+
 ## CopyPasteBin na ekranie
 
 ### Integracja z pulpitem GNOME
 
-Menu w panelu pokazuje stan ochrony i daje szybki dostęp do najważniejszych
-funkcji programu.
+Menu pokazuje stan monitorowania i daje dostęp do sesyjnej listy ostatnich
+tekstów, filtrów, reguł i wykluczeń, automatycznego czyszczenia, ustawień
+języka, edytora, pauzy oraz lokalnego okna „O programie”.
 
 <img width="359" height="608" alt="Menu CopyPasteBin w panelu GNOME" src="docs/screenshots/01-gnome-panel.png" />
 
 ### Ostrzeżenie o danych wrażliwych
 
-Kolorowy banner informuje o poziomie ryzyka i rodzaju wykrytych danych, nie
-pokazując treści schowka.
+Po wykryciu aktywnego wzorca CopyPasteBin pokazuje banner w kolorze poziomu
+ryzyka. Widoczne są wyłącznie bezpieczne nazwy kategorii i liczba trafień,
+nigdy treść schowka. Przycisk otwiera edytor.
 
 <img width="704" height="159" alt="Ostrzeżenie CopyPasteBin o wykryciu danych wysokiego ryzyka" src="docs/screenshots/02-high-risk-warning.png" />
 
 ### Edytor schowka
 
-Edytor podświetla wykryte fragmenty i pozwala sprawdzić propozycję anonimizacji
-przed świadomym zastąpieniem schowka.
+Edytor podświetla fragmenty znalezione przez lokalny detektor i przygotowuje
+propozycję anonimizacji. Schowek zmienia się dopiero po kliknięciu „Zastąp
+schowek”; anulowanie nie wprowadza zmian. Zrzut używa syntetycznych danych.
 
 <img width="1079" height="608" alt="Edytor schowka z podświetlonymi syntetycznymi danymi" src="docs/screenshots/03-clipboard-editor.png" />
 
 ### Anonimizacja wybranego fragmentu
 
-Można zanonimizować pojedyncze trafienie bez zmieniania pozostałej części
-tekstu. Dozwolone trafienia niskiego i średniego ryzyka można też dokładnie
-wykluczyć.
+Kliknięcie trafienia niskiego lub średniego ryzyka wybiera jego dokładny
+zakres. Można zanonimizować tylko ten fragment albo po potwierdzeniu dodać
+dokładne, rozróżniające wielkość liter wykluczenie. Trafienia wysokiego i
+krytycznego ryzyka można anonimizować, ale nie można ich wykluczać.
 
 <img width="1079" height="608" alt="Menu anonimizacji wybranego syntetycznego adresu e-mail" src="docs/screenshots/04-selective-anonymization.png" />
 
 ### Reguły własne i wykluczenia
 
-Lokalne reguły i dokładne wykluczenia można włączać, wyłączać i edytować w
-osobnym oknie.
+Reguły własne są lokalnymi, ograniczonymi i dokładnymi literałami z przypisanym
+poziomem ryzyka. Każdą regułę można włączać i wyłączać. Dokładne wykluczenia
+działają tylko dla obsługiwanych trafień niskiego i średniego ryzyka.
+Prawdziwych haseł, kluczy ani innych sekretów nie należy zapisywać jako reguł
+lub wykluczeń.
 
 <img width="1202" height="647" alt="Okno reguł własnych i dokładnych wykluczeń CopyPasteBin" src="docs/screenshots/05-custom-rules-and-exceptions.png" />
 
 ### Ostatnie wpisy tylko w pamięci sesji
 
 Osobne okno pokazuje do 15 ostatnio skopiowanych tekstów przechowywanych
-wyłącznie w RAM. Lista znika po zablokowaniu ekranu, wylogowaniu lub zatrzymaniu
-programu.
+wyłącznie w pamięci procesu. Lista znika po zablokowaniu ekranu, wylogowaniu
+lub zatrzymaniu rozszerzenia, a przywrócenie wpisu wymaga jawnej akcji. Jest
+oddzielona od trwałej historii, która zapisuje ograniczone metadane i HMAC,
+lecz nie treść schowka.
 
 <img width="1039" height="718" alt="Sesyjna lista syntetycznych wpisów schowka" src="docs/screenshots/06-clipboard-history.png" />
 
-Autorką CopyPasteBin jest **Anna Kozłowska**. Projekt powstaje przy wsparciu
-narzędzi ChatGPT i Codex od OpenAI. CopyPasteBin jest niezależnym projektem;
-nie jest oficjalnym produktem ani projektem sponsorowanym przez OpenAI.
+## Zgodność
 
-Copyright © 2026 Anna Kozłowska. Kod CopyPasteBin jest udostępniany na
-licencji **GPL-3.0-or-later**; pełne warunki znajdują się w pliku `LICENSE`.
-Informacje i warunki dotyczące danych stron trzecich znajdują się w pliku
-`NOTICE` oraz w `docs/third-party-data.md`.
+Wersja 1.0.0 obsługuje następujące środowisko:
 
-Historia zmian publicznych znajduje się w `CHANGELOG.md`.
+| Element | Wymaganie |
+| --- | --- |
+| System operacyjny | Linux |
+| Pulpit | GNOME Shell 50 |
+| Serwer wyświetlania | Wayland |
+| Python | 3.11 lub nowszy, z modułem `venv` |
+| Dodatkowe komponenty | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
 
-Detektor rozróżnia `CRITICAL`, `HIGH`, `MEDIUM` i `LOW`. Rozpoznaje między
-innymi klucze API OpenAI, Anthropic i Google, tokeny GitHub i Slack, klucze
-Stripe i AWS, JWT, klucze prywatne oraz ciągi połączeń popularnych baz danych.
-Całość działa lokalnie; dopasowanie nie potwierdza, że sekret jest aktywny.
+Integracje z pulpitami Cinnamon, KDE Plasma i Xfce nie są obsługiwane w wersji
+1.0.0. Instalator bezpiecznie zatrzymuje się, jeśli GNOME Shell nie jest
+dostępny.
 
-## Aktualny stan
+## Instalacja wersji 1.0.0
 
-Aktualnym interfejsem jest lekkie rozszerzenie GNOME Shell 50. Reaguje na
-`Meta.Selection::owner-changed`, a nie na timer. Przed pobraniem tekstu
-sprawdza blokadę ekranu i pełną pauzę, po czym przekazuje ograniczoną treść do
-lokalnego rdzenia przez anonimowe stdin. Nie używa sieci, nie przechwytuje
-klawiatury i nie zgaduje celu wklejenia.
+### [⬇ Pobierz CopyPasteBin 1.0.0 dla Linuksa (.tar.gz)](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz)
 
-Gotowy zakres lokalnej wersji obejmuje:
+Pobierz również [sumę kontrolną SHA-256](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz.sha256),
+a następnie skorzystaj z [polskiej instrukcji instalacji](docs/offline-installation.md),
+aby sprawdzić plik przed jego otwarciem.
 
-- wykrywanie i deterministyczną anonimizację danych wrażliwych;
-- czteropoziomowe ostrzeżenia we własnym kolorowym banerze;
-- trwałą historię metadanych bez treści oraz podręczne 15 tekstów tylko w RAM;
-- pauzę na 30 minut, 1 godzinę albo bezterminowo;
-- osobne lekkie okno filtrów z widocznymi ptaszkami;
-- jasne, klikalne pozycje filtrów i osobny lokalny edytor reguł oraz wykluczeń;
-- jawny wybór dokładnego wykluczenia w edytorze schowka, otwierany także z bannera;
-- wybór języka systemowego, polskiego albo angielskiego dla całego GUI;
-- opcjonalne czyszczenie ostrzegającego schowka po 1, 5 albo 15 minutach;
-- jawny edytor i narzędzia poprawiania tekstu uruchamiane tylko na żądanie;
-- jawny skrót `Super+Shift+V` („Bezpieczne wklejenie”), który sprawdza bieżący
-  tekst i przygotowuje propozycję redakcji bez automatycznego wklejania;
-- potwierdzane czyszczenie schowka i wyjście z aplikacji;
-- ikonę stanu: zielona tylna kartka oznacza aktywną ochronę, czerwona pauzę,
-  przejście albo błąd;
-- launcher „CopyPasteBin”, który włącza wyłącznie aktualne rozszerzenie.
-- okno „O programie” z informacją o autorce, wersji, prywatności oraz wsparciu
-  ChatGPT i Codexa.
+Uruchom kontrolę zgodności, która niczego nie zmienia:
 
-Rdzeń CLI nadal obsługuje jawne wejście ze stdin, zwykłego pliku UTF-8 albo
-jednorazowego `--clipboard`. Oryginał wysokiego ryzyka wymaga jednorazowej
-frazy z ID i nie ma opcji `--force` ani `--yes`.
-
-## Użycie
-
-Publiczne polecenia rdzenia:
-
-```text
-printf 'tekst' | cpb --purpose chat
-cpb --file JAWNY_PLIK --purpose email
-cpb --clipboard --purpose drive
-cpb pause 30m
-cpb pause 1h
-cpb pause until-resumed
-cpb pause resume
-cpb pause status
-cpb history
-cpb show ID
-```
-
-`--purpose` ma zamknięte wartości: `chat`, `email`, `drive`, `terminal`,
-`other`. `--copy redacted` kopiuje wynik redakcji, a `--copy original`
-oryginał zgodnie z polityką ryzyka. Tekst nie trafia do argv ani zmiennych
-środowiskowych procesów schowka.
-
-## Benchmark jakości detekcji
-
-Deterministyczny benchmark używa wyłącznie syntetycznych przykładów i nie jest
-częścią uruchomienia ani instalacji programu. Raportuje wykryte i pominięte
-przypadki pozytywne oraz fałszywe alarmy osobno dla każdej badanej kategorii.
-Ustalona baza wymaga zera pominięć i zera fałszywych alarmów; regresja kończy
-polecenie niezerowym kodem:
-
-```text
-PYTHONPATH=src python3 benchmarks/detection_quality.py
-```
-
-Polecenia `bridge` i `ui` są wewnętrznym protokołem rozszerzenia, nie
-interfejsem użytkownika.
-
-## Język interfejsu
-
-Menu rozszerzenia zawiera pozycję „Język / Language” z trzema ustawieniami:
-język systemu, polski i angielski. Angielski jest językiem bazowym kodu GUI,
-a polski wbudowanym tłumaczeniem. Zmiana obejmuje menu, banery oraz trzy okna
-GTK: filtry, reguły i edytor schowka. Nowe okna otwierają się już w wybranym
-języku.
-
-Wybór jest lokalny dla użytkownika i zapisuje się w prywatnym pliku
-`${XDG_STATE_HOME:-~/.local/state}/copypastebin/language.json`. Nie zawiera
-treści schowka. Brak pliku oznacza język systemu; dla systemu innego niż
-polski interfejs wybiera angielski. Upgrade i deinstalacja zachowują to
-ustawienie tak samo jak pozostały prywatny stan.
-
-## Aktualne uruchamianie GNOME
-
-Kod rozszerzenia znajduje się w
-`gnome-extension/copypastebin@kozlowska-anna.github.io`.
-Zainstalowana lokalna wersja uruchamia się przy logowaniu, jeżeli rozszerzenie
-ma stan enabled. „Wyjdź z CopyPasteBin” wyłącza je po drugim kliknięciu, a
-launcher `packaging/copypastebin.desktop` wykonuje tylko:
-
-```text
-/usr/bin/gnome-extensions enable copypastebin@kozlowska-anna.github.io
-```
-
-Nie uruchamia terminala, usługi systemd ani watchera `wl-paste`.
-
-## Bezpieczne wklejenie
-
-Skrót `Super+Shift+V` jest rejestrowany przez rozszerzenie standardowym API
-GNOME Shell. Wybrano go zamiast `Super+V`, ponieważ GNOME 50 domyślnie używa
-`Super+V` dla zasobnika wiadomości. CopyPasteBin nie przechwytuje zwykłego
-`Ctrl+V`, nie obserwuje całej klawiatury i nie emuluje naciśnięć klawiszy.
-
-Po użyciu skrótu rozszerzenie sprawdza blokadę ekranu i pauzę, pobiera
-ograniczony tekst schowka oraz uruchamia tę samą lokalną detekcję przez stdin.
-Brak trafienia pokazuje krótkie potwierdzenie i nie zmienia schowka. Dla
-`low`, `medium`, `high` i `critical` otwiera istniejący edytor z przygotowaną
-propozycją redakcji; `high` i `critical` dostają dodatkowo wyraźny czerwony
-komunikat i nigdy nie otrzymują trwałego wyjątku. Dopiero kliknięcie „Zastąp
-schowek” zapisuje wynik. Anulowanie pozostawia schowek bez zmian. Funkcja nie
-wkleja tekstu do aktywnej aplikacji i nie zna jej tytułu, dokumentu ani URL.
-
-Skrót jest obecnie stały i ograniczony do jednego ustawienia GSettings
-rozszerzenia. Rzeczywisty test działania wymaga GNOME Shell 50 po instalacji i
-ponownym zalogowaniu; testy automatyczne nie stanowią LIVE PASS.
-
-## Instalacja offline na drugim komputerze
-
-Gotowy pakiet `CopyPasteBin-offline-linux-1.0.0.tar.gz` instaluje aktualną
-wersję lokalnie dla jednego użytkownika. Nie wymaga `sudo`, nie korzysta z
-sieci i nie przenosi konfiguracji, historii ani zawartości schowka z komputera,
-na którym został zbudowany.
-
-Obsługiwany komputer musi mieć GNOME Shell 50 na Waylandzie, Python 3.11 lub
-nowszy z modułem `venv`, `gjs`, GTK 4 i narzędzie `gnome-extensions`.
-Po rozpakowaniu należy najpierw wykonać bezpieczną kontrolę bez zmian:
-
-```text
+```sh
 ./install.sh --check-only
 ```
 
-Jeżeli zakończy się wynikiem `Kontrola zgodności: OK`, instalację uruchamia:
+Jeżeli kontrola zgłosi `Kontrola zgodności: OK`, zainstaluj CopyPasteBin dla
+bieżącego użytkownika:
 
-```text
+```sh
 ./install.sh
 ```
 
-Instalator zachowuje inne włączone rozszerzenia, usuwa dawny roboczy UUID i
-trwale dopisuje publiczny UUID CopyPasteBin. Następnie trzeba wylogować się i
-zalogować ponownie do sesji GNOME Wayland; CopyPasteBin powinien uruchomić się
-automatycznie. Jeżeli tak się nie stanie, przed użyciem pozycji z menu można
-wykonać `./diagnose-first-activation.sh`. Raport pokazuje wyłącznie ograniczony
-stan techniczny GNOME i niczego nie zmienia. `./uninstall.sh` usuwa kod,
-rozszerzenie i launcher, ale zachowuje prywatne ustawienia oraz historię.
-Szczegóły i granice opisuje `docs/offline-installation.md`.
+Instalacja nie wymaga `sudo`, menedżera pakietów ani połączenia z siecią.
+Aby aktywować rozszerzenie GNOME Shell, wyloguj się i zaloguj ponownie.
+CopyPasteBin powinien uruchomić się automatycznie.
 
-## Kod legacy
+Jeżeli program nie pojawi się po pierwszym logowaniu, przed ręcznym
+uruchomieniem wykonaj dołączoną diagnostykę, która niczego nie zmienia:
 
-`cpb watch start`, `cpb service ...` i `cpb launcher setup` pozostają w
-repozytorium jako wcześniejsza, przetestowana ścieżka techniczna. Nie stanowią
-aktualnego UX GNOME i nie powinny być używane w codziennej sesji. Polling
-`wl-paste` na GNOME Shell 50.1 odbierał fokus i zamykał menu kontekstowe.
-Zwiększenie interwału nie naprawia tej granicy. Stara usługa i dawny launcher
-powinny pozostać nieaktywne; historię decyzji opisuje logbook.
+```sh
+./diagnose-first-activation.sh
+```
 
-Opcjonalny `${XDG_CONFIG_HOME:-~/.config}/copypastebin/config.toml` może
-dodać najwyżej 32 dosłowne wzorce `CUSTOM_RULE` o jednym z czterech poziomów
-ryzyka oraz najwyżej 32 dosłowne wykluczenia. Nie obsługuje regexów. Reguły i
-wykluczenia można dodawać, edytować, czasowo wyłączać ptaszkiem i usuwać przez
-pozycję „Reguły własne i wykluczenia” w menu głównym. Każde wykluczenie wiąże
-dokładny literał z jedną kategorią `low` albo `medium`; kategorie `high` i
-`critical` są odrzucane. Wykluczenie działa tylko dla dopasowania o dokładnie
-takim samym zakresie i tej samej kategorii oraz rozróżnia wielkość liter:
-np. `5.6 Sol` nie wyłącza `5.6 SOL`, `1 SOL` ani całej kategorii kryptowalut.
-Okno pokazuje jednocześnie dwie kolumny — reguły i wykluczenia — a w każdej
-stale widoczne sekcje aktywne i nieaktywne. Nic nie jest zwijane ani ukrywane.
-Każdy banner ryzyka ma jeden przycisk „Otwórz edytor”. Kliknięcie dowolnego
-miejsca w podświetlonym trafieniu automatycznie wybiera jego pełny zakres i
-pokazuje podręczne akcje. „Wyklucz to trafienie” jest dostępne tylko wtedy, gdy
-konkretne trafienie rzeczywiście można wykluczyć.
-Przeciąganie nadal służy zwykłemu zaznaczaniu tekstu i nie otwiera dymka.
-Zapis potwierdza małe okno ostrzegawcze z wyróżnioną akcją „Dodaj
-wykluczenie”; `high` i `critical` nie mogą zostać wykluczone.
-Jest to świadome osłabienie wykrywania wyłącznie dla wpisanej wartości, dlatego
-nie należy wykluczać prawdziwych danych wrażliwych. Literały są zapisywane
-lokalnie w prywatnym pliku; reguła powinna zawierać stabilny marker, nie sekret.
+Aby zaktualizować program, uruchom `./install.sh` z nowej paczki. Aby usunąć
+zainstalowany kod, uruchom `./uninstall.sh`. Aktualizacja i usuwanie zachowują
+prywatną konfigurację oraz historię użytkownika.
 
-Format konfiguracji V3 dodaje kategorię do każdego wykluczenia. Przy odczycie
-V2 program lokalnie wiąże stary wpis tylko wtedy, gdy cały literał daje jedno
-jednoznaczne trafienie `low` lub `medium`. Wpisy niejednoznaczne, `high` i
-`critical` nie są aktywowane; przy następnym jawnym zapisie edytora pozostają
-pominięte. Migracja nie wymaga sieci ani osobnego odczytu schowka.
+Pełne wymagania, pobieranie, weryfikację, aktualizację, usuwanie i rozwiązywanie
+problemów opisuje [kompletna polska instrukcja instalacji](docs/offline-installation.md).
 
-## Kwoty walut tradycyjnych i kryptowalut
+## Prywatność i bezpieczeństwo
 
-Kategoria o stabilnym identyfikatorze `MONEY_AMOUNT_PLN_USD` ma poziom `low`
-i obejmuje jawne kwoty z jednym z 20 kodów:
-`USD EUR JPY GBP CNY CHF AUD CAD HKD SGD INR KRW SEK MXN NZD NOK TWD BRL ZAR PLN`.
-Obsługiwane są też jednoznaczne symbole `$`, `€`, `£` oraz polskie `zł`.
-Dotychczasowe kanoniczne formaty PLN i USD pozostają obsługiwane. Zwykła
-liczba nie jest automatycznie kwotą. Nie ma konwersji, salda ani interpretacji
-finansowej.
+CopyPasteBin ogranicza zbędny dostęp oraz ilość przechowywanych danych:
 
-## Klucze odzyskiwania
+- sprawdzanie schowka i dopasowywanie wzorców odbywa się lokalnie;
+- CopyPasteBin nie wysyła treści schowka;
+- trwała historia zapisuje metadane i HMAC, ale nie oryginalny ani
+  zanonimizowany tekst;
+- ostatnie wpisy schowka istnieją tylko w pamięci procesu i są usuwane po
+  wyłączeniu rozszerzenia, zablokowaniu ekranu lub zakończeniu sesji;
+- tekst między komponentami przechodzi przez ograniczone standardowe wejście i
+  wyjście, a nie argumenty poleceń, zmienne środowiskowe, logi lub pliki
+  tymczasowe;
+- zwykłe wykrywanie nie zmienia schowka;
+- zastąpienie schowka wymaga jawnej akcji w edytorze, z wyjątkiem opcjonalnego
+  automatycznego czyszczenia, które użytkownik musi najpierw włączyć.
 
-Kategoria `RECOVERY_KEY` rozpoznaje 48-cyfrowe hasła odzyskiwania BitLocker:
-osiem grup po sześć cyfr, opcjonalnie rozdzielonych spacjami albo myślnikami.
-Każda grupa musi przejść lokalną kontrolę formatu Microsoftu — wartość nie
-większą niż 720885 i podzielność przez 11. Trafienie ma wysokie ryzyko i jest
-opisywane jako „klucz odzyskiwania”, a nie jako numer telefonu. Wyłączenie tego
-filtra nie powoduje ponownego zaklasyfikowania tego samego zakresu jako telefonu.
-Ta sama ogólna kategoria obejmuje również inne ciągi występujące po wyraźnej
-etykiecie „Recovery key”, „Recovery code”, „Recovery password” albo „Klucz
-odzyskiwania”. Bez takiego kontekstu program nie zgaduje dowolnych długich
-identyfikatorów jako kluczy.
+CopyPasteBin nie chroni przed administratorem, innym procesem działającym jako
+ten sam użytkownik, menedżerem schowka, obserwacją ekranu ani przejętą aplikacją
+źródłową lub docelową. Nie ma gwarancji kryptograficznego wyzerowania pamięci,
+na którą mogą także wpływać swap i hibernacja.
 
-Heurystyka telefonu pomija poprawne daty kalendarzowe w formacie rok–miesiąc–
-dzień albo dzień–miesiąc–rok, rozdzielone myślnikiem, kropką lub ukośnikiem.
-Wyjątek wymaga rzeczywistej daty, więc nie obejmuje ciągów takich jak
-`2026-13-40`. Telefon występujący obok daty nadal jest analizowany.
-Kandydat telefonu jest oceniany jako cały ciąg cyfr i separatorów, ma od 7 do
-15 cyfr oraz przechodzi kontrolę struktury i krótkiego kontekstu. Dzięki temu
-długi identyfikator nie jest dzielony na kilka pozornych telefonów, a opisy
-takie jak `ID`, `order` lub `numer seryjny` wyciszają tylko niejednoznaczne
-formaty. Prefiks `+`, nawias kierunkowy i jawna etykieta telefonu pozostają
-silnymi sygnałami wykrycia. Jeżeli odrzucony ciąg przekracza 15 cyfr, jego
-fragmenty są analizowane osobno tylko przy jawnej etykiecie telefonu albo gdy
-mają własne formatowanie, np. myślniki. Luźne grupy cyfr nie są automatycznie
-składane w numery, a etykieta identyfikatora obejmuje cały niejednoznaczny ciąg.
+Przed użyciem CopyPasteBin w szczególnie wrażliwym procesie przeczytaj
+[model bezpieczeństwa](SECURITY.md) oraz
+[kontrakt wersji 1](docs/v1-contract.md).
 
-Kategoria o stabilnym identyfikatorze `CRYPTO_AMOUNT_BTC_XRP` obejmuje 20
-lokalnie zapisanych tickerów:
-`BTC ETH USDT BNB XRP USDC SOL TRX HYPE ZEC DOGE XMR LINK LEO ADA XLM USDE DAI BCH USD1`.
-Ticker musi wystąpić z liczbą; sam ticker nie wywołuje ostrzeżenia. Lista jest
-aktualizowana wyłącznie wraz z wydaniami programu. CPB nie pobiera rankingu,
-nie przelicza kursów, nie sprawdza adresów portfeli ani sieci blockchain.
+## Dokumentacja
 
-## Frazy BIP-39
+- [Szczegółowy opis techniczny](docs/technical-overview.pl.md)
+- [Instalacja offline — polski](docs/offline-installation.md)
+- [Offline installation — English](docs/offline-installation.en.md)
+- [Model bezpieczeństwa](SECURITY.md)
+- [Architektura](docs/architecture.md)
+- [Backend zdarzeniowy GNOME](docs/gnome-event-backend.md)
+- [Dane stron trzecich](docs/third-party-data.md)
+- [Historia zmian](CHANGELOG.md)
 
-`POSSIBLE_SEED_PHRASE` ma zawsze wysokie ryzyko. Silnik rozróżnia poprawną
-strukturę BIP-39 (pełna lokalna angielska lista i poprawny checksum), frazę
-złożoną ze słów BIP-39 z błędnym checksumem oraz szerszą heurystykę seed-like.
-Błędny checksum nie jest dowodem bezpieczeństwa. Brak albo uszkodzenie
-wersjonowanej listy blokuje analizę. Pochodzenie i fingerprint zasobu opisuje
-`docs/third-party-data.md`.
+## Rozwój i weryfikacja
 
-## Numery z sumą kontrolną
+Testy automatyczne korzystają z danych syntetycznych i katalogów tymczasowych.
+Nie wymagają prawdziwej treści schowka ani prywatnych danych użytkownika.
 
-PESEL, IBAN i numery kart płatniczych mają osobne filtry. PESEL wymaga poprawnej
-sumy oraz możliwej daty, IBAN przechodzi kontrolę modulo 97, a karta algorytm
-Luhna. Poprawny checksum nie potwierdza, że numer istnieje lub należy do danej
-osoby; ogranicza tylko przypadkowe alarmy dla zwykłych ciągów cyfr.
+```sh
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+PYTHONPATH=src python3 benchmarks/detection_quality.py
+```
 
-## Historia
+Opublikowany snapshot wersji 1.0.0 przeszedł 307 testów automatycznych oraz
+26-przypadkowy benchmark detekcji. Kontrole automatyczne nie zastępują testu
+w działającej sesji GNOME Shell.
 
-Historia trafia do `${XDG_STATE_HOME:-~/.local/state}/copypastebin` z prawami
-`0700`; baza i 256-bitowy klucz HMAC mają `0600`. Widok UX pokazuje najwyżej
-8 pozycji. Retencja techniczna wynosi maksymalnie 90 dni i 1000 operacji.
-Historia przechowuje tylko ID, czas, zamknięty rodzaj źródła i celu, wersję
-reguł, przedział rozmiaru, HMAC, relację duplikatu, kategorie, liczniki,
-poziom i status. Nie przechowuje oryginału, redakcji ani „niewinnego” wycinka.
+## Licencja i autorstwo
 
-Niezależnie od tej technicznej historii rozszerzenie trzyma podręcznie najwyżej
-15 ostatnich skopiowanych tekstów wyłącznie w RAM. Limit jednego wpisu wynosi
-256 KiB, a całości 2 MiB; większe teksty nadal są analizowane, lecz nie trafiają
-na listę.
-Pozycja „Ostatnie wpisy schowka” otwiera osobne okno GTK z bezpiecznym
-podglądem, przywróceniem wybranej treści i potwierdzanym czyszczeniem całej
-listy. Okno dostaje chwilową migawkę przez anonimowe stdin i zwraca tylko
-zamknięty identyfikator akcji przez stdout. Treść nie trafia do pliku, argv,
-env ani logu. Zablokowanie ekranu wyłącza rozszerzenie i usuwa listę z jego
-pamięci; to samo następuje po wyłączeniu programu, jego awarii, wylogowaniu lub
-końcu sesji. Po odblokowaniu lista zaczyna się od kolejnych kopiowań.
-Środowisko uruchomieniowe nie gwarantuje kryptograficznego wyzerowania pamięci
-ani wykluczenia swapu i hibernacji.
+Copyright © 2026 Anna Kozłowska.
 
-## Lekki interfejs GNOME
+CopyPasteBin jest udostępniany na licencji
+[GNU GPL-3.0-or-later](LICENSE). Informacje i warunki dotyczące danych stron
+trzecich znajdują się w pliku [NOTICE](NOTICE).
 
-Lekki interfejs zachowuje trwałe metadane bez treści oraz ograniczoną,
-sesyjną listę 15 tekstów w RAM, bez tytułów okien, nazw dokumentów i adresów
-stron. Dla kopiowania zapisuje stabilny identyfikator aplikacji źródłowej,
-jeżeli GNOME potrafi go wiarygodnie wskazać. Aplikacja docelowa pozostaje
-`unknown` przy zwykłym wklejeniu i może zostać zapisana tylko dla jawnej
-operacji wykonanej przez CopyPasteBin; zmiana fokusu nie jest dowodem
-wklejenia.
-
-Ostrzeżenie o danych wrażliwych jest doradcze. Domyślnie nie usuwa, nie redaguje
-i nie blokuje treści automatycznie. Użytkowniczka może jednak jawnie włączyć
-czyszczenie ostrzegającego schowka po 1, 5 albo 15 minutach. Licznik jest
-anulowany przez nowe kopiowanie, edycję, zmianę ustawienia lub pauzę i czyści
-tylko tę samą, niezmienioną sekwencję schowka. Treść ani jej hash nie są
-zapisywane w ustawieniu.
-Jawna akcja „Edytuj / anonimizuj schowek” otwiera małe okno z bieżącym
-tekstem. Sugestia anonimizacji używa tego samego silnika reguł; użytkownik
-może ją dalej zmieniać, a schowek jest zastępowany dopiero po kliknięciu
-„Zastąp schowek”. Można zanonimizować wszystkie trafienia albo zaznaczyć tylko
-wybraną wartość lub fragment tekstu, kliknąć wewnątrz zaznaczenia i wybrać
-„Anonimizuj zaznaczenie” z podręcznego menu; pozostała treść nie zostanie wtedy
-zmieniona. Kliknięcie podświetlonego trafienia pokazuje tę samą akcję, a dla
-dozwolonego trafienia niskiego lub średniego ryzyka także dokładne wykluczenie.
-Anulowanie nie zmienia schowka ani historii.
-
-Rozwijana sekcja „Szybkie poprawianie tekstu” działa wyłącznie w otwartym
-edytorze. Pozwala świadomie zapisać czysty tekst bez formatowania, zwinąć
-nadmiarowe spacje, uporządkować albo połączyć wiersze, usunąć puste wiersze,
-zmienić wielkość liter oraz wykonać dosłowne „znajdź i zamień”. Ostatnią
-zmianę można cofnąć; wersje cofania istnieją tylko w pamięci procesu edytora
-i znikają po zamknięciu okna. Te narzędzia nie dodają pracy do obsługi
-kopiowania w tle. Osobny przycisk „Wyczyść schowek” wymaga drugiego kliknięcia
-potwierdzającego i dopiero wtedy zastępuje jego zawartość pustym tekstem.
-Przyciski anonimizacji wszystkich trafień, wskazania trafień i cofania pozostają
-widoczne w jednym głównym rzędzie szerszego okna; anonimizacja zaznaczenia jest
-w jego podręcznym menu, a cofanie uaktywnia się dopiero po zmianie tekstu.
-Po otwarciu edytor wskazuje trafienia kolorami: bursztynowym dla ostrzeżenia
-i czerwonym dla wysokiego ryzyka. Zmiana tekstu usuwa nieaktualne oznaczenia,
-a „Wskaż wykryte dane” ponawia analizę na żądanie.
-
-Gdy aktywny CPBin zauważy zmianę właściciela schowka, czarna przednia kartka
-ikony na 200 ms zmienia kolor na jasnoszary `#E8E8E8`. Jest to wyłącznie
-ciche potwierdzenie zauważenia kopiowania: nie zmienia oceny ryzyka ani banerów.
-Kolejne szybkie kopiowanie przedłuża błysk, a pauza, blokada ekranu i własny
-zapis z edytora go nie wywołują.
-
-Ostrzeżenia zdarzeniowego interfejsu GNOME korzystają z własnego lekkiego
-banera pod ikoną CPBin zamiast szarej notyfikacji systemowej. Ostrzeżenie ma
-kolor bursztynowy, wysokie ryzyko czerwony, sukces zielony, a informacja
-niebieski. Baner pokazuje wyłącznie nazwy zamkniętych kategorii i liczniki,
-nigdy treść schowka; znika po 6 sekundach, może zostać zamknięty ręcznie albo
-otworzyć edytor. Szybkie kolejne zdarzenie zastępuje poprzedni baner. Blokada
-ekranu usuwa go natychmiast.
-Położenie dopasowuje się do panelu: pod panelem górnym albo nad panelem dolnym,
-z ograniczeniem do widocznego obszaru głównego monitora.
-
-Menu zawiera również potwierdzane drugim kliknięciem „Wyjdź z CopyPasteBin”.
-Wyjście wyłącza rozszerzenie, usuwa ikonę, baner, timery i obserwację schowka.
-Pozycja „CopyPasteBin” w menu aplikacji włącza ponownie wyłącznie aktualne
-rozszerzenie zdarzeniowe, bez terminala, starej usługi i watchera pollingowego.
-Po ponownym uruchomieniu rozszerzenie pozostaje włączone także przy kolejnych
-logowaniach; po wyjściu pozostaje wyłączone do użycia launchera.
-
-Program ma pełną pauzę: 30 minut, 1 godzinę albo bezterminowo do ręcznego
-wznowienia. Podczas pauzy nie czyta i nie analizuje schowka, nie wysyła
-ostrzeżeń i nie zapisuje metadanych źródła ani celu. Po wznowieniu ignoruje
-wartość pozostawioną w schowku podczas pauzy i czeka na następne kopiowanie.
-Stan pauzy oraz pozostały czas muszą być stale widoczne; wznowienie czasowe
-publikuje neutralne powiadomienie bez danych schowka.
-
-Pozycja „Filtry wykrywania” pokazuje liczbę aktywnych ustawień i otwiera
-osobne, przewijane okno wszystkich 17 kategorii. Włączone pozycje mają ptaszek,
-a każda zmiana zapisuje się od razu.
-Na świeżej instalacji wyłączone są „Token”, „Ścieżka domowa” i „Fraza seed”;
-pozostałe filtry, w tym klucze konkretnych usług, są aktywne. Zmiana jest
-trwała i wpływa na kolejne
-ostrzeżenia, kategorie nowych wpisów historii, jawne analizy oraz sugestię
-anonimizacji. Nie zmienia wcześniejszych wpisów. Plik ustawień zawiera tylko
-zamknięte nazwy wyłączonych kategorii oraz wybrany czas czyszczenia, nigdy
-treść schowka.
-
-Budżet UX pozostaje mały: przetwarzanie zdarzeniowe bez pollingu, brak sieci,
-brak globalnego podsłuchiwania klawiatury, najwyżej 15 tekstów i 2 MiB w RAM
-oraz okna historii i edycji otwierane wyłącznie na żądanie.
-
-Polecenia `cpb pause ...` zapisują bezpieczny stan pauzy konsumowany przez
-zdarzeniowe rozszerzenie GNOME. Pollingowy watcher nie jest uruchamiany i nie
-należy traktować tych poleceń jako naprawy jego regresji GNOME.
-
-Repozytorium zawiera działające rozszerzenie GNOME 50 łączące wskaźnik pauzy
-z natywnym zdarzeniem zmiany schowka. Pobiera wyłącznie tekst, najwyżej 10 MiB,
-poza pauzą i ekranem blokady. Do historii zapisuje metadane źródła oraz cel
-`unknown`, bez treści. Nowa wersja lokalnego rozszerzenia zaczyna działać po
-ponownym zalogowaniu do sesji Wayland; wyłączenie i włączenie w tej samej sesji
-nie gwarantuje przeładowania kodu z dysku.
-
-Ikona ma dwie zachodzące na siebie kartki. Przednia pozostaje czarna z jasnym
-obrysem, a częściowo widoczna tylna kartka pokazuje stan: zielony oznacza
-aktywną ochronę, czerwony pauzę, zmianę stanu albo błąd/stan niepotwierdzony.
-
-Podręczna historia treści otwiera osobne okno na żądanie i przekazuje jego
-migawkę wyłącznie anonimowym stdin. Edytor jest uruchamiany tylko na żądanie;
-oryginał i wynik sugestii przechodzą przez anonimowe stdin/stdout, nigdy przez
-argv, env ani plik tymczasowy. Edytor i zapis ponownie sprawdzają pełną pauzę.
-
-## Granice
-
-CopyPasteBin nie używa sieci, nie wykonuje wejściowego tekstu, nie wysyła go
-do aplikacji i nie przejmuje `Ctrl+V`. Zdarzeniowy backend nie wkleja ani nie
-wysyła treści. Zmiana schowka następuje po jawnej akcji w edytorze albo przez
-jawnie włączone czasowe czyszczenie ostrzegającego wpisu. Program nie gwarantuje wykrycia wszystkich sekretów ani
-kryptograficznego wyzerowania pamięci Pythona. Szczegółowy kontrakt i model
-zagrożeń są w `docs/v1-contract.md` i `SECURITY.md`.
+Projekt powstaje przy wsparciu narzędzi ChatGPT i Codex od OpenAI.
+CopyPasteBin jest niezależnym projektem; nie jest powiązany z OpenAI,
+zatwierdzony przez OpenAI ani sponsorowany przez OpenAI.
