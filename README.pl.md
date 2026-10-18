@@ -1,7 +1,7 @@
 <h1>
+  <img align="right" width="160" alt="Logo CopyPasteBin" src="docs/screenshots/ikona.png" />
+  <br /><br /><br />
   CopyPasteBin
-  <img align="right" width="180" alt="Logo CopyPasteBin" src="docs/screenshots/ikona.png" />
-  <br clear="right" />
 </h1>
 
 [English](README.md) | **Polski**
