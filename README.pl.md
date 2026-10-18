@@ -6,17 +6,40 @@
 
 [English](README.md) | **Polski**
 
-Materiały informacyjne: [broszura po polsku](docs/CopyPasteBin_brochure_PL.pdf)
-oraz [broszura po angielsku](docs/CopyPasteBin_brochure_EN.pdf).
+## Więcej kontroli zanim wkleisz
 
-CopyPasteBin V1 jest lokalnym asystentem schowka dla GNOME. Rozpoznaje wybrane
-rodzaje danych wrażliwych i sekretów, ostrzega przed ryzykiem oraz pomaga
-świadomie zanonimizować tekst przed wklejeniem. Cała analiza odbywa się na
-urządzeniu, bez wysyłania treści do chmury.
+CopyPasteBin pomaga zauważyć dane wrażliwe w skopiowanym tekście, zanim trafią
+do czatu, maila, dokumentu lub terminala. Analiza działa lokalnie, a decyzja
+zawsze należy do Ciebie.
 
-Program ogranicza ryzyko przypadkowego ujawnienia danych, ale nie zastępuje
-oceny użytkownika. Brak ostrzeżenia oznacza jedynie, że CopyPasteBin nie
-rozpoznał żadnego z aktywnych wzorców.
+### Dlaczego warto
+
+- **Zauważasz ryzyko wcześniej.** Ostrzeżenie pojawia się, gdy tekst przypomina
+  obsługiwany rodzaj danych wrażliwych.
+- **Decyzja należy do Ciebie.** Program pomaga ocenić tekst, ale nie wkleja go
+  i domyślnie nie zmienia schowka automatycznie.
+- **Twoje dane zostają na komputerze.** Wykrywanie i anonimizacja działają bez
+  wysyłania treści do chmury.
+- **Łatwiej poprawiasz tekst.** Bezpieczne wklejenie i edytor pomagają usunąć
+  albo zanonimizować wybrane wartości przed użyciem.
+
+### W codziennej pracy
+
+Kopiujesz jak zwykle. CopyPasteBin pracuje w tle i daje Ci chwilę na
+sprawdzenie tekstu przed użyciem go w rozmowie, wiadomości, dokumencie lub
+poleceniu.
+
+### Ty zachowujesz kontrolę
+
+CopyPasteBin ostrzega i proponuje poprawki, lecz zapis wymaga jawnej akcji.
+Opcjonalne czyszczenie niezmienionego ostrzegającego schowka działa tylko po
+świadomym włączeniu przez użytkownika.
+
+### Uczciwie o ochronie
+
+Brak ostrzeżenia oznacza tylko, że program nie wykrył znanego, aktywnego
+wzorca. CopyPasteBin pomaga ograniczać ryzyko, ale nie gwarantuje wykrycia
+wszystkich danych wrażliwych i nie blokuje wklejania.
 
 Autorką CopyPasteBin jest **Anna Kozłowska**. Projekt powstaje przy wsparciu
 narzędzi ChatGPT i Codex od OpenAI. CopyPasteBin jest niezależnym projektem;

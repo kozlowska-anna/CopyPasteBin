@@ -8,13 +8,37 @@
 
 ## More control before you paste
 
-CopyPasteBin helps you avoid accidentally sharing sensitive information copied to your clipboard.
-It recognizes potentially sensitive data, such as passwords, API keys, payment card numbers, and email addresses, and warns you when something deserves a second look.
-You can review the text, anonymize sensitive details, or leave it unchanged. CopyPasteBin helps you make informed decisions without taking control away from you.
-Everything runs locally on your computer. Your clipboard content is never sent to the cloud by CopyPasteBin.
+CopyPasteBin helps you notice sensitive information in copied text before it
+reaches a chat, email, document, or terminal. Analysis runs locally, and the
+decision always stays with you.
 
-CopyPasteBin is an advisory tool. A missing warning means only that none of the
-enabled patterns matched; it is not a guarantee that the text is safe.
+### Why use it
+
+- **Notice risk earlier.** A warning appears when text resembles a supported
+  kind of sensitive information.
+- **Keep the decision.** CopyPasteBin helps you review text, but it does not
+  paste it or change the clipboard automatically by default.
+- **Keep data on your device.** Detection and redaction run without sending
+  clipboard contents to cloud services.
+- **Prepare safer text.** Safe Paste and the editor help remove or redact
+  selected values before you share them.
+
+### In everyday work
+
+Copy as usual. CopyPasteBin works in the background and gives you a moment to
+review text before using it in a conversation, message, document, or command.
+
+### You stay in control
+
+CopyPasteBin warns and suggests edits, but saving a replacement requires an
+explicit action. Optional clearing of an unchanged warning-triggering clipboard
+entry works only after you enable it.
+
+### Honest protection boundaries
+
+No warning means only that no known, enabled pattern matched. CopyPasteBin
+helps reduce risk, but it cannot guarantee detection of all sensitive
+information and does not block pasting.
 
 ## Features
 
@@ -179,8 +203,6 @@ CopyPasteBin in a sensitive workflow.
 ## Documentation
 
 - [Polish README](README.pl.md)
-- [Promotional brochure in English](docs/CopyPasteBin_brochure_EN.pdf)
-- [Promotional brochure in Polish](docs/CopyPasteBin_brochure_PL.pdf)
 - [Offline installation (Polish)](docs/offline-installation.md)
 - [Security model (Polish)](SECURITY.md)
 - [Architecture (Polish)](docs/architecture.md)
