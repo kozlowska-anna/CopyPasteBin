@@ -1,13 +1,43 @@
 **English** | [Polski](README.pl.md)
 <img width="829" height="726" alt="CopyPasteBin_brochure_EN (zmodyfikowane)" src="https://github.com/user-attachments/assets/813bb36f-968e-4d87-9705-a479f8f7e406" />
 
-### Clipboard editor
+#📸 CopyPasteBin Screenshots
+
+### 1. GNOME Desktop Integration
+
+CopyPasteBin integrates directly into the GNOME desktop, providing quick access to clipboard history, detection filters, privacy settings, and protection controls from the system panel.
+<img width="359" height="608" alt="01-gnome-panel" src="https://github.com/user-attachments/assets/8373d4a6-1f01-45bc-86f9-e1ec5ac6668d" />
+
+### 2, Sensitive Data Warning
+
+CopyPasteBin detects potentially sensitive clipboard content and displays clear, color-coded warnings based on risk severity. Open the editor to review detected information before sharing it.
+
+<img width="704" height="159" alt="02-high-risk-warning" src="https://github.com/user-attachments/assets/8c220e27-07c2-4553-b32d-3040b0d78198" />
+
+### 3. Clipboard Editor & Risk Highlighting
 
 Review detected sensitive information and anonymize
 selected content before replacing the clipboard.
 
 <img width="1079" height="608" alt="03-clipboard-editor" src="https://github.com/user-attachments/assets/b6175965-3fec-4eca-a217-724b7df4b5ed" />
 
+### 4. Selective Anonymization
+
+Take control of individual detections with contextual actions. Anonymize selected content or exclude a specific detection without changing the rest of your text.
+
+<img width="1079" height="608" alt="04-selective-anonymization" src="https://github.com/user-attachments/assets/bde143c5-cd0f-4739-a3c9-b24d8f08b776" />
+
+### 5. Custom Rules & Exceptions
+
+Personalize clipboard protection with custom, case-sensitive words and phrases. Assign risk levels, enable or disable individual rules, and configure precise exceptions for supported detection categories.
+
+<img width="1202" height="647" alt="05-custom-rules-and-exceptions" src="https://github.com/user-attachments/assets/e9c8aac8-425c-4894-8c41-529c2bc33f75" />
+
+### 6. Recent Clipboard History
+
+Quickly browse recently copied content from the GNOME panel. CopyPasteBin keeps a temporary clipboard history in memory, making it easier to find and reuse text without relying on cloud storage.
+
+<img width="1039" height="718" alt="06-clipboard-history" src="https://github.com/user-attachments/assets/0500ea09-4055-4aba-a07d-47210744da5d" />
 
 # CopyPasteBin
 
