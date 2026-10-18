@@ -198,7 +198,7 @@ as the same user, a clipboard manager, screen observation, or a compromised
 source or destination application. Runtime memory is not guaranteed to be
 cryptographically erased and may be affected by swap or hibernation.
 
-Read the [security model (Polish)](SECURITY.md) and the
+Read the [security model](SECURITY.md) and the
 [version 1 contract (Polish)](docs/v1-contract.md) before relying on
 CopyPasteBin in a sensitive workflow.
 
@@ -207,7 +207,8 @@ CopyPasteBin in a sensitive workflow.
 - [Polish README](README.pl.md)
 - [Offline installation (English)](docs/offline-installation.en.md)
 - [Instalacja offline (polski)](docs/offline-installation.md)
-- [Security model (Polish)](SECURITY.md)
+- [Security model (English)](SECURITY.md)
+- [Model bezpieczeństwa (Polish)](docs/security.pl.md)
 - [Architecture (Polish)](docs/architecture.md)
 - [GNOME event backend (Polish)](docs/gnome-event-backend.md)
 - [Third-party data (Polish)](docs/third-party-data.md)

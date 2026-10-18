@@ -199,7 +199,7 @@ ten sam użytkownik, menedżerem schowka, obserwacją ekranu ani przejętą apli
 na którą mogą także wpływać swap i hibernacja.
 
 Przed użyciem CopyPasteBin w szczególnie wrażliwym procesie przeczytaj
-[model bezpieczeństwa](SECURITY.md) oraz
+[polski model bezpieczeństwa](docs/security.pl.md) oraz
 [kontrakt wersji 1](docs/v1-contract.md).
 
 ## Dokumentacja
@@ -207,7 +207,8 @@ Przed użyciem CopyPasteBin w szczególnie wrażliwym procesie przeczytaj
 - [Szczegółowy opis techniczny](docs/technical-overview.pl.md)
 - [Instalacja offline — polski](docs/offline-installation.md)
 - [Offline installation — English](docs/offline-installation.en.md)
-- [Model bezpieczeństwa](SECURITY.md)
+- [Model bezpieczeństwa — polski](docs/security.pl.md)
+- [Security model — English](SECURITY.md)
 - [Architektura](docs/architecture.md)
 - [Backend zdarzeniowy GNOME](docs/gnome-event-backend.md)
 - [Dane stron trzecich](docs/third-party-data.md)

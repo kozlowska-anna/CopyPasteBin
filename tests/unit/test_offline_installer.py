@@ -19,6 +19,8 @@ ENGLISH_OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.en.md"
 README = ROOT / "README.md"
 POLISH_README = ROOT / "README.pl.md"
 POLISH_TECHNICAL_OVERVIEW = ROOT / "docs" / "technical-overview.pl.md"
+SECURITY_MODEL = ROOT / "SECURITY.md"
+POLISH_SECURITY_MODEL = ROOT / "docs" / "security.pl.md"
 LICENSE = ROOT / "LICENSE"
 NOTICE = ROOT / "NOTICE"
 INSTALLER = ROOT / "packaging" / "offline" / "install.sh"
@@ -179,6 +181,26 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("## Kod legacy", technical_overview)
         self.assertIn("## Frazy BIP-39", technical_overview)
         self.assertIn("## Granice", technical_overview)
+
+    def test_security_model_has_english_default_and_linked_polish_version(self):
+        english = SECURITY_MODEL.read_text(encoding="utf-8")
+        polish = POLISH_SECURITY_MODEL.read_text(encoding="utf-8")
+        english_readme = README.read_text(encoding="utf-8")
+        polish_readme = POLISH_README.read_text(encoding="utf-8")
+
+        self.assertTrue(english.startswith("# CopyPasteBin V1 Security Model\n"))
+        self.assertIn("[Polski](docs/security.pl.md)", english)
+        self.assertTrue(polish.startswith("# Model bezpieczeństwa CopyPasteBin V1\n"))
+        self.assertIn("[English](../SECURITY.md)", polish)
+        self.assertIn("[Security model (English)](SECURITY.md)", english_readme)
+        self.assertIn(
+            "[Model bezpieczeństwa (Polish)](docs/security.pl.md)",
+            english_readme,
+        )
+        self.assertIn(
+            "[Model bezpieczeństwa — polski](docs/security.pl.md)",
+            polish_readme,
+        )
 
     def test_both_readmes_use_the_versioned_screenshot_set(self):
         screenshot_paths = (

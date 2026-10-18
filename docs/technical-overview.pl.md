@@ -6,7 +6,7 @@ instrukcją pierwszego uruchomienia.
 
 Pełne procedury instalacji, aktualizacji i usuwania znajdują się w
 [instrukcji instalacji offline](offline-installation.md). Założenia
-bezpieczeństwa i granice zaufania opisuje [model zagrożeń](../SECURITY.md).
+bezpieczeństwa i granice zaufania opisuje [model zagrożeń](security.pl.md).
 
 Detektor rozróżnia `CRITICAL`, `HIGH`, `MEDIUM` i `LOW`. Rozpoznaje między
 innymi klucze API OpenAI, Anthropic i Google, tokeny GitHub i Slack, klucze
@@ -394,5 +394,6 @@ do aplikacji i nie przejmuje `Ctrl+V`. Zdarzeniowy backend nie wkleja ani nie
 wysyła treści. Zmiana schowka następuje po jawnej akcji w edytorze albo przez
 jawnie włączone czasowe czyszczenie ostrzegającego wpisu. Program nie gwarantuje wykrycia wszystkich sekretów ani
 kryptograficznego wyzerowania pamięci Pythona. Szczegółowy kontrakt i model
-zagrożeń są w [`v1-contract.md`](v1-contract.md) i [`SECURITY.md`](../SECURITY.md).
+zagrożeń są w [`v1-contract.md`](v1-contract.md) i
+[`security.pl.md`](security.pl.md).
 
