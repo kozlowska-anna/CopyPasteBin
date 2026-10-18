@@ -6,15 +6,10 @@
 
 ## More control before you paste
 
-CopyPasteBin is a local-first clipboard privacy assistant for GNOME Linux. It
-detects selected kinds of sensitive information in clipboard text, shows
-risk-based warnings, and helps you review or redact the text before sharing it.
-
-Detection and redaction run on your device. CopyPasteBin does not send
-clipboard contents to cloud services.
-
-CopyPasteBin is an advisory tool. A missing warning means only that none of the
-enabled patterns matched; it is not a guarantee that the text is safe.
+CopyPasteBin helps you avoid accidentally sharing sensitive information copied to your clipboard.
+It recognizes potentially sensitive data, such as passwords, API keys, payment card numbers, and email addresses, and warns you when something deserves a second look.
+You can review the text, anonymize sensitive details, or leave it unchanged. CopyPasteBin helps you make informed decisions without taking control away from you.
+Everything runs locally on your computer. Your clipboard content is never sent to the cloud by CopyPasteBin.
 
 ## Features
 
