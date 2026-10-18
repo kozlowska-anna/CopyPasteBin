@@ -145,11 +145,16 @@ class OfflineInstallerTests(unittest.TestCase):
             f"download/v1.0.0/{archive}"
         )
 
+        download_label = (
+            "⬇ Official Download — CopyPasteBin 1.0.0 for Linux (.tar.gz)"
+        )
+        self.assertIn(f"[{download_label}]({release_download})", readme)
         self.assertIn(
-            "[Download CopyPasteBin 1.0.0](docs/offline-installation.en.md)",
+            "[English installation instructions](docs/offline-installation.en.md)",
             readme,
         )
-        self.assertIn(f"[Download CopyPasteBin 1.0.0]({release_download})", guide)
+        self.assertIn(f"[{download_label}]({release_download})", guide)
+        self.assertIn("This is the official CopyPasteBin archive", guide)
         self.assertIn(f"{release_download}.sha256", guide)
         self.assertIn(f"sha256sum --check {archive}.sha256", guide)
         self.assertIn(f"tar -xzf {archive}", guide)
