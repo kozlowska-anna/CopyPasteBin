@@ -1,8 +1,8 @@
-**English** | [Polski](README.pl.md) 
-<img width="256" height="256" alt="ikona" src="https://github.com/user-attachments/assets/e88d6ef5-b997-4971-a979-07358f366ae0" />
-
+<img align="right" width="180" alt="CopyPasteBin logo" src="docs/screenshots/ikona.png" />
 
 # CopyPasteBin
+
+**English** | [Polski](README.pl.md)
 
 ## More control before you paste
 
@@ -10,6 +10,9 @@ CopyPasteBin helps you avoid accidentally sharing sensitive information copied t
 It recognizes potentially sensitive data, such as passwords, API keys, payment card numbers, and email addresses, and warns you when something deserves a second look.
 You can review the text, anonymize sensitive details, or leave it unchanged. CopyPasteBin helps you make informed decisions without taking control away from you.
 Everything runs locally on your computer. Your clipboard content is never sent to the cloud by CopyPasteBin.
+
+CopyPasteBin is an advisory tool. A missing warning means only that none of the
+enabled patterns matched; it is not a guarantee that the text is safe.
 
 ## Features
 
@@ -35,44 +38,62 @@ Everything runs locally on your computer. Your clipboard content is never sent t
 CopyPasteBin does not take over `Ctrl+V`, globally intercept keyboard input, or
 paste text on your behalf.
 
-## 📸 CopyPasteBin Screenshots
+## CopyPasteBin screenshots
 
 ### GNOME Desktop Integration
 
-CopyPasteBin integrates directly into the GNOME desktop, providing quick access to clipboard history, detection filters, privacy settings, and protection controls from the system panel.
+The panel menu shows whether monitoring is active and opens the session-only
+recent clipboard, detection filters, custom rules and exact exclusions,
+automatic clearing, language settings, the clipboard editor, pause controls,
+and the local About window.
 
-<img width="359" height="608" alt="01-gnome-panel" src="https://github.com/user-attachments/assets/8373d4a6-1f01-45bc-86f9-e1ec5ac6668d" />
+<img width="359" height="608" alt="CopyPasteBin menu in the GNOME panel" src="docs/screenshots/01-gnome-panel.png" />
 
 ### Sensitive Data Warning
 
-CopyPasteBin detects potentially sensitive clipboard content and displays clear, color-coded warnings based on risk severity. Open the editor to review detected information before sharing it.
+When an enabled pattern matches, CopyPasteBin displays a risk-colored banner
+with safe category names and counts, never the clipboard text itself. The
+single action opens the editor for review.
 
-<img width="704" height="159" alt="02-high-risk-warning" src="https://github.com/user-attachments/assets/8c220e27-07c2-4553-b32d-3040b0d78198" />
+<img width="704" height="159" alt="High-risk CopyPasteBin banner for a detected payment card" src="docs/screenshots/02-high-risk-warning.png" />
 
 ### Clipboard Editor & Risk Highlighting
 
-Review detected sensitive information and anonymize
-selected content before replacing the clipboard.
+The editor highlights ranges found by the same local detector and prepares a
+redaction suggestion. The clipboard changes only after **Replace clipboard**;
+canceling leaves it unchanged. The screenshot uses synthetic demonstration
+text.
 
-<img width="1079" height="608" alt="03-clipboard-editor" src="https://github.com/user-attachments/assets/b6175965-3fec-4eca-a217-724b7df4b5ed" />
+<img width="1079" height="608" alt="Clipboard editor highlighting a synthetic email address and password" src="docs/screenshots/03-clipboard-editor.png" />
 
 ### Selective Anonymization
 
-Take control of individual detections with contextual actions. Anonymize selected content or exclude a specific detection without changing the rest of your text.
+Clicking a highlighted low- or medium-risk match selects its exact range. You
+can anonymize only that selection or, after confirmation, add an exact,
+case-sensitive exclusion for that value and category. High- and critical-risk
+matches can be anonymized but cannot be excluded.
 
-<img width="1079" height="608" alt="04-selective-anonymization" src="https://github.com/user-attachments/assets/bde143c5-cd0f-4739-a3c9-b24d8f08b776" />
+<img width="1079" height="608" alt="Context menu for anonymizing or excluding a selected synthetic email address" src="docs/screenshots/04-selective-anonymization.png" />
 
 ### Custom Rules & Exceptions
 
-Personalize clipboard protection with custom, case-sensitive words and phrases. Assign risk levels, enable or disable individual rules, and configure precise exceptions for supported detection categories.
+Custom rules are bounded, local, exact, case-sensitive literals with an
+assigned risk level. Each rule can be enabled or disabled. Exact exclusions
+are available only for supported low- and medium-risk detections; real
+passwords, keys, and other secrets should never be saved as rules or
+exclusions.
 
-<img width="1202" height="647" alt="05-custom-rules-and-exceptions" src="https://github.com/user-attachments/assets/e9c8aac8-425c-4894-8c41-529c2bc33f75" />
+<img width="1202" height="647" alt="CopyPasteBin editor for synthetic custom rules and exact exclusions" src="docs/screenshots/05-custom-rules-and-exceptions.png" />
 
-### Recent Clipboard History
+### Recent clipboard in session memory
 
-Quickly browse recently copied content from the GNOME panel. CopyPasteBin keeps a temporary clipboard history in memory, making it easier to find and reuse text without relying on cloud storage.
+The separate window shows up to 15 recently copied text entries held only in
+process memory. Locking the screen, logging out, or stopping the extension
+clears the list. Restoring an entry requires an explicit action. This list is
+separate from the persistent history, which stores limited metadata and an
+HMAC but no clipboard text.
 
-<img width="1039" height="718" alt="06-clipboard-history" src="https://github.com/user-attachments/assets/0500ea09-4055-4aba-a07d-47210744da5d" />
+<img width="1039" height="718" alt="Session-only list of synthetic recent clipboard entries" src="docs/screenshots/06-clipboard-history.png" />
 
 
 ## Compatibility
@@ -93,9 +114,7 @@ version 1.0.0. The installer stops safely when GNOME Shell is unavailable.
 ## Install version 1.0.0
 
 Download `CopyPasteBin-offline-linux-1.0.0.tar.gz` and a checksum file from
-the GitHub.
-
-[Download CopyPasteBin 1.0.0](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.0.0).
+the [v1.0.0 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.0.0).
 
 Verify the archive before extracting it.
 
@@ -127,8 +146,8 @@ To update, run `./install.sh` from the new package. To remove the installed
 code, run `./uninstall.sh`. Updates and removal preserve the user's private
 configuration and history.
 
-See the [complete offline installation guide](docs/offline-installation.md) for
-requirements, verification, update, removal, and troubleshooting details.
+See the [complete offline installation guide (Polish)](docs/offline-installation.md)
+for requirements, verification, update, removal, and troubleshooting details.
 
 ## Privacy and security
 
@@ -151,21 +170,21 @@ as the same user, a clipboard manager, screen observation, or a compromised
 source or destination application. Runtime memory is not guaranteed to be
 cryptographically erased and may be affected by swap or hibernation.
 
-Read the [security model](SECURITY.md) and the
-[version 1 contract](docs/v1-contract.md) before relying on CopyPasteBin in a
-sensitive workflow.
+Read the [security model (Polish)](SECURITY.md) and the
+[version 1 contract (Polish)](docs/v1-contract.md) before relying on
+CopyPasteBin in a sensitive workflow.
 
 ## Documentation
 
 - [Polish README](README.pl.md)
 - [Promotional brochure in English](docs/CopyPasteBin_brochure_EN.pdf)
 - [Promotional brochure in Polish](docs/CopyPasteBin_brochure_PL.pdf)
-- [Offline installation](docs/offline-installation.md)
-- [Security model](SECURITY.md)
-- [Architecture](docs/architecture.md)
-- [GNOME event backend](docs/gnome-event-backend.md)
-- [Third-party data](docs/third-party-data.md)
-- [Changelog](CHANGELOG.md)
+- [Offline installation (Polish)](docs/offline-installation.md)
+- [Security model (Polish)](SECURITY.md)
+- [Architecture (Polish)](docs/architecture.md)
+- [GNOME event backend (Polish)](docs/gnome-event-backend.md)
+- [Third-party data (Polish)](docs/third-party-data.md)
+- [Changelog (Polish)](CHANGELOG.md)
 
 ## Development and verification
 

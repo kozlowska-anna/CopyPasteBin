@@ -1,8 +1,11 @@
-[English](README.md) | **Polski**
-
-<img width="829" height="731" alt="CopyPasteBin_brochure_PL (zmodyfikowane)" src="https://github.com/user-attachments/assets/2397223c-fe4f-4849-8a56-19a1b011896d" />
+<img align="right" width="180" alt="Logo CopyPasteBin" src="docs/screenshots/ikona.png" />
 
 # CopyPasteBin
+
+[English](README.md) | **Polski**
+
+Materiały informacyjne: [broszura po polsku](docs/CopyPasteBin_brochure_PL.pdf)
+oraz [broszura po angielsku](docs/CopyPasteBin_brochure_EN.pdf).
 
 CopyPasteBin V1 jest lokalnym asystentem schowka dla GNOME. Rozpoznaje wybrane
 rodzaje danych wrażliwych i sekretów, ostrzega przed ryzykiem oraz pomaga
