@@ -1,6 +1,8 @@
-<img align="right" width="180" alt="CopyPasteBin logo" src="docs/screenshots/ikona.png" />
-
-# CopyPasteBin
+<h1>
+  CopyPasteBin
+  <img align="right" width="180" alt="CopyPasteBin logo" src="docs/screenshots/ikona.png" />
+  <br clear="right" />
+</h1>
 
 **English** | [Polski](README.pl.md)
 
