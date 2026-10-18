@@ -1,6 +1,5 @@
 **English** | [Polski](README.pl.md)
-
-<img width="829" height="910" alt="CopyPasteBin_brochure_EN" src="https://github.com/user-attachments/assets/3c2cebd8-49ca-4eab-8f78-0794d23f6cac" />
+<img width="829" height="726" alt="CopyPasteBin_brochure_EN (zmodyfikowane)" src="https://github.com/user-attachments/assets/813bb36f-968e-4d87-9705-a479f8f7e406" />
 
 # CopyPasteBin
 
