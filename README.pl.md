@@ -1,4 +1,5 @@
 [English](README.md) | **Polski**
+
 ![Uploading CopyPasteBin_brochure_PL (zmodyfikowane).png…]()
 
 
