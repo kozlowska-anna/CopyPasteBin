@@ -17,6 +17,7 @@ ABOUT_WINDOW = (
 OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.md"
 ENGLISH_OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.en.md"
 README = ROOT / "README.md"
+POLISH_README = ROOT / "README.pl.md"
 LICENSE = ROOT / "LICENSE"
 NOTICE = ROOT / "NOTICE"
 INSTALLER = ROOT / "packaging" / "offline" / "install.sh"
@@ -156,6 +157,24 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn(f"sha256sum --check {archive}.sha256", guide)
         self.assertIn(f"tar -xzf {archive}", guide)
         self.assertIn("./install.sh --check-only", guide)
+
+    def test_both_readmes_use_the_versioned_screenshot_set(self):
+        screenshot_paths = (
+            "docs/screenshots/01-gnome-panel.png",
+            "docs/screenshots/02-high-risk-warning.png",
+            "docs/screenshots/03-clipboard-editor.png",
+            "docs/screenshots/04-selective-anonymization.png",
+            "docs/screenshots/05-custom-rules-and-exceptions.png",
+            "docs/screenshots/06-clipboard-history.png",
+        )
+
+        for readme_path in (README, POLISH_README):
+            source = readme_path.read_text(encoding="utf-8")
+            with self.subTest(readme=readme_path.name):
+                self.assertNotIn("github.com/user-attachments", source)
+                for screenshot in screenshot_paths:
+                    self.assertIn(f'src="{screenshot}"', source)
+                    self.assertTrue((ROOT / screenshot).is_file())
 
     def test_release_archive_has_normalized_metadata_and_no_silent_overwrite(self):
         source = BUILDER.read_text(encoding="utf-8")

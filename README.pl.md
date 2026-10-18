@@ -41,6 +41,52 @@ Brak ostrzeżenia oznacza tylko, że program nie wykrył znanego, aktywnego
 wzorca. CopyPasteBin pomaga ograniczać ryzyko, ale nie gwarantuje wykrycia
 wszystkich danych wrażliwych i nie blokuje wklejania.
 
+## CopyPasteBin na ekranie
+
+### Integracja z pulpitem GNOME
+
+Menu w panelu pokazuje stan ochrony i daje szybki dostęp do najważniejszych
+funkcji programu.
+
+<img width="359" height="608" alt="Menu CopyPasteBin w panelu GNOME" src="docs/screenshots/01-gnome-panel.png" />
+
+### Ostrzeżenie o danych wrażliwych
+
+Kolorowy banner informuje o poziomie ryzyka i rodzaju wykrytych danych, nie
+pokazując treści schowka.
+
+<img width="704" height="159" alt="Ostrzeżenie CopyPasteBin o wykryciu danych wysokiego ryzyka" src="docs/screenshots/02-high-risk-warning.png" />
+
+### Edytor schowka
+
+Edytor podświetla wykryte fragmenty i pozwala sprawdzić propozycję anonimizacji
+przed świadomym zastąpieniem schowka.
+
+<img width="1079" height="608" alt="Edytor schowka z podświetlonymi syntetycznymi danymi" src="docs/screenshots/03-clipboard-editor.png" />
+
+### Anonimizacja wybranego fragmentu
+
+Można zanonimizować pojedyncze trafienie bez zmieniania pozostałej części
+tekstu. Dozwolone trafienia niskiego i średniego ryzyka można też dokładnie
+wykluczyć.
+
+<img width="1079" height="608" alt="Menu anonimizacji wybranego syntetycznego adresu e-mail" src="docs/screenshots/04-selective-anonymization.png" />
+
+### Reguły własne i wykluczenia
+
+Lokalne reguły i dokładne wykluczenia można włączać, wyłączać i edytować w
+osobnym oknie.
+
+<img width="1202" height="647" alt="Okno reguł własnych i dokładnych wykluczeń CopyPasteBin" src="docs/screenshots/05-custom-rules-and-exceptions.png" />
+
+### Ostatnie wpisy tylko w pamięci sesji
+
+Osobne okno pokazuje do 15 ostatnio skopiowanych tekstów przechowywanych
+wyłącznie w RAM. Lista znika po zablokowaniu ekranu, wylogowaniu lub zatrzymaniu
+programu.
+
+<img width="1039" height="718" alt="Sesyjna lista syntetycznych wpisów schowka" src="docs/screenshots/06-clipboard-history.png" />
+
 Autorką CopyPasteBin jest **Anna Kozłowska**. Projekt powstaje przy wsparciu
 narzędzi ChatGPT i Codex od OpenAI. CopyPasteBin jest niezależnym projektem;
 nie jest oficjalnym produktem ani projektem sponsorowanym przez OpenAI.
