@@ -1,6 +1,14 @@
 **English** | [Polski](README.pl.md)
 <img width="829" height="726" alt="CopyPasteBin_brochure_EN (zmodyfikowane)" src="https://github.com/user-attachments/assets/813bb36f-968e-4d87-9705-a479f8f7e406" />
 
+### Clipboard editor
+
+Review detected sensitive information and anonymize
+selected content before replacing the clipboard.
+
+<img width="1079" height="608" alt="03-clipboard-editor" src="https://github.com/user-attachments/assets/b6175965-3fec-4eca-a217-724b7df4b5ed" />
+
+
 # CopyPasteBin
 
 ## More control before you paste
