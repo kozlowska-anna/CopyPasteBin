@@ -4,9 +4,6 @@
 
 # CopyPasteBin
 
-Materiały informacyjne: [broszura po polsku](docs/CopyPasteBin_brochure_PL.pdf)
-oraz [broszura po angielsku](docs/CopyPasteBin_brochure_EN.pdf).
-
 CopyPasteBin V1 jest lokalnym asystentem schowka dla GNOME. Rozpoznaje wybrane
 rodzaje danych wrażliwych i sekretów, ostrzega przed ryzykiem oraz pomaga
 świadomie zanonimizować tekst przed wklejeniem. Cała analiza odbywa się na
