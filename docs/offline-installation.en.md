@@ -4,10 +4,7 @@ The `CopyPasteBin-offline-linux-1.0.0.tar.gz` package provides a controlled,
 local installation of CopyPasteBin 1.0.0. The confirmed supported environment
 is GNOME Shell 50 on Wayland with Python 3.11 or newer.
 
-This is the official CopyPasteBin archive published in the project's GitHub
-Release. It is not an advertisement or a link to an external download site.
-
-## [⬇ Official Download — CopyPasteBin 1.0.0 for Linux (.tar.gz)](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz)
+## [⬇ Download CopyPasteBin 1.0.0 for Linux (.tar.gz)](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz)
 
 **Required verification file:**
 [Download the SHA-256 checksum (.sha256)](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz.sha256)
