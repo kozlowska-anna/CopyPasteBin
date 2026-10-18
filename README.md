@@ -99,6 +99,7 @@ version 1.0.0. The installer stops safely when GNOME Shell is unavailable.
 
 Download `CopyPasteBin-offline-linux-1.0.0.tar.gz` and a checksum file from
 the 
+
 [Download CopyPasteBin 1.0.0](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.0.0).
 
 Verify the archive before extracting it.
