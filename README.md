@@ -139,10 +139,11 @@ version 1.0.0. The installer stops safely when GNOME Shell is unavailable.
 
 ## Install version 1.0.0
 
-Download `CopyPasteBin-offline-linux-1.0.0.tar.gz` and a checksum file from
-the [v1.0.0 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.0.0).
+### [Download CopyPasteBin 1.0.0](docs/offline-installation.en.md)
 
-Verify the archive before extracting it.
+The English installation guide provides direct download links for
+`CopyPasteBin-offline-linux-1.0.0.tar.gz` and its checksum, followed by
+verification, installation, update, and removal instructions.
 
 Run the read-only compatibility check:
 
@@ -172,8 +173,9 @@ To update, run `./install.sh` from the new package. To remove the installed
 code, run `./uninstall.sh`. Updates and removal preserve the user's private
 configuration and history.
 
-See the [complete offline installation guide (Polish)](docs/offline-installation.md)
-for requirements, verification, update, removal, and troubleshooting details.
+See the [complete English installation guide](docs/offline-installation.en.md)
+for requirements, download links, verification, update, removal, and
+troubleshooting details.
 
 ## Privacy and security
 
@@ -203,7 +205,8 @@ CopyPasteBin in a sensitive workflow.
 ## Documentation
 
 - [Polish README](README.pl.md)
-- [Offline installation (Polish)](docs/offline-installation.md)
+- [Offline installation (English)](docs/offline-installation.en.md)
+- [Instalacja offline (polski)](docs/offline-installation.md)
 - [Security model (Polish)](SECURITY.md)
 - [Architecture (Polish)](docs/architecture.md)
 - [GNOME event backend (Polish)](docs/gnome-event-backend.md)

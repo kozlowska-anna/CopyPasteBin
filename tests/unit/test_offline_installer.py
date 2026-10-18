@@ -15,6 +15,7 @@ ABOUT_WINDOW = (
     / "about.js"
 )
 OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.md"
+ENGLISH_OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.en.md"
 README = ROOT / "README.md"
 LICENSE = ROOT / "LICENSE"
 NOTICE = ROOT / "NOTICE"
@@ -130,6 +131,29 @@ class OfflineInstallerTests(unittest.TestCase):
             archive_name,
             OFFLINE_DOCUMENTATION.read_text(encoding="utf-8"),
         )
+        self.assertIn(
+            archive_name,
+            ENGLISH_OFFLINE_DOCUMENTATION.read_text(encoding="utf-8"),
+        )
+
+    def test_english_download_path_is_explicit_and_complete(self):
+        readme = README.read_text(encoding="utf-8")
+        guide = ENGLISH_OFFLINE_DOCUMENTATION.read_text(encoding="utf-8")
+        archive = "CopyPasteBin-offline-linux-1.0.0.tar.gz"
+        release_download = (
+            "https://github.com/kozlowska-anna/CopyPasteBin/releases/"
+            f"download/v1.0.0/{archive}"
+        )
+
+        self.assertIn(
+            "[Download CopyPasteBin 1.0.0](docs/offline-installation.en.md)",
+            readme,
+        )
+        self.assertIn(f"[Download CopyPasteBin 1.0.0]({release_download})", guide)
+        self.assertIn(f"{release_download}.sha256", guide)
+        self.assertIn(f"sha256sum --check {archive}.sha256", guide)
+        self.assertIn(f"tar -xzf {archive}", guide)
+        self.assertIn("./install.sh --check-only", guide)
 
     def test_release_archive_has_normalized_metadata_and_no_silent_overwrite(self):
         source = BUILDER.read_text(encoding="utf-8")
