@@ -162,6 +162,11 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("Open in Terminal", guide)
         self.assertIn("./install.sh --check-only", guide)
         self.assertIn("[Download / Installation](#install-version-100)", readme)
+        self.assertIn(
+            "[Technical overview (Polish)](docs/technical-overview.pl.md)",
+            readme,
+        )
+        self.assertNotIn("[Polish README](README.pl.md)", readme)
         self.assertNotIn("Kontrola zgodności", readme)
         self.assertNotIn("Kontrola zgodności", guide)
 
@@ -189,6 +194,14 @@ class OfflineInstallerTests(unittest.TestCase):
             "[Pobieranie / Instalacja](#instalacja-wersji-100)",
             readme,
         )
+        self.assertIn(
+            "wykluczenie dla tej wartości i kategorii",
+            " ".join(readme.split()),
+        )
+        self.assertIn("rozróżniają wielkość liter", readme)
+        self.assertIn("wykrytej karty płatniczej", readme)
+        self.assertIn("syntetycznym adresem e-mail i hasłem", readme)
+        self.assertIn("anonimizacji lub wykluczenia", readme)
 
     def test_security_model_has_english_default_and_linked_polish_version(self):
         english = SECURITY_MODEL.read_text(encoding="utf-8")

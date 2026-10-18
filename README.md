@@ -206,7 +206,7 @@ CopyPasteBin in a sensitive workflow.
 
 ## Documentation
 
-- [Polish README](README.pl.md)
+- [Technical overview (Polish)](docs/technical-overview.pl.md)
 - [Offline installation (English)](docs/offline-installation.en.md)
 - [Instalacja offline (polski)](docs/offline-installation.md)
 - [Security model (English)](SECURITY.md)

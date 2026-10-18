@@ -84,7 +84,7 @@ Po wykryciu aktywnego wzorca CopyPasteBin pokazuje banner w kolorze poziomu
 ryzyka. Widoczne są wyłącznie bezpieczne nazwy kategorii i liczba trafień,
 nigdy treść schowka. Przycisk otwiera edytor.
 
-<img width="704" height="159" alt="Ostrzeżenie CopyPasteBin o wykryciu danych wysokiego ryzyka" src="docs/screenshots/02-high-risk-warning.png" />
+<img width="704" height="159" alt="Ostrzeżenie CopyPasteBin wysokiego ryzyka dla wykrytej karty płatniczej" src="docs/screenshots/02-high-risk-warning.png" />
 
 ### Edytor schowka
 
@@ -92,24 +92,25 @@ Edytor podświetla fragmenty znalezione przez lokalny detektor i przygotowuje
 propozycję anonimizacji. Schowek zmienia się dopiero po kliknięciu „Zastąp
 schowek”; anulowanie nie wprowadza zmian. Zrzut używa syntetycznych danych.
 
-<img width="1079" height="608" alt="Edytor schowka z podświetlonymi syntetycznymi danymi" src="docs/screenshots/03-clipboard-editor.png" />
+<img width="1079" height="608" alt="Edytor schowka z podświetlonym syntetycznym adresem e-mail i hasłem" src="docs/screenshots/03-clipboard-editor.png" />
 
 ### Anonimizacja wybranego fragmentu
 
 Kliknięcie trafienia niskiego lub średniego ryzyka wybiera jego dokładny
 zakres. Można zanonimizować tylko ten fragment albo po potwierdzeniu dodać
-dokładne, rozróżniające wielkość liter wykluczenie. Trafienia wysokiego i
-krytycznego ryzyka można anonimizować, ale nie można ich wykluczać.
+dokładne, rozróżniające wielkość liter wykluczenie dla tej wartości i
+kategorii. Trafienia wysokiego i krytycznego ryzyka można anonimizować, ale nie
+można ich wykluczać.
 
-<img width="1079" height="608" alt="Menu anonimizacji wybranego syntetycznego adresu e-mail" src="docs/screenshots/04-selective-anonymization.png" />
+<img width="1079" height="608" alt="Menu anonimizacji lub wykluczenia wybranego syntetycznego adresu e-mail" src="docs/screenshots/04-selective-anonymization.png" />
 
 ### Reguły własne i wykluczenia
 
-Reguły własne są lokalnymi, ograniczonymi i dokładnymi literałami z przypisanym
-poziomem ryzyka. Każdą regułę można włączać i wyłączać. Dokładne wykluczenia
-działają tylko dla obsługiwanych trafień niskiego i średniego ryzyka.
-Prawdziwych haseł, kluczy ani innych sekretów nie należy zapisywać jako reguł
-lub wykluczeń.
+Reguły własne są lokalnymi, ograniczonymi i dokładnymi literałami, które
+rozróżniają wielkość liter i mają przypisany poziom ryzyka. Każdą regułę można
+włączać i wyłączać. Dokładne wykluczenia działają tylko dla obsługiwanych
+trafień niskiego i średniego ryzyka. Prawdziwych haseł, kluczy ani innych
+sekretów nie należy zapisywać jako reguł lub wykluczeń.
 
 <img width="1202" height="647" alt="Okno reguł własnych i dokładnych wykluczeń CopyPasteBin" src="docs/screenshots/05-custom-rules-and-exceptions.png" />
 
