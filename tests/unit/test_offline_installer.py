@@ -159,6 +159,7 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn(f"{release_download}.sha256", guide)
         self.assertIn(f"sha256sum --check {archive}.sha256", guide)
         self.assertIn(f"tar -xzf {archive}", guide)
+        self.assertIn("Open in Terminal", guide)
         self.assertIn("./install.sh --check-only", guide)
         self.assertIn("[Download / Installation](#install-version-100)", readme)
         self.assertNotIn("Kontrola zgodności", readme)
@@ -377,6 +378,10 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("Autorka: Anna Kozłowska", text)
         self.assertIn("ChatGPT i Codex od OpenAI", text)
         self.assertIn("nie jest oficjalnym produktem", text)
+        self.assertIn(
+            "Otwórz w terminalu",
+            OFFLINE_DOCUMENTATION.read_text(encoding="utf-8"),
+        )
         self.assertIn("./install.sh --check-only", text)
         self.assertIn("./install.sh", text)
         self.assertIn("Wyloguj się i zaloguj ponownie", text)

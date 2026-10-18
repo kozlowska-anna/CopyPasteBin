@@ -40,7 +40,9 @@ cd CopyPasteBin-offline-linux-1.0.0
 
 ## Check compatibility and install
 
-Run the read-only compatibility check first:
+After extracting the package, open a terminal in its folder. For example, use
+the **Open in Terminal** option in the file manager's context menu. Then run the
+read-only compatibility check:
 
 ```sh
 ./install.sh --check-only

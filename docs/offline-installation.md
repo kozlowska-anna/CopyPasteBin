@@ -1,4 +1,4 @@
-# Instalacja offline
+# Instalacja offline na drugim komputerze
 
 Pakiet `CopyPasteBin-offline-linux-1.0.0.tar.gz` służy do kontrolowanej,
 lokalnej instalacji CopyPasteBin 1.0.0. Obsługuje wyłącznie potwierdzony zakres
@@ -42,7 +42,9 @@ powiązane z UUID i pozostają w dotychczasowych prywatnych katalogach.
 
 ## Procedura użytkownika
 
-Po rozpakowaniu pakietu należy najpierw wykonać:
+Po rozpakowaniu pakietu uruchom terminal w jego folderze. Można na przykład
+użyć opcji **Otwórz w terminalu** w menu kontekstowym menedżera plików.
+Następnie sprawdź zgodność systemu:
 
 ```text
 ./install.sh --check-only
