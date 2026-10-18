@@ -1,4 +1,4 @@
-# Offline installation on another computer
+# Offline installation on a computer
 
 The `CopyPasteBin-offline-linux-1.0.0.tar.gz` package provides a controlled,
 local installation of CopyPasteBin 1.0.0. The confirmed supported environment
