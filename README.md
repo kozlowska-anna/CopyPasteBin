@@ -10,7 +10,7 @@ CopyPasteBin integrates directly into the GNOME desktop, providing quick access 
 
 <img width="359" height="608" alt="01-gnome-panel" src="https://github.com/user-attachments/assets/8373d4a6-1f01-45bc-86f9-e1ec5ac6668d" />
 
-### 2, Sensitive Data Warning
+### 2. Sensitive Data Warning
 
 CopyPasteBin detects potentially sensitive clipboard content and displays clear, color-coded warnings based on risk severity. Open the editor to review detected information before sharing it.
 
