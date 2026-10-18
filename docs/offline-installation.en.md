@@ -59,18 +59,6 @@ The installer does not require `sudo`, a package manager, or network access.
 Log out and log back in to the GNOME Wayland session. CopyPasteBin should then
 start automatically.
 
-If it does not appear after the first login, run the included read-only
-diagnostic before starting CopyPasteBin manually:
-
-```sh
-./diagnose-first-activation.sh
-```
-
-The diagnostic reports only bounded technical information about the GNOME
-session and the CopyPasteBin extension. It does not print clipboard content,
-CopyPasteBin private data, the home-directory path, or names of unrelated
-extensions, and it changes nothing.
-
 ## Package contents
 
 The package contains:
@@ -130,3 +118,19 @@ Version 1.0.0 supports GNOME Shell 50 on Wayland with Python 3.11 or newer,
 including `venv`, GJS, GTK 4, GioUnix, GNOME Extensions, and `sha256sum`.
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in this
 release. The installer stops safely when GNOME Shell is unavailable.
+
+## If CopyPasteBin does not start automatically
+
+This troubleshooting step is not part of a normal installation. Use it only if
+CopyPasteBin does not appear after logging back in. Before starting
+CopyPasteBin manually, run the included read-only diagnostic from the extracted
+package directory:
+
+```sh
+./diagnose-first-activation.sh
+```
+
+The diagnostic reports only bounded technical information about the GNOME
+session and the CopyPasteBin extension. It does not print clipboard content,
+CopyPasteBin private data, the home-directory path, or names of unrelated
+extensions, and it changes nothing.

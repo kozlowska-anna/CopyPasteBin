@@ -164,13 +164,6 @@ Installation does not require `sudo`, a package manager, or network access.
 Log out and log back in to activate the GNOME Shell extension. CopyPasteBin
 should then start automatically.
 
-If it does not appear after the first login, run the included read-only
-diagnostic before starting CopyPasteBin manually:
-
-```sh
-./diagnose-first-activation.sh
-```
-
 To update, run `./install.sh` from the new package. To remove the installed
 code, run `./uninstall.sh`. Updates and removal preserve the user's private
 configuration and history.

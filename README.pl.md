@@ -165,13 +165,6 @@ Instalacja nie wymaga `sudo`, menedżera pakietów ani połączenia z siecią.
 Aby aktywować rozszerzenie GNOME Shell, wyloguj się i zaloguj ponownie.
 CopyPasteBin powinien uruchomić się automatycznie.
 
-Jeżeli program nie pojawi się po pierwszym logowaniu, przed ręcznym
-uruchomieniem wykonaj dołączoną diagnostykę, która niczego nie zmienia:
-
-```sh
-./diagnose-first-activation.sh
-```
-
 Aby zaktualizować program, uruchom `./install.sh` z nowej paczki. Aby usunąć
 zainstalowany kod, uruchom `./uninstall.sh`. Aktualizacja i usuwanie zachowują
 prywatną konfigurację oraz historię użytkownika.

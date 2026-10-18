@@ -33,14 +33,7 @@ INSTALACJA
    ./install.sh
 
 5. Wyloguj się i zaloguj ponownie do sesji GNOME Wayland.
-6. CopyPasteBin powinien uruchomić się automatycznie. Jeżeli tak się nie stało,
-   zanim uruchomisz go z menu, zbierz bezpieczny raport techniczny:
-
-   ./diagnose-first-activation.sh
-
-   Skopiuj cały wynik. Raport nie zawiera treści schowka, historii, reguł,
-   wykluczeń, ścieżki katalogu domowego ani listy innych rozszerzeń.
-7. Po zapisaniu raportu uruchom CopyPasteBin z menu aplikacji.
+6. CopyPasteBin powinien uruchomić się automatycznie.
 
 Jawne „Bezpieczne wklejenie” używa skrótu Super+Shift+V. Sprawdza schowek i
 może przygotować propozycję redakcji, ale nie wkleja automatycznie i nie
@@ -48,6 +41,18 @@ przechwytuje zwykłego Ctrl+V.
 
 Instalator zapisuje program w ~/.local/share. Nie zmienia prywatnych plików
 w ~/.config/copypastebin ani ~/.local/state/copypastebin.
+
+ROZWIĄZYWANIE PROBLEMÓW
+
+Poniższy krok nie jest częścią zwykłej instalacji. Użyj go tylko wtedy, gdy
+CopyPasteBin nie uruchomi się automatycznie po ponownym zalogowaniu. Zanim
+uruchomisz program z menu, w rozpakowanym folderze wykonaj:
+
+   ./diagnose-first-activation.sh
+
+Skopiuj cały wynik. Raport nie zawiera treści schowka, historii, reguł,
+wykluczeń, ścieżki katalogu domowego ani listy innych rozszerzeń. Po zapisaniu
+raportu możesz uruchomić CopyPasteBin z menu aplikacji.
 
 AKTUALIZACJA Z WERSJI ROBOCZEJ
 

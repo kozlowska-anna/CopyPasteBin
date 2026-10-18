@@ -161,6 +161,10 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn(f"tar -xzf {archive}", guide)
         self.assertIn("Open in Terminal", guide)
         self.assertIn("./install.sh --check-only", guide)
+        self.assertNotIn("./diagnose-first-activation.sh", readme)
+        self.assertIn("## If CopyPasteBin does not start automatically", guide)
+        self.assertIn("not part of a normal installation", guide)
+        self.assertIn("./diagnose-first-activation.sh", guide)
         self.assertIn("[Download / Installation](#install-version-100)", readme)
         self.assertIn(
             "[Technical overview (Polish)](docs/technical-overview.pl.md)",
@@ -202,6 +206,10 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("wykrytej karty płatniczej", readme)
         self.assertIn("syntetycznym adresem e-mail i hasłem", readme)
         self.assertIn("anonimizacji lub wykluczenia", readme)
+        self.assertNotIn("./diagnose-first-activation.sh", readme)
+        polish_guide = OFFLINE_DOCUMENTATION.read_text(encoding="utf-8")
+        self.assertIn("## Gdy CopyPasteBin nie uruchomi się automatycznie", polish_guide)
+        self.assertIn("nie jest częścią zwykłej instalacji", polish_guide)
 
     def test_security_model_has_english_default_and_linked_polish_version(self):
         english = SECURITY_MODEL.read_text(encoding="utf-8")
@@ -405,6 +413,11 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("./install.sh", text)
         self.assertIn("Wyloguj się i zaloguj ponownie", text)
         self.assertIn("./diagnose-first-activation.sh", text)
+        self.assertIn("ROZWIĄZYWANIE PROBLEMÓW", text)
+        self.assertLess(
+            text.index("ROZWIĄZYWANIE PROBLEMÓW"),
+            text.index("./diagnose-first-activation.sh"),
+        )
         self.assertIn("./uninstall.sh", text)
         self.assertIn("nie przenosi ustawień, historii ani zawartości", text)
 

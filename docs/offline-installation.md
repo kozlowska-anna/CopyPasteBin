@@ -63,8 +63,17 @@ zachowując wszystkie pozostałe wpisy i usuwając wyłącznie dawny roboczy UUI
 Nie wymaga to usługi, opóźnienia ani dodatkowego dostępu do schowka. Po
 ponownym zalogowaniu CopyPasteBin powinien uruchomić się automatycznie.
 
-Do ewentualnej diagnostyki, przed uruchomieniem pozycji z menu aplikacji, można
-w rozpakowanym folderze wykonać:
+Deinstalacja używa `./uninstall.sh` z bieżącego pakietu. Nie należy uruchamiać
+deinstalatora ze starego rozpakowanego katalogu, ponieważ starsza wersja może
+nie znać publicznego UUID. Bieżący skrypt usuwa kod i launcher dla publicznego
+UUID oraz pozostałość starego UUID, ale świadomie pozostawia lokalne ustawienia
+i historię.
+
+## Gdy CopyPasteBin nie uruchomi się automatycznie
+
+Ten krok diagnostyczny nie jest częścią zwykłej instalacji. Użyj go tylko
+wtedy, gdy CopyPasteBin nie pojawi się po ponownym zalogowaniu. Przed ręcznym
+uruchomieniem programu wykonaj w rozpakowanym folderze:
 
 ```text
 ./diagnose-first-activation.sh
@@ -73,11 +82,5 @@ w rozpakowanym folderze wykonać:
 Raport pokazuje wyłącznie techniczny stan sesji, rozpoznania i włączenia UUID
 oraz właściwych ustawień GNOME. Nie wypisuje treści schowka, prywatnych danych
 CopyPasteBin, ścieżki katalogu domowego ani nazw innych rozszerzeń. Test niczego
-nie zmienia. Jeżeli automatyczny start nie nastąpił, po zapisaniu całego wyniku
-można uruchomić CopyPasteBin z menu aplikacji.
-
-Deinstalacja używa `./uninstall.sh` z bieżącego pakietu. Nie należy uruchamiać
-deinstalatora ze starego rozpakowanego katalogu, ponieważ starsza wersja może
-nie znać publicznego UUID. Bieżący skrypt usuwa kod i launcher dla publicznego
-UUID oraz pozostałość starego UUID, ale świadomie pozostawia lokalne ustawienia
-i historię.
+nie zmienia. Po zapisaniu całego wyniku można uruchomić CopyPasteBin z menu
+aplikacji.
