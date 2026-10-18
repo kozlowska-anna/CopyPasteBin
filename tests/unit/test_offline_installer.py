@@ -388,6 +388,12 @@ class OfflineInstallerTests(unittest.TestCase):
 
     def test_user_instructions_explain_check_install_and_logout(self):
         text = INSTRUCTIONS.read_text(encoding="utf-8")
+        polish_guide = OFFLINE_DOCUMENTATION.read_text(encoding="utf-8")
+        english_guide = ENGLISH_OFFLINE_DOCUMENTATION.read_text(encoding="utf-8")
+        self.assertTrue(polish_guide.startswith("# Instalacja offline na komputerze\n"))
+        self.assertNotIn("na drugim komputerze", polish_guide)
+        self.assertTrue(english_guide.startswith("# Offline installation on a computer\n"))
+        self.assertNotIn("another computer", english_guide)
         self.assertIn("Autorka: Anna Kozłowska", text)
         self.assertIn("ChatGPT i Codex od OpenAI", text)
         self.assertIn("nie jest oficjalnym produktem", text)
