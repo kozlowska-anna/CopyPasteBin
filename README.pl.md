@@ -1,3 +1,6 @@
+<img width="829" height="910" alt="CopyPasteBin_brochure_PL" src="https://github.com/user-attachments/assets/0c0491ce-3fa8-4026-affd-4699bce905e9" />
+
+
 # CopyPasteBin
 
 [English](README.md) | **Polski**
