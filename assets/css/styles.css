@@ -721,6 +721,16 @@ code {
   color: var(--muted);
 }
 
+.cta .project-credit {
+  margin-top: 1.25rem;
+  border-left: 3px solid var(--plum-700);
+  padding-left: 1rem;
+}
+
+.project-credit strong {
+  color: var(--ink);
+}
+
 .site-footer {
   border-top: 1px solid var(--line);
   background: #fff;
