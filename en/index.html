@@ -12,7 +12,7 @@
     <link rel="alternate" hreflang="en" href="https://kozlowska-anna.github.io/CopyPasteBin/en/">
     <link rel="alternate" hreflang="x-default" href="https://kozlowska-anna.github.io/CopyPasteBin/">
     <link rel="icon" type="image/png" href="../assets/images/logo.png">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=20261019-3">
+    <link rel="stylesheet" href="../assets/css/styles.css?v=20261019-4">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="CopyPasteBin">
     <meta property="og:locale" content="en_US">
@@ -25,7 +25,7 @@
     <meta property="og:image:height" content="647">
     <meta property="og:image:alt" content="CopyPasteBin rules and exceptions window with demonstration data">
     <meta name="twitter:card" content="summary_large_image">
-    <script defer src="../assets/js/site.js?v=20261019-3"></script>
+    <script defer src="../assets/js/site.js?v=20261019-4"></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -50,18 +50,14 @@
             <ul class="hero-proof" aria-label="Key facts"><li>runs locally</li><li>no account or telemetry</li><li>GPL-3.0-or-later</li></ul>
           </div>
           <div class="banner-showcase" role="group" aria-labelledby="risk-demo-title">
-            <p class="banner-kicker">The real interface</p>
-            <figure class="real-banner">
-              <img src="../assets/images/high-risk-warning.png" width="704" height="159" alt="Real red high-risk CopyPasteBin banner for a demonstration payment card">
-              <figcaption id="risk-demo-title"><strong>A real high-risk banner.</strong> It shows the category and match count, but never clipboard content.</figcaption>
-            </figure>
-            <p class="risk-legend-title">The full interface color scale:</p>
-            <ul class="risk-legend" aria-label="Four CopyPasteBin risk levels">
-              <li><span class="risk-swatch risk-low" aria-hidden="true"></span>Low</li>
-              <li><span class="risk-swatch risk-medium" aria-hidden="true"></span>Medium</li>
-              <li><span class="risk-swatch risk-high" aria-hidden="true"></span>High</li>
-              <li><span class="risk-swatch risk-critical" aria-hidden="true"></span>Critical</li>
-            </ul>
+            <div class="banner-showcase-heading"><p class="banner-kicker">The interface language</p><p id="risk-demo-title"><strong>Four colors. An immediate signal.</strong></p></div>
+            <div class="risk-stack" role="list" aria-label="Four CopyPasteBin risk levels">
+              <div class="risk-banner risk-low" role="listitem"><span class="risk-copy"><strong>CPBin: low risk</strong><span>Detected: home path.</span></span><span class="risk-action">Open editor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-medium" role="listitem"><span class="risk-copy"><strong>CPBin: medium risk</strong><span>Detected: email.</span></span><span class="risk-action">Open editor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-high" role="listitem"><span class="risk-copy"><strong>CPBin: high risk</strong><span>Detected: payment card.</span></span><span class="risk-action">Open editor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-critical" role="listitem"><span class="risk-copy"><strong>CPBin: critical risk</strong><span>Detected: seed phrase.</span></span><span class="risk-action">Open editor</span><span class="risk-close" aria-hidden="true">×</span></div>
+            </div>
+            <p class="banner-note">Color communicates the highest detected level. The banner never reveals clipboard content.</p>
           </div>
         </div>
       </section>
