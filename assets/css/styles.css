@@ -293,9 +293,9 @@ h3 {
 
 .banner-showcase-heading {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.2rem;
   margin-bottom: 0.6rem;
 }
 
