@@ -190,7 +190,7 @@
         <div class="container download-grid">
           <div class="system-card">
             <p class="eyebrow">Wymagania systemowe</p>
-            <h2>Potwierdzone środowisko.</h2>
+            <h2>Wymagane środowisko.</h2>
             <ul class="requirements-list">
               <li>Linux z GNOME Shell 50</li>
               <li>sesja Wayland</li>
@@ -198,7 +198,14 @@
               <li><code>gjs</code>, GTK 4, GioUnix i <code>gnome-extensions</code></li>
               <li><code>sha256sum</code> do kontroli pobranego archiwum</li>
             </ul>
-            <div class="note"><strong>Ważne:</strong> wersja 1.0.0 nie deklaruje obsługi KDE Plasma, Cinnamon, X11 ani Windows.</div>
+            <p><strong>Przykładowe zgodne dystrybucje:</strong></p>
+            <ul class="requirements-list">
+              <li>Ubuntu 26.04 LTS (GNOME 50, Wayland)</li>
+              <li>Fedora Workstation 44 (GNOME 50, Wayland)</li>
+            </ul>
+            <p>Obecnie nieobsługiwane środowiska: KDE Plasma, Cinnamon, Xfce oraz sesje X11.</p>
+            <p>Zgodność zależy od środowiska graficznego i jego wersji, a nie wyłącznie od nazwy dystrybucji.</p>
+            <div class="note"><strong>Zakres zgodności:</strong> są to przykłady spełniające wymagania techniczne, a nie konfiguracje z potwierdzonym testem instalacyjnym. Wersja 1.0.0 pozostaje przeznaczona wyłącznie dla Linuksa.</div>
           </div>
           <div class="download-card">
             <span class="version-badge">Stabilne wydanie · 1.0.0</span>
