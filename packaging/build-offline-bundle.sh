@@ -3,17 +3,18 @@ set -Eeuo pipefail
 umask 022
 
 readonly ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)"
-readonly VERSION="1.0.0"
-readonly SOURCE_DATE_EPOCH="1792195200"
+readonly VERSION="1.1"
+readonly SOURCE_DATE_EPOCH="1792454400"
 readonly UUID="copypastebin@kozlowska-anna.github.io"
 readonly WINDOW_APPLICATION_IDS=(
     "io.github.copypastebin.Editor"
+    "io.github.copypastebin.ImageRedactor"
     "io.github.copypastebin.FilterEditor"
     "io.github.copypastebin.RulesEditor"
     "io.github.copypastebin.RecentClipboard"
     "io.github.copypastebin.About"
 )
-readonly BUNDLE_NAME="CopyPasteBin-offline-linux-$VERSION"
+readonly BUNDLE_NAME="CopyPasteBin-linux-$VERSION"
 readonly DIST_DIR="$ROOT/dist"
 readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/copypastebin-bundle.XXXXXX")"
 readonly BUILD_SOURCE_DIR="$WORK_DIR/source"
@@ -58,7 +59,14 @@ cp -- "$ROOT/packaging/offline/install.sh" "$STAGE_DIR/install.sh"
 cp -- "$ROOT/packaging/offline/uninstall.sh" "$STAGE_DIR/uninstall.sh"
 cp -- "$ROOT/packaging/offline/diagnose-first-activation.sh" \
     "$STAGE_DIR/diagnose-first-activation.sh"
-cp -- "$ROOT/packaging/offline/README-INSTALL.txt" "$STAGE_DIR/README-INSTALL.txt"
+for document in README.md README.pl.md INSTALL.md INSTALL.pl.md; do
+    cp -- "$ROOT/packaging/offline/$document" "$STAGE_DIR/$document"
+done
+# Preserve the full security model, adapting only the language-switch paths.
+sed -e 's|(docs/security.pl.md)|(SECURITY.pl.md)|g' -e 's|(docs/image-redaction.md)|(IMAGE-REDACTION.md)|g' "$ROOT/SECURITY.md" > "$STAGE_DIR/SECURITY.md"
+sed -e 's|(../SECURITY.md)|(SECURITY.md)|g' -e 's|(image-redaction.pl.md)|(IMAGE-REDACTION.pl.md)|g' "$ROOT/docs/security.pl.md" > "$STAGE_DIR/SECURITY.pl.md"
+sed 's|(image-redaction.pl.md)|(IMAGE-REDACTION.pl.md)|g' "$ROOT/docs/image-redaction.md" > "$STAGE_DIR/IMAGE-REDACTION.md"
+sed 's|(image-redaction.md)|(IMAGE-REDACTION.md)|g' "$ROOT/docs/image-redaction.pl.md" > "$STAGE_DIR/IMAGE-REDACTION.pl.md"
 cp -- "$ROOT/LICENSE" "$STAGE_DIR/LICENSE"
 cp -- "$ROOT/NOTICE" "$STAGE_DIR/NOTICE"
 chmod 0755 -- "$STAGE_DIR/install.sh" "$STAGE_DIR/uninstall.sh" \

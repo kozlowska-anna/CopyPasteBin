@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CopyPasteBin | Clipboard Manager for GNOME</title>
+    <meta name="description" content="CopyPasteBin is a clipboard manager for GNOME with sensitive-data detection, paste warnings, text and image redaction, and a built-in paste editor.">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <link rel="canonical" href="https://kozlowska-anna.github.io/CopyPasteBin/en/">
+    <link rel="alternate" hreflang="pl" href="https://kozlowska-anna.github.io/CopyPasteBin/">
+    <link rel="alternate" hreflang="en" href="https://kozlowska-anna.github.io/CopyPasteBin/en/">
+    <link rel="alternate" hreflang="x-default" href="https://kozlowska-anna.github.io/CopyPasteBin/">
+    <link rel="icon" type="image/svg+xml" href="../assets/images/logo-web.svg">
+    <link rel="stylesheet" href="../assets/css/styles.css?v=20261022-12">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CopyPasteBin">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="pl_PL">
+    <meta property="og:title" content="CopyPasteBin | Clipboard Manager for GNOME">
+    <meta property="og:description" content="CopyPasteBin is a clipboard manager for GNOME with sensitive-data detection, paste warnings, text and image redaction, and a built-in paste editor.">
+    <meta property="og:url" content="https://kozlowska-anna.github.io/CopyPasteBin/en/">
+    <meta property="og:image" content="https://kozlowska-anna.github.io/CopyPasteBin/assets/images/rules-and-exceptions.png">
+    <meta property="og:image:width" content="1202">
+    <meta property="og:image:height" content="647">
+    <meta property="og:image:alt" content="CopyPasteBin rules and exceptions window with demonstration data">
+    <meta name="twitter:card" content="summary_large_image">
+    <script defer src="../assets/js/site.js?v=20261019-6"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container nav-shell">
+        <a class="brand" href="#top" aria-label="CopyPasteBin home"><img src="../assets/images/logo-web.svg" width="32" height="32" alt=""><span>CopyPasteBin</span></a>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-navigation" data-menu-button>Menu</button>
+        <nav class="site-nav" id="site-navigation" aria-label="Main navigation" data-navigation data-open="false">
+          <a href="#how-it-works">Why use it</a><a href="#use-cases">Use cases</a><a href="#features">Features</a><a href="#gallery">Gallery</a><a href="#privacy">Privacy</a><a href="#download">Version 1.1</a><a href="#roadmap">Roadmap</a><a class="language-link" href="../" lang="pl" hreflang="pl" aria-label="Wersja polska">PL</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="container hero-grid">
+          <div>
+            <p class="eyebrow">Privacy-focused clipboard manager · GNOME</p>
+            <h1>Check Before You Paste.</h1>
+            <p class="hero-lede">Copy as usual. CopyPasteBin warns when text looks like a password, key, personal data, or financial information. It helps you review, edit, or redact the content before use—while the decision about what to paste remains yours.</p>
+            <div class="hero-actions"><a class="button button-primary" href="#download">Explore version 1.1</a><a class="button button-secondary" href="#how-it-works">See how it works</a></div>
+            <ul class="hero-proof" aria-label="Key facts"><li>runs locally</li><li>no account or telemetry</li><li>open source · GPL-3.0-or-later</li><li>version 1.1 · two installers</li></ul>
+          </div>
+          <div class="banner-showcase" role="group" aria-labelledby="risk-demo-title">
+            <div class="banner-showcase-heading"><p class="banner-kicker">A moment before you paste</p><p id="risk-demo-title"><strong>The color warns you. You decide.</strong></p></div>
+            <div class="risk-stack" role="list" aria-label="Four CopyPasteBin risk levels">
+              <div class="risk-banner risk-low" role="listitem"><span class="risk-copy"><strong>CPBin: low risk</strong><span>Detected: phone number.</span></span><span class="risk-action">Open editor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-medium" role="listitem"><span class="risk-copy"><strong>CPBin: medium risk</strong><span>Detected: email address.</span></span><span class="risk-action">Open editor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-high" role="listitem"><span class="risk-copy"><strong>CPBin: high risk</strong><span>Detected: payment card.</span></span><span class="risk-action">Open editor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-critical" role="listitem"><span class="risk-copy"><strong>CPBin: critical risk</strong><span>Detected: private key.</span></span><span class="risk-action">Open editor</span><span class="risk-close" aria-hidden="true">×</span></div>
+            </div>
+            <p class="banner-note">Color communicates the highest detected level. The banner never reveals clipboard content.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="how-it-works">
+        <div class="container">
+          <div class="product-positioning">
+            <div class="product-positioning-copy">
+              <p class="eyebrow">Why use it · Privacy-focused Clipboard Manager</p>
+              <h2>A manager, but not a traditional clipboard archive.</h2>
+              <p>Traditional clipboard managers focus mainly on storing, searching, and reusing copies. CopyPasteBin also provides a short history, but prioritizes spotting risk, preparing text, and protecting you from an unfortunate click on “Paste”.</p>
+            </div>
+          </div>
+          <div class="trust-strip" role="group" aria-label="Key benefits"><div class="trust-item"><strong>Notice risk earlier</strong><span>A warning appears when text resembles a supported kind of sensitive information.</span></div><div class="trust-item"><strong>Keep the decision</strong><span>The app does not paste text or change the clipboard automatically by default.</span></div><div class="trust-item"><strong>Keep data on your device</strong><span>Detection and redaction run locally without uploading clipboard content.</span></div><div class="trust-item"><strong>Prepare safer text</strong><span>The editor helps remove or anonymize selected values before use.</span></div></div>
+        </div>
+      </section>
+
+      <section class="section" id="use-cases">
+        <div class="container">
+          <div class="section-heading"><p class="eyebrow">Example uses</p><h2>When might CopyPasteBin help?</h2></div>
+          <ul class="use-case-list" aria-label="Four situations where CopyPasteBin may help">
+            <li><strong>When writing a message:</strong> check whether copied text accidentally contains personal, contact, or financial information.</li>
+            <li><strong>When working with code or a terminal:</strong> notice tokens, keys, and connection strings before pasting them into a conversation, issue, or documentation.</li>
+            <li><strong>When using an AI tool:</strong> review copied text from a document, code, log, or command and redact sensitive data locally before pasting.</li>
+            <li><strong>When sharing an image:</strong> manually cover selected areas of a photo or screenshot and save a new PNG copy.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section section-soft" id="features">
+        <div class="container">
+          <div class="section-heading"><p class="eyebrow">Core features</p><h2>Practical help for everyday copying and pasting.</h2></div>
+          <div class="feature-grid">
+            <article class="feature-card"><span class="feature-number">01</span><h3>Handy text editor</h3><p>Open copied content, make manual changes, or redact detected fragments. The clipboard changes only after your confirmation.</p></article>
+            <article class="feature-card"><span class="feature-number">02</span><h3>Image redaction</h3><p>Open a local PNG or JPEG, cover selected areas with rectangles, and save a new PNG. The original file remains unchanged.</p></article>
+            <article class="feature-card"><span class="feature-number">03</span><h3>Rules and exact exceptions</h3><p>Custom markers stay local. Exceptions are limited to one exact low- or medium-risk detection.</p></article>
+            <article class="feature-card"><span class="feature-number">04</span><h3>15-item clipboard history</h3><p>The history contains up to 15 recently copied text items and remains only in current-session RAM. Locking the screen, logging out, or disabling the extension clears it.</p></article>
+            <article class="feature-card"><span class="feature-number">05</span><h3>Four risk levels</h3><p>Rules distinguish low, medium, high, and critical risk, with categories for contact details, financial data, tokens, private keys, and more.</p></article>
+            <article class="feature-card"><span class="feature-number">06</span><h3>Safe Paste</h3><p>Use <code>Super+Shift+V</code> to check the text currently in the clipboard. If CopyPasteBin detects a risk, it opens the editor with a redaction suggestion. It will not paste or change anything without confirmation.</p></article>
+            <article class="feature-card"><span class="feature-number">07</span><h3>Pause and optional clearing</h3><p>Pause durations remain visible while protection is paused, with Resume close at hand. Optional clipboard clearing stays off by default.</p></article>
+            <article class="feature-card"><span class="feature-number">08</span><h3>Two installers, one codebase</h3><p>The DEB package and tar.gz archive are built from the same source set and contain the same application code, image editor, icons, and defaults.</p></article>
+          </div>
+          <div class="feature-facts">
+            <article class="facts-card"><h3>What it can recognize</h3><ul><li>email addresses, phone numbers, PESEL, IBAN, and payment cards;</li><li>service keys, tokens, JWTs, and database connection strings;</li><li>private keys, recovery keys, and valid BIP-39 phrases;</li><li>other heuristics depending on the filters you enable.</li></ul></article>
+            <article class="facts-card"><h3>What it retains</h3><ul><li>a technical event history without clipboard content;</li><li>up to 15 text items in current-session RAM;</li><li>local settings, custom rules, and exact exceptions;</li><li>no telemetry, account, or cloud synchronization.</li></ul></article>
+            <article class="facts-card"><h3>What you control</h3><ul><li>individual detection category filters;</li><li>a 30-minute, one-hour, or indefinite pause;</li><li>clearing after 1, 5, or 15 minutes—or keeping it off;</li><li>the system language, Polish, or English;</li><li>the local input image and destination for its redacted copy.</li></ul></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="gallery">
+        <div class="container">
+          <div class="section-heading"><p class="eyebrow">The real interface</p><h2>CopyPasteBin in GNOME.</h2><p>These screenshots show the CopyPasteBin 1.1 interface and demonstration data only.</p></div>
+          <div class="gallery-grid">
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>GNOME desktop integration</strong><span>The panel menu shows monitoring status and opens recent text, filters, rules and exceptions, automatic clearing, language settings, the editor, pause controls, and the About window.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="CopyPasteBin menu in the GNOME panel"><img src="../assets/images/gnome-panel.png" width="359" height="608" loading="lazy" alt="CopyPasteBin menu in the GNOME panel"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Sensitive data warning</strong><span>When an enabled pattern matches, the banner displays a safe category name and count—never the clipboard text. Its single action opens the editor.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="High-risk warning for a demonstration payment card"><img src="../assets/images/high-risk-warning.png" width="704" height="159" loading="lazy" alt="Red high-risk warning from CopyPasteBin"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Clipboard editor and risk highlighting</strong><span>The editor marks ranges found by the local detector and prepares a redaction suggestion. Clipboard text changes only after explicit confirmation.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Editor with a demonstration email address and password"><img src="../assets/images/clipboard-editor.png" width="1079" height="608" loading="lazy" alt="Clipboard editor highlighting a demonstration email address and password"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Selective anonymization</strong><span>Select the exact detected range. Low- and medium-risk matches can be anonymized or added as exact exceptions; high and critical matches cannot be excluded.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Anonymizing or exactly excluding a demonstration email address"><img src="../assets/images/selective-anonymization.png" width="1079" height="608" loading="lazy" alt="Editor offering anonymization or an exact exception for a detection"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Custom rules and exact exceptions</strong><span>Rules are bounded local literals with assigned risk levels. Exceptions affect only an exact detection and should never contain real secrets.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Custom rules and exact exceptions with demonstration data"><img src="../assets/images/rules-and-exceptions.png" width="1202" height="647" loading="lazy" alt="CopyPasteBin custom rules and exact exceptions window"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Recent clipboard in session memory</strong><span>Up to 15 recently copied text items stay only in RAM. Locking the screen, logging out, or stopping the extension clears the list; restoring an item requires explicit action.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Session-only list of demonstration clipboard entries"><img src="../assets/images/recent-clipboard.png" width="1039" height="718" loading="lazy" alt="Session-only list of recent clipboard entries"></button></figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-dark" id="privacy">
+        <div class="container privacy-grid">
+          <div><p class="eyebrow">Privacy and security</p><h2>Local, with no account or cloud.</h2><p>Detection and redaction run on your computer. CopyPasteBin requires no account or connection to an AI service and does not save clipboard content in persistent history.</p><div class="privacy-points"><div class="privacy-point"><h3>No telemetry or trackers</h3><p>The app and this website do not send usage analytics.</p></div><div class="privacy-point"><h3>Explicit limits</h3><p>No warning does not mean a text is safe. Rules can miss something or raise a false positive.</p></div><div class="privacy-point"><h3>No persistent content history</h3><p>Up to 15 recent text items remain only in current-session RAM.</p></div></div></div>
+          <aside class="limits-card" aria-labelledby="limits-title"><h3 id="limits-title">What the app cannot guarantee</h3><p>CopyPasteBin helps you notice potential risk, but it is not an isolated vault.</p><ul><li>It cannot protect against root or another process running as the same user.</li><li>It cannot control external clipboard managers, screen observation, or the destination app.</li><li>It cannot guarantee secure erasure from RAM, swap, or process dumps.</li><li>It cannot prove that no detection means no sensitive data.</li></ul><p><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/SECURITY.md">Read the security model</a></p></aside>
+        </div>
+      </section>
+
+      <section class="section section-soft" id="download">
+        <div class="container download-grid">
+          <div class="system-card"><p class="eyebrow">System requirements</p><h2>Required environment.</h2><ul class="requirements-list"><li>Linux with GNOME Shell 50</li><li>a Wayland session</li><li>Python 3.11 or newer with <code>venv</code></li><li><code>gjs</code>, GTK 4, GdkPixbuf, GioUnix, and <code>gnome-extensions</code></li><li><code>sha256sum</code> to verify the downloaded archive</li></ul><p><strong>Examples of compatible Linux distributions:</strong></p><ul class="requirements-list"><li>Ubuntu 26.04 LTS (GNOME 50, Wayland)</li><li>Fedora Workstation 44 (GNOME 50, Wayland)</li></ul><p>Currently unsupported: KDE Plasma, Cinnamon, Xfce, and X11 sessions.</p><p>Compatibility depends on the desktop environment and its version, not just the Linux distribution.</p></div>
+          <div class="download-card"><span class="version-badge">Release · 1.1</span><h2>Two installers from the same source.</h2><p><code>copypastebin_1.1-1_all.deb</code> provides a system installation managed by APT, while <code>CopyPasteBin-linux-1.1.tar.gz</code> installs locally for one user without <code>sudo</code>.</p><div class="download-actions"><a class="button button-dark" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">Download DEB</a><a class="button" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">Download tar.gz</a></div><p>The 1.1 tar.gz includes English and Polish documentation. Start with <code>README.md</code> and <code>INSTALL.md</code>; use the language links to switch to Polish. Both site languages use the same archive.</p><ol class="install-steps"><li>The version 1.1 synthetic detection benchmark passed <strong>26/26</strong>.</li><li>Both installation variants were checked in the target GNOME/Wayland environment.</li></ol><p>Ubuntu Software did not upgrade the existing DEB, so manual upgrades use APT.</p><p><strong>Do not install both variants at the same time.</strong></p><p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/CHANGELOG.md">See what changed in version 1.1 →</a></p><p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.en.md">Full installation, upgrade, and uninstall guide →</a></p></div>
+        </div>
+      </section>
+
+      <section class="section" id="roadmap">
+        <div class="container">
+          <div class="section-heading"><p class="eyebrow">Public roadmap</p><h2>What’s next for CopyPasteBin.</h2><p>We show accepted development directions and areas that we are still exploring. The roadmap has no fixed dates.</p></div>
+          <div class="feature-grid">
+            <article class="feature-card"><span class="feature-number">Planned</span><h3>Easier content preparation</h3><p>We want to improve the editor, custom rules, and redaction so CopyPasteBin fits everyday work more naturally—still locally and without taking the decision away from the user.</p></article>
+            <article class="feature-card"><span class="feature-number">Exploring</span><h3>More ways to protect content</h3><p>Version 1.1 lets you manually cover parts of images. We are exploring local text recognition in images and integrations with other desktop environments.</p></article>
+          </div>
+          <p><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/ROADMAP.md">Read the full roadmap →</a></p>
+        </div>
+      </section>
+
+      <section class="section"><div class="container"><div class="cta"><p class="eyebrow">Open source</p><h2>Your clipboard. Your rules. Your decision.</h2><p class="project-credit"><strong>Development was assisted by ChatGPT and Codex from OpenAI.</strong> CopyPasteBin is an independent project and is not affiliated with, endorsed by, or sponsored by OpenAI.</p><p class="project-credit"><strong>CopyPasteBin is open-source software licensed under GPL-3.0-or-later.</strong> Review the source, documentation, and security model. If you find a bug, report it publicly without attaching real secrets or private clipboard content.</p><div class="hero-actions"><a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin">View the repository</a><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/issues">Report an issue</a></div></div></div></section>
+    </main>
+
+    <footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-brand"><img src="../assets/images/logo-web.svg" width="48" height="48" alt=""><div><strong>CopyPasteBin</strong><span>Clipboard manager for GNOME with sensitive-data detection, paste warnings, text and image redaction, and a built-in paste editor.</span></div></div><div><strong>Documentation</strong><ul class="footer-links"><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/README.md">Project overview</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/ROADMAP.md">Roadmap</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.en.md">Installation</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/image-redaction.md">Image redaction</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/SECURITY.md">Security</a></li></ul></div><div><strong>Project</strong><ul class="footer-links"><li><a href="https://github.com/kozlowska-anna/CopyPasteBin">GitHub</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/LICENSE">GPL-3.0-or-later</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/issues">Issue tracker</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 Anna Kozłowska</span></div></div></footer>
+
+    <dialog class="lightbox" data-lightbox aria-label="Enlarged screenshot"><button class="lightbox-close" type="button" aria-label="Close" data-lightbox-close>×</button><figure><img src="../assets/images/clipboard-editor.png" width="1079" height="608" data-lightbox-image alt=""><figcaption data-lightbox-caption></figcaption></figure></dialog>
+  </body>
+</html>

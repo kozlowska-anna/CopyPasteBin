@@ -6,7 +6,7 @@
 
 **English** | [Polski](README.pl.md)
 
-[Download / Installation](#install-version-100)
+[Download / Installation](#install-version-11)
 
 ## More control before you paste
 
@@ -50,6 +50,8 @@ information and does not block pasting.
 - **Four risk levels:** low, medium, high, and critical.
 - **Review and redaction:** inspect detected content and explicitly replace the
   clipboard only after reviewing the result.
+- **Image redaction:** open a local PNG or JPEG on demand, cover selected areas,
+  and save a new PNG without modifying the original file.
 - **Safe Paste:** press `Super+Shift+V` to inspect clipboard text without
   automatically pasting it into the active application.
 - **Exact exclusions:** suppress a known low- or medium-risk match without
@@ -126,7 +128,7 @@ HMAC but no clipboard text.
 
 ## Compatibility
 
-Version 1.0.0 supports the following environment:
+Version 1.1 supports the following environment:
 
 | Component | Requirement |
 | --- | --- |
@@ -137,15 +139,22 @@ Version 1.0.0 supports the following environment:
 | Additional components | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
 
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in
-version 1.0.0. The installer stops safely when GNOME Shell is unavailable.
+version 1.1. The installer stops safely when GNOME Shell is unavailable.
 
-## Install version 1.0.0
+## Install version 1.1
 
-### [⬇ Download CopyPasteBin 1.0.0 for Linux (.tar.gz)](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz)
+Choose one installation method:
 
-Also download the [SHA-256 checksum](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz.sha256),
-then follow the [English installation instructions](docs/offline-installation.en.md)
-to verify the file before opening it.
+- [⬇ Download the Debian package](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb) for a system installation managed by APT.
+- [⬇ Download the tar.gz archive](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz) for a user-local installation without `sudo`.
+- [Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) and verify the selected file before opening it.
+
+**Do not install both variants at the same time.** Follow the
+[complete English installation guide](docs/offline-installation.en.md) for
+verification, installation, update, switching methods, and removal.
+
+For the user-local archive, run the read-only compatibility check after
+extracting it:
 
 Run the read-only compatibility check:
 
@@ -164,13 +173,9 @@ Installation does not require `sudo`, a package manager, or network access.
 Log out and log back in to activate the GNOME Shell extension. CopyPasteBin
 should then start automatically.
 
-To update, run `./install.sh` from the new package. To remove the installed
-code, run `./uninstall.sh`. Updates and removal preserve the user's private
-configuration and history.
-
-See the [complete English installation guide](docs/offline-installation.en.md)
-for requirements, download links, verification, update, removal, and
-troubleshooting details.
+To update the archive installation, run `./install.sh` from the new package.
+To update a local DEB, use APT with the new file. Updates and removal preserve
+the user's private configuration and history.
 
 ## Privacy and security
 
@@ -200,8 +205,11 @@ CopyPasteBin in a sensitive workflow.
 ## Documentation
 
 - [Technical overview (Polish)](docs/technical-overview.pl.md)
+- [Roadmap](ROADMAP.md)
 - [Offline installation (English)](docs/offline-installation.en.md)
 - [Instalacja offline (polski)](docs/offline-installation.md)
+- [Image redaction](docs/image-redaction.md)
+- [Anonimizacja obrazów (polski)](docs/image-redaction.pl.md)
 - [Security model (English)](SECURITY.md)
 - [Model bezpieczeństwa (Polish)](docs/security.pl.md)
 - [Architecture (Polish)](docs/architecture.md)
@@ -219,8 +227,8 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 PYTHONPATH=src python3 benchmarks/detection_quality.py
 ```
 
-The published 1.0.0 snapshot passed 307 automated tests and the 26-case
-detection benchmark. These checks do not replace a live GNOME Shell test.
+The synthetic detection benchmark passed 26/26. Automated checks do not
+replace a test in a running GNOME Shell session.
 
 ## License and authorship
 

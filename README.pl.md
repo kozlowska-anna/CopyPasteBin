@@ -6,7 +6,7 @@
 
 [English](README.md) | **Polski**
 
-[Pobieranie / Instalacja](#instalacja-wersji-100)
+[Pobieranie / Instalacja](#instalacja-wersji-11)
 
 ## Więcej kontroli zanim wkleisz
 
@@ -52,6 +52,8 @@ wszystkich danych wrażliwych i nie blokuje wklejania.
 - **Cztery poziomy ryzyka:** niski, średni, wysoki i krytyczny.
 - **Sprawdzanie i anonimizacja:** możesz obejrzeć wykryte dane i jawnie
   zastąpić schowek dopiero po sprawdzeniu wyniku.
+- **Anonimizacja obrazów:** na żądanie otwórz lokalny plik PNG lub JPEG,
+  zakryj wybrane obszary i zapisz nowy PNG bez modyfikowania oryginału.
 - **Bezpieczne wklejenie:** skrót `Super+Shift+V` sprawdza tekst bez
   automatycznego wklejania go do aktywnej aplikacji.
 - **Dokładne wykluczenia:** znane trafienie niskiego lub średniego ryzyka można
@@ -126,7 +128,7 @@ lecz nie treść schowka.
 
 ## Zgodność
 
-Wersja 1.0.0 obsługuje następujące środowisko:
+Wersja 1.1 obsługuje następujące środowisko:
 
 | Element | Wymaganie |
 | --- | --- |
@@ -137,16 +139,23 @@ Wersja 1.0.0 obsługuje następujące środowisko:
 | Dodatkowe komponenty | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
 
 Integracje z pulpitami Cinnamon, KDE Plasma i Xfce nie są obsługiwane w wersji
-1.0.0. Instalator bezpiecznie zatrzymuje się, jeśli GNOME Shell nie jest
+1.1. Instalator bezpiecznie zatrzymuje się, jeśli GNOME Shell nie jest
 dostępny.
 
-## Instalacja wersji 1.0.0
+## Instalacja wersji 1.1
 
-### [⬇ Pobierz CopyPasteBin 1.0.0 dla Linuksa (.tar.gz)](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz)
+Wybierz jeden sposób instalacji:
 
-Pobierz również [sumę kontrolną SHA-256](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz.sha256),
-a następnie skorzystaj z [polskiej instrukcji instalacji](docs/offline-installation.md),
-aby sprawdzić plik przed jego otwarciem.
+- [⬇ Pobierz pakiet Debiana](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb) do instalacji systemowej zarządzanej przez APT.
+- [⬇ Pobierz archiwum tar.gz](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz) do instalacji lokalnej bez `sudo`.
+- [Pobierz `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) i sprawdź wybrany plik przed jego otwarciem.
+
+**Nie instaluj obu wariantów jednocześnie.** Pełną weryfikację, instalację,
+aktualizację, zmianę metody oraz odinstalowanie opisuje
+[polska instrukcja instalacji](docs/offline-installation.md).
+
+Po rozpakowaniu wariantu lokalnego uruchom kontrolę zgodności, która niczego
+nie zmienia:
 
 Uruchom kontrolę zgodności, która niczego nie zmienia:
 
@@ -165,12 +174,9 @@ Instalacja nie wymaga `sudo`, menedżera pakietów ani połączenia z siecią.
 Aby aktywować rozszerzenie GNOME Shell, wyloguj się i zaloguj ponownie.
 CopyPasteBin powinien uruchomić się automatycznie.
 
-Aby zaktualizować program, uruchom `./install.sh` z nowej paczki. Aby usunąć
-zainstalowany kod, uruchom `./uninstall.sh`. Aktualizacja i usuwanie zachowują
-prywatną konfigurację oraz historię użytkownika.
-
-Pełne wymagania, pobieranie, weryfikację, aktualizację, usuwanie i rozwiązywanie
-problemów opisuje [kompletna polska instrukcja instalacji](docs/offline-installation.md).
+Aby zaktualizować instalację archiwalną, uruchom `./install.sh` z nowej paczki.
+Lokalny DEB aktualizuj przez APT z nowym plikiem. Aktualizacja i usuwanie
+zachowują prywatną konfigurację oraz historię użytkownika.
 
 ## Prywatność i bezpieczeństwo
 
@@ -201,8 +207,11 @@ Przed użyciem CopyPasteBin w szczególnie wrażliwym procesie przeczytaj
 ## Dokumentacja
 
 - [Szczegółowy opis techniczny](docs/technical-overview.pl.md)
+- [Roadmapa](ROADMAP.pl.md)
 - [Instalacja offline — polski](docs/offline-installation.md)
 - [Offline installation — English](docs/offline-installation.en.md)
+- [Anonimizacja obrazów](docs/image-redaction.pl.md)
+- [Image redaction — English](docs/image-redaction.md)
 - [Model bezpieczeństwa — polski](docs/security.pl.md)
 - [Security model — English](SECURITY.md)
 - [Architektura](docs/architecture.md)
@@ -220,9 +229,8 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 PYTHONPATH=src python3 benchmarks/detection_quality.py
 ```
 
-Opublikowany snapshot wersji 1.0.0 przeszedł 307 testów automatycznych oraz
-26-przypadkowy benchmark detekcji. Kontrole automatyczne nie zastępują testu
-w działającej sesji GNOME Shell.
+Syntetyczny benchmark detekcji zakończył się wynikiem 26/26. Kontrole
+automatyczne nie zastępują testu w działającej sesji GNOME Shell.
 
 ## Licencja i autorstwo
 

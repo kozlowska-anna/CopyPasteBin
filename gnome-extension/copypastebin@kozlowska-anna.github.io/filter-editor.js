@@ -3,6 +3,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import System from 'system';
+import {backendCommand} from './backend-path.js';
 import {languageFromArgs, translate} from './i18n.js';
 
 const LANGUAGE = languageFromArgs(ARGV);
@@ -10,7 +11,7 @@ const t = (message, values = {}) => translate(LANGUAGE, message, values);
 
 const MAX_FILTERS_BYTES = 2048;
 const FILTERS = new Map([
-    ['EMAIL', 'E-mail'],
+    ['EMAIL', t('Email address')],
     ['PHONE', t('Phone number')],
     ['PESEL', 'PESEL'],
     ['IBAN', 'IBAN'],
@@ -33,20 +34,10 @@ const FILTERS = new Map([
     ['TOKEN', 'Token'],
     ['SECRET_ASSIGNMENT', t('Secret or password')],
     ['POSSIBLE_SEED_PHRASE', t('Seed phrase')],
-    ['MONEY_AMOUNT_PLN_USD', t('Traditional currency amounts')],
+    ['MONEY_AMOUNT_PLN_USD', t('Currency amounts')],
     ['CRYPTO_AMOUNT_BTC_XRP', t('Cryptocurrency amounts')],
     ['CUSTOM_RULE', t('Custom rules')],
 ]);
-const ENTRY_POINT = GLib.build_filenamev([
-    GLib.get_home_dir(),
-    '.local',
-    'share',
-    'copypastebin',
-    'venv',
-    'bin',
-    'cpb',
-]);
-
 const FilterApplication = GObject.registerClass(
 class FilterApplication extends Gtk.Application {
     constructor() {
@@ -54,6 +45,8 @@ class FilterApplication extends Gtk.Application {
         this._process = null;
         this._checks = new Map();
         this._applying = false;
+        this._available = false;
+        this._saving = false;
     }
 
     vfunc_activate() {
@@ -127,13 +120,27 @@ class FilterApplication extends Gtk.Application {
         this._run(['filters'], null);
     }
 
-    _setBusy(busy) {
-        for (const check of this._checks.values())
-            check.sensitive = !busy;
+    _refreshInteractivity() {
+        const interactive = this._available && !this._saving;
+        for (const check of this._checks.values()) {
+            check.sensitive = this._available;
+            check.can_target = interactive;
+            check.focusable = interactive;
+        }
+    }
+
+    _setAvailable(available) {
+        this._available = available;
+        this._refreshInteractivity();
+    }
+
+    _setSaving(saving) {
+        this._saving = saving;
+        this._refreshInteractivity();
     }
 
     _setFilter(category, enabled) {
-        this._setBusy(true);
+        this._setSaving(true);
         this._status.label = t('Saving change…');
         this._run(['filter-set', category, enabled ? 'on' : 'off'], category);
     }
@@ -141,7 +148,7 @@ class FilterApplication extends Gtk.Application {
     _run(arguments_, changedCategory) {
         try {
             this._process = Gio.Subprocess.new(
-                [ENTRY_POINT, 'ui', ...arguments_],
+                backendCommand('ui', ...arguments_),
                 Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE
             );
         } catch (_error) {
@@ -167,7 +174,8 @@ class FilterApplication extends Gtk.Application {
                             enabled: enabledCount, total: FILTERS.size,
                         });
                 this._process = null;
-                this._setBusy(false);
+                this._setAvailable(true);
+                this._setSaving(false);
             } catch (_error) {
                 this._failed();
             }
@@ -195,8 +203,11 @@ class FilterApplication extends Gtk.Application {
     _apply(states) {
         this._applying = true;
         try {
-            for (const [category, check] of this._checks)
-                check.active = states.get(category);
+            for (const [category, check] of this._checks) {
+                const active = states.get(category);
+                if (check.active !== active)
+                    check.active = active;
+            }
         } finally {
             this._applying = false;
         }
@@ -204,7 +215,8 @@ class FilterApplication extends Gtk.Application {
 
     _failed() {
         this._process = null;
-        this._setBusy(true);
+        this._setSaving(false);
+        this._setAvailable(false);
         this._status.label = t('Filters could not be read or saved safely.');
     }
 });

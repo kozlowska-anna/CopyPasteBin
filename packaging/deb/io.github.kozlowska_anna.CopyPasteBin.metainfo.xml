@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.kozlowska_anna.CopyPasteBin</id>
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>CopyPasteBin</name>
+  <summary>Local clipboard privacy assistant for GNOME</summary>
+  <summary xml:lang="pl">Lokalny asystent prywatności schowka dla GNOME</summary>
+  <description>
+    <p>CopyPasteBin detects selected sensitive clipboard text and secrets, warns when sensitive content is detected, and helps redact text before sharing.</p>
+    <p>It also supports manual redaction of selected areas in local photos and screenshots. Analysis and editing stay on the device; no data is sent to a cloud service.</p>
+    <p xml:lang="pl">CopyPasteBin wykrywa wybrane dane wrażliwe i sekrety w schowku, ostrzega o wykryciu wrażliwej treści oraz pomaga anonimizować tekst przed udostępnieniem.</p>
+    <p xml:lang="pl">Umożliwia też ręczne zakrywanie wybranych obszarów lokalnych zdjęć i screenshotów. Analiza i edycja pozostają na urządzeniu; dane nie są wysyłane do chmury.</p>
+  </description>
+  <developer id="io.github.kozlowska_anna">
+    <name>Anna Kozłowska</name>
+  </developer>
+  <url type="homepage">https://github.com/kozlowska-anna/CopyPasteBin</url>
+  <launchable type="desktop-id">copypastebin.desktop</launchable>
+  <icon type="stock">copypastebin</icon>
+  <categories>
+    <category>Utility</category>
+    <category>Security</category>
+  </categories>
+  <provides>
+    <binary>cpb</binary>
+  </provides>
+  <releases>
+    <release version="1.1" date="2026-10-20"/>
+    <release version="1.0.0" date="2026-10-18"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

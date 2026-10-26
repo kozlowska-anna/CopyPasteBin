@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CopyPasteBin | Menedżer schowka dla GNOME</title>
+    <meta name="description" content="CopyPasteBin to menedżer schowka dla GNOME z wykrywaniem danych wrażliwych, ostrzeżeniami przed wklejeniem, anonimizacją tekstu i obrazów oraz podręcznym edytorem treści.">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <link rel="canonical" href="https://kozlowska-anna.github.io/CopyPasteBin/">
+    <link rel="alternate" hreflang="pl" href="https://kozlowska-anna.github.io/CopyPasteBin/">
+    <link rel="alternate" hreflang="en" href="https://kozlowska-anna.github.io/CopyPasteBin/en/">
+    <link rel="alternate" hreflang="x-default" href="https://kozlowska-anna.github.io/CopyPasteBin/">
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo-web.svg">
+    <link rel="stylesheet" href="assets/css/styles.css?v=20261022-12">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CopyPasteBin">
+    <meta property="og:locale" content="pl_PL">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:title" content="CopyPasteBin | Menedżer schowka dla GNOME">
+    <meta property="og:description" content="CopyPasteBin to menedżer schowka dla GNOME z wykrywaniem danych wrażliwych, ostrzeżeniami przed wklejeniem, anonimizacją tekstu i obrazów oraz podręcznym edytorem treści.">
+    <meta property="og:url" content="https://kozlowska-anna.github.io/CopyPasteBin/">
+    <meta property="og:image" content="https://kozlowska-anna.github.io/CopyPasteBin/assets/images/rules-and-exceptions.png">
+    <meta property="og:image:width" content="1202">
+    <meta property="og:image:height" content="647">
+    <meta property="og:image:alt" content="Okno reguł i wykluczeń CopyPasteBin z danymi demonstracyjnymi">
+    <meta name="twitter:card" content="summary_large_image">
+    <script defer src="assets/js/site.js?v=20261019-6"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Przejdź do treści</a>
+    <header class="site-header">
+      <div class="container nav-shell">
+        <a class="brand" href="#top" aria-label="CopyPasteBin — strona główna">
+          <img src="assets/images/logo-web.svg" width="32" height="32" alt="">
+          <span>CopyPasteBin</span>
+        </a>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-navigation" data-menu-button>Menu</button>
+        <nav class="site-nav" id="site-navigation" aria-label="Główna nawigacja" data-navigation data-open="false">
+          <a href="#jak-dziala">Dlaczego warto</a>
+          <a href="#zastosowania">Zastosowania</a>
+          <a href="#mozliwosci">Możliwości</a>
+          <a href="#galeria">Galeria</a>
+          <a href="#prywatnosc">Prywatność</a>
+          <a href="#pobierz">Wersja 1.1</a>
+          <a href="#roadmapa">Rozwój</a>
+          <a class="language-link" href="en/" lang="en" hreflang="en" aria-label="English version">EN</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="container hero-grid">
+          <div>
+            <p class="eyebrow">Menedżer schowka skoncentrowany na prywatności · GNOME</p>
+            <h1>Sprawdź, zanim wkleisz.</h1>
+            <p class="hero-lede">Kopiujesz jak zwykle. CopyPasteBin ostrzega, gdy tekst przypomina hasło, klucz, dane osobowe lub finansowe. Pomaga Ci sprawdzić, poprawić lub zanonimizować treść przed użyciem — a decyzja, co ostatecznie wkleić, pozostaje po Twojej stronie.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#pobierz">Poznaj wersję 1.1</a>
+              <a class="button button-secondary" href="#jak-dziala">Zobacz, jak działa</a>
+            </div>
+            <ul class="hero-proof" aria-label="Najważniejsze informacje">
+              <li>działa lokalnie</li>
+              <li>bez konta i telemetrii</li>
+              <li>open source · GPL-3.0-or-later</li>
+              <li>wersja 1.1 · dwa instalatory</li>
+            </ul>
+          </div>
+          <div class="banner-showcase" role="group" aria-labelledby="risk-demo-title">
+            <div class="banner-showcase-heading">
+              <p class="banner-kicker">Chwila namysłu przed wklejeniem</p>
+              <p id="risk-demo-title"><strong>Kolor ostrzega. Ty decydujesz.</strong></p>
+            </div>
+            <div class="risk-stack" role="list" aria-label="Cztery poziomy ryzyka CopyPasteBin">
+              <div class="risk-banner risk-low" role="listitem"><span class="risk-copy"><strong>CPBin: niskie ryzyko</strong><span>Wykryto: numer telefonu.</span></span><span class="risk-action">Otwórz edytor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-medium" role="listitem"><span class="risk-copy"><strong>CPBin: średnie ryzyko</strong><span>Wykryto: e-mail.</span></span><span class="risk-action">Otwórz edytor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-high" role="listitem"><span class="risk-copy"><strong>CPBin: wysokie ryzyko</strong><span>Wykryto: karta płatnicza.</span></span><span class="risk-action">Otwórz edytor</span><span class="risk-close" aria-hidden="true">×</span></div>
+              <div class="risk-banner risk-critical" role="listitem"><span class="risk-copy"><strong>CPBin: krytyczne ryzyko</strong><span>Wykryto: klucz prywatny.</span></span><span class="risk-action">Otwórz edytor</span><span class="risk-close" aria-hidden="true">×</span></div>
+            </div>
+            <p class="banner-note">Kolor pokazuje najwyższy wykryty poziom. Baner nie ujawnia treści schowka.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="jak-dziala">
+        <div class="container">
+          <div class="product-positioning">
+            <div class="product-positioning-copy">
+              <p class="eyebrow">Dlaczego warto · Privacy-focused Clipboard Manager</p>
+              <h2>Menedżer, ale nie klasyczne archiwum schowka.</h2>
+              <p>Klasyczne menedżery schowków skupiają się przede wszystkim na przechowywaniu, wyszukiwaniu i ponownym używaniu kopii. CopyPasteBin również daje dostęp do krótkiej historii, lecz jego priorytetem jest wychwycenie ryzyka, przygotowanie tekstu i ochrona przed niefortunnym kliknięciem „Wklej”.</p>
+            </div>
+          </div>
+          <div class="trust-strip" role="group" aria-label="Najważniejsze korzyści">
+            <div class="trust-item"><strong>Zauważasz ryzyko wcześniej</strong><span>Ostrzeżenie pojawia się, gdy tekst przypomina obsługiwany rodzaj danych wrażliwych.</span></div>
+            <div class="trust-item"><strong>Decyzja należy do Ciebie</strong><span>Program nie wkleja tekstu i domyślnie nie zmienia schowka automatycznie.</span></div>
+            <div class="trust-item"><strong>Dane zostają na komputerze</strong><span>Wykrywanie i anonimizacja działają lokalnie, bez wysyłania treści do chmury.</span></div>
+            <div class="trust-item"><strong>Łatwiej poprawiasz tekst</strong><span>Edytor pomaga usunąć lub zanonimizować wybrane wartości przed użyciem.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="zastosowania">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Przykładowe zastosowania</p>
+            <h2>Kiedy może się przydać CopyPasteBin?</h2>
+          </div>
+          <ul class="use-case-list" aria-label="Cztery sytuacje, w których może przydać się CopyPasteBin">
+            <li><strong>Gdy piszesz wiadomość:</strong> sprawdź, czy kopiowany tekst nie zawiera przypadkowo danych osobowych, kontaktowych lub finansowych.</li>
+            <li><strong>Gdy pracujesz z kodem lub terminalem:</strong> zwróć uwagę na tokeny, klucze i ciągi połączeń przed ich wklejeniem do rozmowy, zgłoszenia lub dokumentacji.</li>
+            <li><strong>Gdy korzystasz z narzędzia AI:</strong> sprawdź kopiowany fragment dokumentu, kodu, logu lub polecenia i w razie potrzeby zanonimizuj wrażliwe dane przed wklejeniem.</li>
+            <li><strong>Gdy udostępniasz obraz:</strong> ręcznie zakryj wybrane obszary zdjęcia lub screenshota i zapisz nową kopię PNG.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section section-soft" id="mozliwosci">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Najważniejsze możliwości</p>
+            <h2>Praktyczna pomoc w codziennym kopiowaniu i wklejaniu.</h2>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card"><span class="feature-number">01</span><h3>Podręczny edytor treści</h3><p>Otwórz skopiowaną treść, wprowadź ręczne poprawki lub zanonimizuj wykryte fragmenty. Schowek zmieni się dopiero po Twojej akceptacji.</p></article>
+            <article class="feature-card"><span class="feature-number">02</span><h3>Anonimizacja obrazów</h3><p>Otwórz lokalny plik PNG lub JPEG, zakryj wybrane fragmenty prostokątami i zapisz nowy PNG. Oryginał pozostaje bez zmian.</p></article>
+            <article class="feature-card"><span class="feature-number">03</span><h3>Reguły i dokładne wykluczenia</h3><p>Własne znaczniki działają lokalnie. Wykluczenia są dozwolone tylko dla dokładnego trafienia o niskim lub średnim ryzyku.</p></article>
+            <article class="feature-card"><span class="feature-number">04</span><h3>Historia ostatnich 15 kopiowań</h3><p>Historia obejmuje do 15 ostatnio skopiowanych tekstów i pozostaje wyłącznie w pamięci RAM bieżącej sesji. Znika po blokadzie ekranu, wylogowaniu lub wyłączeniu rozszerzenia.</p></article>
+            <article class="feature-card"><span class="feature-number">05</span><h3>Cztery poziomy ryzyka</h3><p>Reguły rozróżniają poziomy od niskiego do krytycznego i kategorie takie jak dane kontaktowe, numery finansowe, tokeny czy klucze prywatne.</p></article>
+            <article class="feature-card"><span class="feature-number">06</span><h3>Bezpieczne wklejenie</h3><p>Użyj <code>Super+Shift+V</code>, aby sprawdzić tekst znajdujący się w schowku. Jeśli program wykryje ryzyko, otworzy edytor z propozycją anonimizacji. Niczego nie wklei ani nie zmieni bez potwierdzenia.</p></article>
+            <article class="feature-card"><span class="feature-number">07</span><h3>Pauza i opcjonalne czyszczenie</h3><p>Podczas pauzy opcje czasu pozostają widoczne, a przycisk wznowienia jest pod ręką. Opcjonalne czyszczenie schowka pozostaje wyłączone domyślnie.</p></article>
+            <article class="feature-card"><span class="feature-number">08</span><h3>Dwa instalatory, jeden kod</h3><p>Pakiet DEB i archiwum tar.gz powstają z tego samego zestawu źródeł i zawierają ten sam kod aplikacji, edytor obrazów, ikony oraz ustawienia domyślne.</p></article>
+          </div>
+          <div class="feature-facts">
+            <article class="facts-card">
+              <h3>Co może rozpoznać</h3>
+              <ul>
+                <li>adresy e-mail, telefony, PESEL, IBAN i karty płatnicze;</li>
+                <li>klucze usług, tokeny, JWT i ciągi połączeń baz danych;</li>
+                <li>klucze prywatne, odzyskiwania i poprawne frazy BIP-39;</li>
+                <li>inne heurystyki zależnie od włączonych filtrów.</li>
+              </ul>
+            </article>
+            <article class="facts-card">
+              <h3>Co zachowuje</h3>
+              <ul>
+                <li>techniczną historię zdarzeń bez treści schowka;</li>
+                <li>do 15 tekstów w RAM bieżącej sesji;</li>
+                <li>lokalne ustawienia, reguły własne i dokładne wykluczenia;</li>
+                <li>brak telemetrii, konta i synchronizacji z chmurą.</li>
+              </ul>
+            </article>
+            <article class="facts-card">
+              <h3>Co kontrolujesz</h3>
+              <ul>
+                <li>filtry poszczególnych kategorii wykrywania;</li>
+                <li>pauzę na 30 minut, godzinę lub do wznowienia;</li>
+                <li>czyszczenie po 1, 5 lub 15 minutach albo wyłączenie;</li>
+                <li>język systemowy, polski lub angielski;</li>
+                <li>lokalny obraz wejściowy i miejsce zapisu zanonimizowanej kopii.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="galeria">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Prawdziwy interfejs</p>
+            <h2>CopyPasteBin w GNOME.</h2>
+            <p>Zrzuty pokazują interfejs CopyPasteBin 1.1 i wyłącznie dane demonstracyjne.</p>
+          </div>
+          <div class="gallery-grid">
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Integracja z pulpitem GNOME</strong><span>Menu pokazuje stan monitorowania i daje dostęp do ostatnich tekstów, filtrów, reguł i wykluczeń, automatycznego czyszczenia, języka, edytora, pauzy oraz okna „O programie”.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Menu CopyPasteBin w panelu GNOME"><img src="assets/images/gnome-panel.png" width="359" height="608" loading="lazy" alt="Menu CopyPasteBin w panelu GNOME"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Ostrzeżenie o danych wrażliwych</strong><span>Po wykryciu aktywnego wzorca banner pokazuje bezpieczną nazwę kategorii i liczbę trafień — nigdy treść schowka. Jedyny przycisk otwiera edytor.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Ostrzeżenie wysokiego ryzyka dla demonstracyjnej karty płatniczej"><img src="assets/images/high-risk-warning.png" width="704" height="159" loading="lazy" alt="Czerwone ostrzeżenie CopyPasteBin wysokiego ryzyka"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Edytor schowka i podświetlenie ryzyka</strong><span>Edytor zaznacza fragmenty znalezione przez lokalny detektor i przygotowuje propozycję anonimizacji. Schowek zmienia się dopiero po jawnej akceptacji.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Edytor z demonstracyjnym adresem e-mail i hasłem"><img src="assets/images/clipboard-editor.png" width="1079" height="608" loading="lazy" alt="Edytor schowka z podświetlonym demonstracyjnym adresem e-mail i hasłem"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Anonimizacja wybranego fragmentu</strong><span>Kliknięcie trafienia wybiera jego dokładny zakres. Trafienia niskiego i średniego ryzyka można anonimizować lub dodać jako dokładne wykluczenie; poziom wysoki i krytyczny nie pozwala na wykluczenie.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Anonimizacja albo dokładne wykluczenie demonstracyjnego adresu e-mail"><img src="assets/images/selective-anonymization.png" width="1079" height="608" loading="lazy" alt="Edytor z akcją anonimizacji lub dokładnego wykluczenia trafienia"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Reguły własne i dokładne wykluczenia</strong><span>Reguły są lokalnymi, ograniczonymi literałami z przypisanym poziomem ryzyka. Wykluczenia dotyczą tylko dokładnego trafienia i nie powinny zawierać prawdziwych sekretów.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Reguły własne i dokładne wykluczenia z danymi demonstracyjnymi"><img src="assets/images/rules-and-exceptions.png" width="1202" height="647" loading="lazy" alt="Okno reguł własnych i dokładnych wykluczeń CopyPasteBin"></button></figure>
+            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Ostatnie wpisy tylko w pamięci sesji</strong><span>Do 15 ostatnio skopiowanych tekstów pozostaje wyłącznie w RAM. Blokada ekranu, wylogowanie lub zatrzymanie rozszerzenia usuwa listę, a przywrócenie wpisu wymaga jawnej akcji.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="Sesyjna lista demonstracyjnych wpisów schowka"><img src="assets/images/recent-clipboard.png" width="1039" height="718" loading="lazy" alt="Sesyjna lista ostatnich wpisów schowka"></button></figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-dark" id="prywatnosc">
+        <div class="container privacy-grid">
+          <div>
+            <p class="eyebrow">Prywatność i bezpieczeństwo</p>
+            <h2>Lokalnie, bez konta i chmury.</h2>
+            <p>Wykrywanie i anonimizacja działają na Twoim komputerze. CopyPasteBin nie wymaga konta ani połączenia z usługą AI i nie zapisuje treści schowka w trwałej historii.</p>
+            <div class="privacy-points">
+              <div class="privacy-point"><h3>Bez telemetrii i trackerów</h3><p>Aplikacja i ta strona nie wysyłają analityki użytkowania.</p></div>
+              <div class="privacy-point"><h3>Jawne granice</h3><p>Brak ostrzeżenia nie oznacza, że tekst jest bezpieczny. Reguły mogą coś przeoczyć lub zgłosić fałszywy alarm.</p></div>
+              <div class="privacy-point"><h3>Bez trwałej historii treści</h3><p>Do 15 ostatnich tekstów pozostaje tylko w pamięci RAM bieżącej sesji.</p></div>
+            </div>
+          </div>
+          <aside class="limits-card" aria-labelledby="limits-title">
+            <h3 id="limits-title">Czego program nie może zagwarantować</h3>
+            <p>CopyPasteBin pomaga zauważyć potencjalne ryzyko, ale nie jest izolowanym sejfem.</p>
+            <ul>
+              <li>Nie chroni przed rootem ani innym procesem tego samego użytkownika.</li>
+              <li>Nie kontroluje zewnętrznych menedżerów schowka, obserwacji ekranu ani aplikacji docelowej.</li>
+              <li>Nie gwarantuje bezpiecznego wymazywania danych z RAM, swapu lub zrzutów procesu.</li>
+              <li>Nie potwierdza, że brak wykrycia oznacza brak danych wrażliwych.</li>
+            </ul>
+            <p><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/security.pl.md">Przeczytaj model bezpieczeństwa</a></p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section section-soft" id="pobierz">
+        <div class="container download-grid">
+          <div class="system-card">
+            <p class="eyebrow">Wymagania systemowe</p>
+            <h2>Wymagane środowisko.</h2>
+            <ul class="requirements-list">
+              <li>Linux z GNOME Shell 50</li>
+              <li>sesja Wayland</li>
+              <li>Python 3.11 lub nowszy z <code>venv</code></li>
+              <li><code>gjs</code>, GTK 4, GdkPixbuf, GioUnix i <code>gnome-extensions</code></li>
+              <li><code>sha256sum</code> do kontroli pobranego archiwum</li>
+            </ul>
+            <p><strong>Przykładowe zgodne dystrybucje:</strong></p>
+            <ul class="requirements-list">
+              <li>Ubuntu 26.04 LTS (GNOME 50, Wayland)</li>
+              <li>Fedora Workstation 44 (GNOME 50, Wayland)</li>
+            </ul>
+            <p>Obecnie nieobsługiwane środowiska: KDE Plasma, Cinnamon, Xfce oraz sesje X11.</p>
+            <p>Zgodność zależy od środowiska graficznego i jego wersji, a nie wyłącznie od nazwy dystrybucji.</p>
+          </div>
+          <div class="download-card">
+            <span class="version-badge">Wydanie · 1.1</span>
+            <h2>Dwa instalatory z tego samego kodu.</h2>
+            <p><code>copypastebin_1.1-1_all.deb</code> zapewnia instalację systemową zarządzaną przez APT, a <code>CopyPasteBin-linux-1.1.tar.gz</code> — instalację lokalną dla jednego użytkownika bez <code>sudo</code>.</p>
+            <div class="download-actions">
+              <a class="button button-dark" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">Pobierz DEB</a>
+              <a class="button" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">Pobierz tar.gz</a>
+            </div>
+            <p>Archiwum 1.1 tar.gz zawiera dokumentację polską i angielską. Zacznij od <code>README.pl.md</code> i <code>INSTALL.pl.md</code>; odnośniki językowe pozwalają przełączyć język. Obie wersje strony korzystają z tej samej paczki.</p>
+            <ol class="install-steps">
+              <li>Syntetyczny benchmark detekcji wersji 1.1 zakończył się wynikiem <strong>26/26</strong>.</li>
+              <li>Oba warianty instalacji sprawdzono w docelowym środowisku GNOME/Wayland.</li>
+            </ol>
+            <p>Centrum oprogramowania nie zaktualizowało istniejącego DEB, dlatego ręczna aktualizacja używa APT.</p>
+            <p><strong>Nie instaluj obu wariantów jednocześnie.</strong></p>
+            <p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/CHANGELOG.md">Zobacz zmiany w wersji 1.1 →</a></p>
+            <p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.md">Pełna instrukcja instalacji, aktualizacji i odinstalowania →</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="roadmapa">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Publiczna roadmapa</p>
+            <h2>Co dalej z CopyPasteBin.</h2>
+            <p>Pokazujemy przyjęte kierunki rozwoju oraz obszary, które nadal badamy. Roadmapa nie zawiera sztywnych terminów.</p>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card"><span class="feature-number">Planowane</span><h3>Wygodniejsze przygotowanie treści</h3><p>Chcemy rozwijać edytor, własne reguły i anonimizację tak, aby łatwiej dopasować CopyPasteBin do codziennej pracy — nadal lokalnie i bez odbierania użytkownikowi decyzji.</p></article>
+            <article class="feature-card"><span class="feature-number">Badamy</span><h3>Więcej sposobów ochrony</h3><p>Wersja 1.1 pozwala ręcznie zakrywać fragmenty obrazów. Badamy lokalne rozpoznawanie treści w obrazach oraz integracje z innymi środowiskami.</p></article>
+          </div>
+          <p><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/ROADMAP.pl.md">Zobacz pełną roadmapę →</a></p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="cta">
+            <p class="eyebrow">Projekt otwartoźródłowy</p>
+            <h2>Twój schowek. Twoje reguły. Twoja decyzja.</h2>
+            <p class="project-credit"><strong>Projekt powstaje przy wsparciu narzędzi ChatGPT i Codex od OpenAI.</strong> CopyPasteBin jest niezależnym projektem; nie jest powiązany z OpenAI, zatwierdzony przez OpenAI ani sponsorowany przez OpenAI.</p>
+            <p class="project-credit"><strong>CopyPasteBin jest oprogramowaniem open source na licencji GPL-3.0-or-later.</strong> Sprawdź kod źródłowy, dokumentację i model bezpieczeństwa. Jeśli znajdziesz błąd, zgłoś go publicznie bez dołączania prawdziwych sekretów ani prywatnej treści schowka.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin">Otwórz repozytorium</a>
+              <a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/issues">Zgłoś problem</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand"><img src="assets/images/logo-web.svg" width="48" height="48" alt=""><div><strong>CopyPasteBin</strong><span>Menedżer schowka dla GNOME z wykrywaniem danych wrażliwych, ostrzeżeniami przed wklejeniem, anonimizacją tekstu i obrazów oraz podręcznym edytorem treści.</span></div></div>
+          <div><strong>Dokumentacja</strong><ul class="footer-links"><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/README.pl.md">Opis projektu</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/ROADMAP.pl.md">Roadmapa</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.md">Instalacja</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/image-redaction.pl.md">Anonimizacja obrazów</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/security.pl.md">Bezpieczeństwo</a></li></ul></div>
+          <div><strong>Projekt</strong><ul class="footer-links"><li><a href="https://github.com/kozlowska-anna/CopyPasteBin">GitHub</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/LICENSE">GPL-3.0-or-later</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/issues">Zgłaszanie błędów</a></li></ul></div>
+        </div>
+        <div class="footer-bottom"><span>© 2026 Anna Kozłowska</span></div>
+      </div>
+    </footer>
+
+    <dialog class="lightbox" data-lightbox aria-label="Powiększony zrzut ekranu">
+      <button class="lightbox-close" type="button" aria-label="Zamknij" data-lightbox-close>×</button>
+      <figure><img src="assets/images/clipboard-editor.png" width="1079" height="608" data-lightbox-image alt=""><figcaption data-lightbox-caption></figcaption></figure>
+    </dialog>
+  </body>
+</html>

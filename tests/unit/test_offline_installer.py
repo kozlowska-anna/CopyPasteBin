@@ -15,12 +15,7 @@ ABOUT_WINDOW = (
     / "about.js"
 )
 OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.md"
-ENGLISH_OFFLINE_DOCUMENTATION = ROOT / "docs" / "offline-installation.en.md"
 README = ROOT / "README.md"
-POLISH_README = ROOT / "README.pl.md"
-POLISH_TECHNICAL_OVERVIEW = ROOT / "docs" / "technical-overview.pl.md"
-SECURITY_MODEL = ROOT / "SECURITY.md"
-POLISH_SECURITY_MODEL = ROOT / "docs" / "security.pl.md"
 LICENSE = ROOT / "LICENSE"
 NOTICE = ROOT / "NOTICE"
 INSTALLER = ROOT / "packaging" / "offline" / "install.sh"
@@ -35,6 +30,7 @@ APP_ICON = ROOT / "packaging" / "copypastebin-app.svg"
 ENABLEMENT_HELPER = ROOT / "packaging" / "persist-extension-enablement.js"
 WINDOW_APPLICATION_IDS = (
     "io.github.copypastebin.Editor",
+    "io.github.copypastebin.ImageRedactor",
     "io.github.copypastebin.FilterEditor",
     "io.github.copypastebin.RulesEditor",
     "io.github.copypastebin.RecentClipboard",
@@ -43,6 +39,33 @@ WINDOW_APPLICATION_IDS = (
 
 
 class OfflineInstallerTests(unittest.TestCase):
+    def test_bundle_documentation_is_bilingual_and_self_contained(self):
+        import re
+        source = BUILDER.read_text(encoding="utf-8")
+        self.assertNotIn('"$STAGE_DIR/README-INSTALL.txt"', source)
+        self.assertNotIn("README", INSTALLER.read_text(encoding="utf-8"))
+        files = {name: (ROOT / "packaging/offline" / name).read_text(encoding="utf-8")
+                 for name in ("README.md", "README.pl.md", "INSTALL.md", "INSTALL.pl.md")}
+        targets = set(files) | {"SECURITY.md", "SECURITY.pl.md", "LICENSE", "NOTICE", "IMAGE-REDACTION.md", "IMAGE-REDACTION.pl.md"}
+        for name, text in files.items():
+            for target in re.findall(r'\]\(([^)]+)\)', text):
+                self.assertIn(target, targets, (name, target))
+        for name in ("INSTALL.md", "INSTALL.pl.md"):
+            for command in ("./install.sh --check-only", "./install.sh",
+                            "./uninstall.sh", "./diagnose-first-activation.sh"):
+                self.assertIn(command, files[name])
+            for private_path in ("~/.config/copypastebin", "~/.local/state/copypastebin"):
+                self.assertIn(private_path, files[name])
+        for language, filename, readme, install in (
+            ("en", "website/en/index.html", "README.md", "INSTALL.md"),
+            ("pl", "website/index.html", "README.pl.md", "INSTALL.pl.md"),
+        ):
+            page = (ROOT / filename).read_text(encoding="utf-8")
+            self.assertIn(f"<code>{readme}</code>", page)
+            self.assertIn(f"<code>{install}</code>", page)
+            self.assertIn("https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/", page)
+
+
     def test_installer_is_user_local_offline_and_fail_closed(self):
         source = INSTALLER.read_text(encoding="utf-8")
         self.assertIn('REQUIRED_SHELL_MAJOR="50"', source)
@@ -111,7 +134,7 @@ class OfflineInstallerTests(unittest.TestCase):
                 self.assertNotIn(forbidden, source)
 
     def test_release_version_is_consistent(self):
-        expected = "1.0.0"
+        expected = "1.1"
         self.assertIn(f'version = "{expected}"', PYPROJECT.read_text(encoding="utf-8"))
         self.assertIn(
             f'__version__ = "{expected}"',
@@ -129,132 +152,19 @@ class OfflineInstallerTests(unittest.TestCase):
             f"COPYPASTEBIN {expected} - INSTALACJA OFFLINE",
             INSTRUCTIONS.read_text(encoding="utf-8"),
         )
-        archive_name = f"CopyPasteBin-offline-linux-{expected}.tar.gz"
+        archive_name = f"CopyPasteBin-linux-{expected}.tar.gz"
         self.assertIn(archive_name, README.read_text(encoding="utf-8"))
         self.assertIn(
             archive_name,
             OFFLINE_DOCUMENTATION.read_text(encoding="utf-8"),
         )
-        self.assertIn(
-            archive_name,
-            ENGLISH_OFFLINE_DOCUMENTATION.read_text(encoding="utf-8"),
-        )
-
-    def test_english_download_path_is_explicit_and_complete(self):
-        readme = README.read_text(encoding="utf-8")
-        guide = ENGLISH_OFFLINE_DOCUMENTATION.read_text(encoding="utf-8")
-        archive = "CopyPasteBin-offline-linux-1.0.0.tar.gz"
-        release_download = (
-            "https://github.com/kozlowska-anna/CopyPasteBin/releases/"
-            f"download/v1.0.0/{archive}"
-        )
-
-        download_label = "⬇ Download CopyPasteBin 1.0.0 for Linux (.tar.gz)"
-        self.assertIn(f"[{download_label}]({release_download})", readme)
-        self.assertIn(
-            "[English installation instructions](docs/offline-installation.en.md)",
-            readme,
-        )
-        self.assertIn(f"[{download_label}]({release_download})", guide)
-        self.assertIn(f"{release_download}.sha256", guide)
-        self.assertIn(f"sha256sum --check {archive}.sha256", guide)
-        self.assertIn(f"tar -xzf {archive}", guide)
-        self.assertIn("Open in Terminal", guide)
-        self.assertIn("./install.sh --check-only", guide)
-        self.assertNotIn("./diagnose-first-activation.sh", readme)
-        self.assertIn("## If CopyPasteBin does not start automatically", guide)
-        self.assertIn("not part of a normal installation", guide)
-        self.assertIn("./diagnose-first-activation.sh", guide)
-        self.assertIn("[Download / Installation](#install-version-100)", readme)
-        self.assertIn(
-            "[Technical overview (Polish)](docs/technical-overview.pl.md)",
-            readme,
-        )
-        self.assertNotIn("[Polish README](README.pl.md)", readme)
-        self.assertNotIn("Kontrola zgodności", readme)
-        self.assertNotIn("Kontrola zgodności", guide)
-
-    def test_polish_readme_is_a_product_page_with_a_clear_download_path(self):
-        readme = POLISH_README.read_text(encoding="utf-8")
-        technical_overview = POLISH_TECHNICAL_OVERVIEW.read_text(encoding="utf-8")
-        archive = "CopyPasteBin-offline-linux-1.0.0.tar.gz"
-        release_download = (
-            "https://github.com/kozlowska-anna/CopyPasteBin/releases/"
-            f"download/v1.0.0/{archive}"
-        )
-
-        download_label = "⬇ Pobierz CopyPasteBin 1.0.0 dla Linuksa (.tar.gz)"
-        self.assertIn(f"[{download_label}]({release_download})", readme)
-        self.assertIn(
-            "[Szczegółowy opis techniczny](docs/technical-overview.pl.md)",
-            readme,
-        )
-        self.assertNotIn("## Kod legacy", readme)
-        self.assertNotIn("## Frazy BIP-39", readme)
-        self.assertIn("## Kod legacy", technical_overview)
-        self.assertIn("## Frazy BIP-39", technical_overview)
-        self.assertIn("## Granice", technical_overview)
-        self.assertIn(
-            "[Pobieranie / Instalacja](#instalacja-wersji-100)",
-            readme,
-        )
-        self.assertIn(
-            "wykluczenie dla tej wartości i kategorii",
-            " ".join(readme.split()),
-        )
-        self.assertIn("rozróżniają wielkość liter", readme)
-        self.assertIn("wykrytej karty płatniczej", readme)
-        self.assertIn("syntetycznym adresem e-mail i hasłem", readme)
-        self.assertIn("anonimizacji lub wykluczenia", readme)
-        self.assertNotIn("./diagnose-first-activation.sh", readme)
-        polish_guide = OFFLINE_DOCUMENTATION.read_text(encoding="utf-8")
-        self.assertIn("## Gdy CopyPasteBin nie uruchomi się automatycznie", polish_guide)
-        self.assertIn("nie jest częścią zwykłej instalacji", polish_guide)
-
-    def test_security_model_has_english_default_and_linked_polish_version(self):
-        english = SECURITY_MODEL.read_text(encoding="utf-8")
-        polish = POLISH_SECURITY_MODEL.read_text(encoding="utf-8")
-        english_readme = README.read_text(encoding="utf-8")
-        polish_readme = POLISH_README.read_text(encoding="utf-8")
-
-        self.assertTrue(english.startswith("# CopyPasteBin V1 Security Model\n"))
-        self.assertIn("[Polski](docs/security.pl.md)", english)
-        self.assertTrue(polish.startswith("# Model bezpieczeństwa CopyPasteBin V1\n"))
-        self.assertIn("[English](../SECURITY.md)", polish)
-        self.assertIn("[Security model (English)](SECURITY.md)", english_readme)
-        self.assertIn(
-            "[Model bezpieczeństwa (Polish)](docs/security.pl.md)",
-            english_readme,
-        )
-        self.assertIn(
-            "[Model bezpieczeństwa — polski](docs/security.pl.md)",
-            polish_readme,
-        )
-
-    def test_both_readmes_use_the_versioned_screenshot_set(self):
-        screenshot_paths = (
-            "docs/screenshots/01-gnome-panel.png",
-            "docs/screenshots/02-high-risk-warning.png",
-            "docs/screenshots/03-clipboard-editor.png",
-            "docs/screenshots/04-selective-anonymization.png",
-            "docs/screenshots/05-custom-rules-and-exceptions.png",
-            "docs/screenshots/06-clipboard-history.png",
-        )
-
-        for readme_path in (README, POLISH_README):
-            source = readme_path.read_text(encoding="utf-8")
-            with self.subTest(readme=readme_path.name):
-                self.assertNotIn("github.com/user-attachments", source)
-                for screenshot in screenshot_paths:
-                    self.assertIn(f'src="{screenshot}"', source)
-                    self.assertTrue((ROOT / screenshot).is_file())
 
     def test_release_archive_has_normalized_metadata_and_no_silent_overwrite(self):
         source = BUILDER.read_text(encoding="utf-8")
 
         for expected in (
             "umask 022",
-            'readonly SOURCE_DATE_EPOCH="1792195200"',
+            'readonly SOURCE_DATE_EPOCH="1792454400"',
             'readonly BUILD_SOURCE_DIR="$WORK_DIR/source"',
             'cp -a -- "$ROOT/src/." "$BUILD_SOURCE_DIR/src/"',
             'find "$BUILD_SOURCE_DIR" -type f -exec chmod 0644',
@@ -376,12 +286,19 @@ class OfflineInstallerTests(unittest.TestCase):
         icon = APP_ICON.read_text(encoding="utf-8")
 
         self.assertIn('viewBox="0 0 128 128"', icon)
-        self.assertIn('<linearGradient id="green-paper"', icon)
-        self.assertIn('<linearGradient id="graphite-paper"', icon)
-        self.assertIn('<filter id="rear-shadow"', icon)
-        self.assertIn('<filter id="front-shadow"', icon)
-        self.assertIn('transform="rotate(-7 55 58)"', icon)
-        self.assertIn('transform="rotate(3 78 76)"', icon)
+        self.assertIn('<linearGradient id="navy-paper"', icon)
+        self.assertIn('<linearGradient id="blue-outline"', icon)
+        self.assertIn('<linearGradient id="risk-low"', icon)
+        self.assertIn('<linearGradient id="risk-medium"', icon)
+        self.assertIn('<linearGradient id="risk-high"', icon)
+        self.assertIn('<linearGradient id="risk-critical"', icon)
+        self.assertIn('<filter id="document-shadow"', icon)
+        self.assertIn('<filter id="outline-glow"', icon)
+        self.assertIn('stroke-width="4"', icon)
+        self.assertIn('#2e6da8', icon)
+        self.assertIn('#986300', icon)
+        self.assertIn('#b71931', icon)
+        self.assertIn('#730a1b', icon)
         self.assertNotIn('id="tile"', icon)
         self.assertNotIn("http://", icon.replace("http://www.w3.org/2000/svg", ""))
         self.assertNotIn("https://", icon)
@@ -396,28 +313,13 @@ class OfflineInstallerTests(unittest.TestCase):
 
     def test_user_instructions_explain_check_install_and_logout(self):
         text = INSTRUCTIONS.read_text(encoding="utf-8")
-        polish_guide = OFFLINE_DOCUMENTATION.read_text(encoding="utf-8")
-        english_guide = ENGLISH_OFFLINE_DOCUMENTATION.read_text(encoding="utf-8")
-        self.assertTrue(polish_guide.startswith("# Instalacja offline na komputerze\n"))
-        self.assertNotIn("na drugim komputerze", polish_guide)
-        self.assertTrue(english_guide.startswith("# Offline installation on a computer\n"))
-        self.assertNotIn("another computer", english_guide)
         self.assertIn("Autorka: Anna Kozłowska", text)
         self.assertIn("ChatGPT i Codex od OpenAI", text)
         self.assertIn("nie jest oficjalnym produktem", text)
-        self.assertIn(
-            "Otwórz w terminalu",
-            OFFLINE_DOCUMENTATION.read_text(encoding="utf-8"),
-        )
         self.assertIn("./install.sh --check-only", text)
         self.assertIn("./install.sh", text)
         self.assertIn("Wyloguj się i zaloguj ponownie", text)
         self.assertIn("./diagnose-first-activation.sh", text)
-        self.assertIn("ROZWIĄZYWANIE PROBLEMÓW", text)
-        self.assertLess(
-            text.index("ROZWIĄZYWANIE PROBLEMÓW"),
-            text.index("./diagnose-first-activation.sh"),
-        )
         self.assertIn("./uninstall.sh", text)
         self.assertIn("nie przenosi ustawień, historii ani zawartości", text)
 

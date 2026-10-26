@@ -11,6 +11,7 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import {resolveBackendPath} from './backend-path.js';
 import {translate} from './i18n.js';
 
 const ACTIVE = 'CopyPasteBin pause: ACTIVE\n';
@@ -40,7 +41,7 @@ const RISKS = new Set(['none', 'low', 'medium', 'high', 'critical']);
 const EDITOR_APPLICATION_ID = 'io.github.copypastebin.Editor';
 const SAFE_PASTE_KEY = 'safe-paste';
 const CATEGORY_LABELS = new Map([
-    ['EMAIL', 'e-mail'],
+    ['EMAIL', 'email address'],
     ['PHONE', 'phone number'],
     ['PESEL', 'PESEL'],
     ['IBAN', 'IBAN'],
@@ -63,8 +64,8 @@ const CATEGORY_LABELS = new Map([
     ['TOKEN', 'token'],
     ['SECRET_ASSIGNMENT', 'secret'],
     ['POSSIBLE_SEED_PHRASE', 'seed phrase'],
-    ['MONEY_AMOUNT_PLN_USD', 'traditional currency amounts'],
-    ['CRYPTO_AMOUNT_BTC_XRP', 'cryptocurrency amounts'],
+    ['MONEY_AMOUNT_PLN_USD', 'currency amount'],
+    ['CRYPTO_AMOUNT_BTC_XRP', 'cryptocurrency amount'],
     ['CUSTOM_RULE', 'custom rule'],
 ]);
 
@@ -82,14 +83,15 @@ function clearRecentClipboardState(state) {
 
 const CopyPasteBinIndicator = GObject.registerClass(
 class CopyPasteBinIndicator extends PanelMenu.Button {
-    constructor(uuid, entryPoint, editorPath, filterEditorPath, rulesEditorPath,
-        recentClipboardPath, aboutPath,
+    constructor(uuid, entryPoint, editorPath, imageRedactorPath, filterEditorPath,
+        rulesEditorPath, recentClipboardPath, aboutPath,
         activeIconPath, pausedIconPath, copyingIconPath, languageStatus,
         recentClipboardState, onLanguageChanged) {
         super(0.0, 'CopyPasteBin');
         this._uuid = uuid;
         this._entryPoint = entryPoint;
         this._editorPath = editorPath;
+        this._imageRedactorPath = imageRedactorPath;
         this._filterEditorPath = filterEditorPath;
         this._rulesEditorPath = rulesEditorPath;
         this._recentClipboardPath = recentClipboardPath;
@@ -119,6 +121,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._safePasteSequence = 0;
         this._transferCancellable = null;
         this._editorProcess = null;
+        this._imageRedactorProcess = null;
         this._filterEditorProcess = null;
         this._rulesProcess = null;
         this._recentClipboardProcess = null;
@@ -145,10 +148,6 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this.add_child(this._panelIcon);
         this._buildBanner();
 
-        this._statusItem = new PopupMenu.PopupMenuItem(this._t('Status: checking…'), {
-            reactive: false,
-        });
-        this.menu.addMenuItem(this._statusItem);
         this._recentClipboardItem = new PopupMenu.PopupMenuItem('');
         this._recentClipboardItem.connect('activate', () => this._openRecentClipboard());
         this.menu.addMenuItem(this._recentClipboardItem);
@@ -166,11 +165,17 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._buildLanguageMenu();
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this._addEditorAction();
+        this._addImageRedactorAction();
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._statusItem = new PopupMenu.PopupMenuItem(this._t('Status: checking…'), {
+            reactive: false,
+        });
+        this.menu.addMenuItem(this._statusItem);
         this._addAction(this._t('Pause for 30 minutes'), '30m');
         this._addAction(this._t('Pause for 1 hour'), '1h');
         this._addAction(this._t('Pause until resumed'), 'until-resumed');
-        this._addAction(this._t('Resume now'), 'resume');
+        this._resumeItem = this._addAction(this._t('Resume now'), 'resume');
+        this._resumeItem.visible = false;
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this._addQuitAction();
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -216,6 +221,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         const item = new PopupMenu.PopupMenuItem(label);
         item.connect('activate', () => this._run(action, false));
         this.menu.addMenuItem(item);
+        return item;
     }
 
     _buildAutoClearMenu() {
@@ -340,6 +346,60 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         const item = new PopupMenu.PopupMenuItem(this._t('Edit / anonymize clipboard'));
         item.connect('activate', () => this._openEditor());
         this.menu.addMenuItem(item);
+    }
+
+    _addImageRedactorAction() {
+        const item = new PopupMenu.PopupMenuItem(this._t('Anonymize image'));
+        item.connect('activate', () => this._openImageRedactor());
+        this.menu.addMenuItem(item);
+    }
+
+    _openImageRedactor() {
+        if (this._imageRedactorProcess !== null) {
+            try {
+                this._imageRedactorProcess.send_signal(10);
+                return;
+            } catch (_error) {
+                this._imageRedactorProcess = null;
+            }
+        }
+        if (Main.sessionMode.isLocked || Main.sessionMode.isGreeter)
+            return;
+        try {
+            this._imageRedactorProcess = Gio.Subprocess.new(
+                [
+                    '/usr/bin/gjs', '-m', this._imageRedactorPath,
+                    `--language=${this._language}`,
+                ],
+                Gio.SubprocessFlags.STDOUT_SILENCE |
+                    Gio.SubprocessFlags.STDERR_SILENCE
+            );
+        } catch (_error) {
+            this._imageRedactorProcess = null;
+            this._showBanner(
+                'error',
+                this._t('CopyPasteBin: error'),
+                this._t('The image anonymizer could not be opened.')
+            );
+            return;
+        }
+        this._imageRedactorProcess.wait_async(null, (source, result) => {
+            try {
+                source.wait_finish(result);
+                if (!source.get_successful())
+                    throw new Error('closed image redactor failure');
+            } catch (_error) {
+                if (this._imageRedactorProcess === source)
+                    this._showBanner(
+                        'error',
+                        this._t('CopyPasteBin: error'),
+                        this._t('The image anonymizer closed with an error.')
+                    );
+            } finally {
+                if (this._imageRedactorProcess === source)
+                    this._imageRedactorProcess = null;
+            }
+        });
     }
 
     _addQuitAction() {
@@ -630,6 +690,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         if (action !== 'status') {
             this._cancelAutoClear();
             this._mode = 'transition';
+            this._resumeItem.visible = false;
             this._setProtectionIcon(false);
             this._statusItem.label.text = this._t('Status: changing…');
         }
@@ -1213,7 +1274,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
 
     _updateRecentClipboardLabel() {
         this._recentClipboardItem.label.text = this._t(
-            'Recent clipboard — {count}/{limit}', {
+            'Clipboard history — {count}/{limit}', {
                 count: this._recentClipboardState.entries.length,
                 limit: MAX_RECENT_CLIPBOARD_ENTRIES,
             }
@@ -1263,7 +1324,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                 this._showBanner(
                     'info',
                     'CopyPasteBin',
-                    this._t('The recent clipboard window is already open and has been restored.')
+                    this._t('The clipboard history window is already open and has been restored.')
                 );
                 return;
             } catch (_error) {
@@ -1274,7 +1335,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             this._showBanner(
                 'info',
                 'CopyPasteBin',
-                this._t('No recent clipboard items.')
+                this._t('No clipboard history items.')
             );
             return;
         }
@@ -1286,7 +1347,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                 this._showBanner(
                     'warning',
                     this._t('CopyPasteBin: pause active'),
-                    this._t('Resume protection before opening the recent clipboard.')
+                    this._t('Resume protection before opening clipboard history.')
                 );
                 return;
             }
@@ -1313,7 +1374,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             this._showBanner(
                 'error',
                 this._t('CopyPasteBin: error'),
-                this._t('The recent clipboard could not be opened.')
+                this._t('Clipboard history could not be opened.')
             );
             return;
         }
@@ -1339,7 +1400,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                             this._showBanner(
                                 'info',
                                 'CopyPasteBin',
-                                this._t('The selected recent item is no longer available.')
+                                this._t('The selected history item is no longer available.')
                             );
                             return;
                         }
@@ -1355,7 +1416,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                     this._showBanner(
                         'error',
                         this._t('CopyPasteBin: error'),
-                        this._t('The recent clipboard action was not applied.')
+                        this._t('The clipboard history action was not applied.')
                     );
                 } finally {
                     if (this._recentClipboardProcess === source)
@@ -1368,7 +1429,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             this._showBanner(
                 'error',
                 this._t('CopyPasteBin: error'),
-                this._t('The recent clipboard could not be opened.')
+                this._t('Clipboard history could not be opened.')
             );
         }
     }
@@ -1396,7 +1457,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             this._showBanner(
                 'success',
                 'CopyPasteBin',
-                this._t('The selected recent item was restored to the clipboard.')
+                this._t('The selected history item was restored to the clipboard.')
             );
         });
     }
@@ -1407,7 +1468,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._showBanner(
             'success',
             'CopyPasteBin',
-            this._t('Recent clipboard items were cleared from memory.')
+            this._t('Clipboard history was cleared from memory.')
         );
     }
 
@@ -1736,6 +1797,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._clearTimeout();
         if (stdout === ACTIVE) {
             this._mode = 'active';
+            this._resumeItem.visible = false;
             this._setProtectionIcon(true);
             this._statusItem.label.text = this._t('Status: active');
             if (automaticCheck && previousMode === 'timed')
@@ -1748,6 +1810,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         }
         if (stdout === INDEFINITE) {
             this._mode = 'indefinite';
+            this._resumeItem.visible = true;
             this._setProtectionIcon(false);
             this._statusItem.label.text = this._t('Status: paused until resumed');
             return;
@@ -1763,6 +1826,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             return;
         }
         this._mode = 'timed';
+        this._resumeItem.visible = true;
         this._setProtectionIcon(false);
         const minutes = Math.max(1, Math.ceil(remaining / 60));
         this._statusItem.label.text = this._t('Status: paused — {minutes} min', {minutes});
@@ -1782,6 +1846,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         const showBanner = this._mode !== 'error';
         this._clearTimeout();
         this._mode = 'error';
+        this._resumeItem.visible = false;
         this._setProtectionIcon(false);
         this._statusItem.label.text = this._t('Status: error — protection unconfirmed');
         if (showBanner)
@@ -1847,6 +1912,9 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._transferCancellable = null;
         this._editorProcess?.force_exit();
         this._editorProcess = null;
+        const imageRedactorProcess = this._imageRedactorProcess;
+        this._imageRedactorProcess = null;
+        imageRedactorProcess?.force_exit();
         this._filterEditorProcess?.force_exit();
         this._filterEditorProcess = null;
         this._rulesProcess?.force_exit();
@@ -1888,16 +1956,9 @@ export default class CopyPasteBinExtension extends Extension {
     enable() {
         this._recentClipboardState = {entries: [], totalBytes: 0, nextId: 1};
         this._paths = {
-            entryPoint: GLib.build_filenamev([
-            GLib.get_home_dir(),
-            '.local',
-            'share',
-            'copypastebin',
-            'venv',
-            'bin',
-            'cpb',
-            ]),
+            entryPoint: resolveBackendPath(),
             editorPath: GLib.build_filenamev([this.path, 'editor.js']),
+            imageRedactorPath: GLib.build_filenamev([this.path, 'image-redactor.js']),
             filterEditorPath: GLib.build_filenamev([this.path, 'filter-editor.js']),
             rulesEditorPath: GLib.build_filenamev([this.path, 'rules-editor.js']),
             recentClipboardPath: GLib.build_filenamev([this.path, 'recent-clipboard.js']),
@@ -1923,6 +1984,7 @@ export default class CopyPasteBinExtension extends Extension {
             this.uuid,
             paths.entryPoint,
             paths.editorPath,
+            paths.imageRedactorPath,
             paths.filterEditorPath,
             paths.rulesEditorPath,
             paths.recentClipboardPath,

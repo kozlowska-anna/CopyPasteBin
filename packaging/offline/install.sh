@@ -5,6 +5,7 @@ readonly UUID="copypastebin@kozlowska-anna.github.io"
 readonly LEGACY_UUID="copypastebin@local"
 readonly WINDOW_APPLICATION_IDS=(
     "io.github.copypastebin.Editor"
+    "io.github.copypastebin.ImageRedactor"
     "io.github.copypastebin.FilterEditor"
     "io.github.copypastebin.RulesEditor"
     "io.github.copypastebin.RecentClipboard"
@@ -166,7 +167,7 @@ shell_major="$(printf '%s\n' "$shell_version" | sed -nE 's/.* ([0-9]+)(\.[0-9]+)
 [[ "$shell_major" == "$REQUIRED_SHELL_MAJOR" ]] || fail \
     "wymagany jest GNOME Shell $REQUIRED_SHELL_MAJOR; wykryto: ${shell_version:-nieznaną wersję}"
 
-/usr/bin/gjs -c "imports.gi.versions.Gtk = '4.0'; imports.gi.Gtk; imports.gi.GioUnix" \
+/usr/bin/gjs -c "imports.gi.versions.Gtk = '4.0'; imports.gi.Gtk; imports.gi.GioUnix; imports.gi.GdkPixbuf" \
     >/dev/null 2>&1 || fail "brakuje GTK 4 lub bibliotek GObject wymaganych przez edytor"
 
 if [[ -n "${XDG_SESSION_TYPE:-}" && "${XDG_SESSION_TYPE,,}" != "wayland" ]]; then

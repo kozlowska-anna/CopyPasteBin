@@ -10,6 +10,59 @@ LAUNCHER = ROOT / "packaging" / "copypastebin.desktop"
 
 
 class GnomeExtensionTests(unittest.TestCase):
+    def test_about_links_use_native_browser_activation_and_translated_labels(self):
+        import re
+        from urllib.parse import urlsplit
+
+        window = (EXTENSION / "about.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+        site = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
+        canonical = re.search(r'rel="canonical" href="([^"]+)"', site).group(1)
+        for constant, url, english, polish in (
+            ("WEBSITE_URL", canonical, "Website", "Strona internetowa"),
+            ("ISSUES_URL", "https://github.com/kozlowska-anna/CopyPasteBin/issues",
+             "Report an issue", "Zgłoś błąd"),
+        ):
+            with self.subTest(link=constant):
+                self.assertIn(f"const {constant} = '{url}';", window)
+                self.assertIn(
+                    "new Gtk.LinkButton({\n"
+                    f"            label: t('{english}'),\n"
+                    f"            uri: {constant},\n"
+                    "        })", window,
+                )
+                self.assertIn(f"['{english}', '{polish}']", catalog)
+                self.assertEqual("https", urlsplit(url).scheme)
+                self.assertEqual("", urlsplit(url).query)
+        self.assertEqual(2, window.count("new Gtk.LinkButton("))
+        # Keep GTK's default, user-triggered URI handler; no eager launch or upload.
+        for forbidden in ("activate-link", "launch_default_for_uri", "fetch(",
+                          "Soup", "Gio.Subprocess"):
+            self.assertNotIn(forbidden, window)
+
+    def test_all_backend_clients_use_one_deterministic_resolver(self):
+        resolver = (EXTENSION / "backend-path.js").read_text(encoding="utf-8")
+        extension = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        editor = (EXTENSION / "editor.js").read_text(encoding="utf-8")
+        filters = (EXTENSION / "filter-editor.js").read_text(encoding="utf-8")
+        rules = (EXTENSION / "rules-editor.js").read_text(encoding="utf-8")
+        recent = (EXTENSION / "recent-clipboard.js").read_text(encoding="utf-8")
+        about = (EXTENSION / "about.js").read_text(encoding="utf-8")
+
+        self.assertIn("resolveBackendPath", extension)
+        for client in (editor, filters, rules):
+            self.assertIn("import {backendCommand} from './backend-path.js'", client)
+            self.assertNotIn("venv',\n    'bin',\n    'cpb'", client)
+        self.assertIn("backendCommand('ui', 'detections')", editor)
+        self.assertIn("backendCommand('ui', 'redact')", editor)
+        self.assertIn("backendCommand('ui', 'exclusion-add')", editor)
+        self.assertIn("backendCommand('ui', 'rules')", rules)
+        self.assertIn("backendCommand('ui', 'rules-save')", rules)
+        self.assertIn("backendCommand('ui', ...arguments_)", filters)
+        self.assertNotIn("backend-path.js", recent + about)
+        self.assertNotIn("Gio.Subprocess", recent + about)
+        self.assertIn("SYSTEM_BACKEND_PATH = '/usr/bin/cpb'", resolver)
+
     def test_metadata_targets_only_confirmed_shell_generation(self):
         metadata = json.loads((EXTENSION / "metadata.json").read_text(encoding="utf-8"))
         self.assertEqual(PUBLIC_UUID, metadata["uuid"])
@@ -99,7 +152,49 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertNotIn("15m", source)
         self.assertNotIn("2h", source)
 
-    def test_panel_icon_has_green_active_and_red_paused_back_sheet(self):
+    def test_resume_action_is_visible_only_while_pause_is_active(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        recent = source.index("this._recentClipboardItem = new PopupMenu.PopupMenuItem")
+        status = source.index("this._statusItem = new PopupMenu.PopupMenuItem")
+        pause_30m = source.index("this._addAction(this._t('Pause for 30 minutes'), '30m')")
+        self.assertLess(recent, status)
+        self.assertLess(status, pause_30m)
+        self.assertIn("this._resumeItem = this._addAction(this._t('Resume now'), 'resume')", source)
+        apply_status = source[
+            source.index("    _applyStatus(stdout, automaticCheck) {"):
+            source.index("    _showError() {", source.index("    _applyStatus"))
+        ]
+        active = apply_status[apply_status.index("if (stdout === ACTIVE)"):apply_status.index("if (stdout === INDEFINITE)")]
+        indefinite = apply_status[apply_status.index("if (stdout === INDEFINITE)"):apply_status.index("const match = TIMED.exec(stdout)")]
+        timed = apply_status[apply_status.index("this._mode = 'timed'"):]
+        transition = source[source.index("    _run(action, automaticCheck) {"):source.index("    _runPause(action, onSuccess) {")]
+        error = source[source.index("    _showError() {"):source.index("    _showEmptyClipboard() {")]
+        self.assertIn("this._resumeItem.visible = false", active)
+        self.assertIn("this._resumeItem.visible = true", indefinite)
+        self.assertIn("this._resumeItem.visible = true", timed)
+        self.assertIn("this._resumeItem.visible = false", transition)
+        self.assertIn("this._resumeItem.visible = false", error)
+
+    def test_english_category_names_are_consistent_across_the_ui(self):
+        extension = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        editor = (EXTENSION / "editor.js").read_text(encoding="utf-8")
+        filters = (EXTENSION / "filter-editor.js").read_text(encoding="utf-8")
+        i18n = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+        rules = (EXTENSION / "rules-editor.js").read_text(encoding="utf-8")
+        self.assertIn("['EMAIL', 'email address']", extension)
+        self.assertIn("['EMAIL', 'Email address']", editor)
+        self.assertIn("['EMAIL', t('Email address')]", filters)
+        self.assertIn("['EMAIL', 'Email address']", rules)
+        for ui_source in (editor, rules):
+            self.assertIn("['PHONE', 'Phone number']", ui_source)
+            self.assertIn("['MONEY_AMOUNT_PLN_USD', 'Currency amount']", ui_source)
+            self.assertNotIn("'Fiat amount'", ui_source)
+            self.assertNotIn("'Traditional currency amount'", ui_source)
+        self.assertIn("['Email address', 'E-mail']", i18n)
+        self.assertIn("['email address', 'e-mail']", i18n)
+        self.assertIn("['Currency amount', 'Kwota waluty tradycyjnej']", i18n)
+
+    def test_panel_icons_match_brand_states_and_flash_only_the_front_sheet(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
         active = (EXTENSION / "icon-active.svg").read_text(encoding="utf-8")
         paused = (EXTENSION / "icon-paused.svg").read_text(encoding="utf-8")
@@ -108,13 +203,19 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("this._setProtectionIcon(false)", source)
         self.assertIn("icon-active.svg", source)
         self.assertIn("icon-paused.svg", source)
-        self.assertIn('#35c759', active)
-        self.assertIn('#ff453a', paused)
-        self.assertIn('fill="#171717"', active)
-        self.assertIn('fill="#171717"', paused)
+        self.assertIn('fill="#102d4b"', active)
+        self.assertIn('fill="#0a223b"', active)
+        self.assertIn('stroke="#4da9e8"', active)
+        self.assertIn('stroke="#73c7fa"', active)
+        self.assertIn('fill="#730a1b"', paused)
+        self.assertIn('stroke="#e23b52"', paused)
+        self.assertIn('stroke="#ff6478"', paused)
         self.assertIn("icon-copying.svg", source)
-        self.assertIn('fill="#E8E8E8"', copying)
-        self.assertIn('fill="#35c759"', copying)
+        self.assertIn('fill="#102d4b"', copying)
+        self.assertIn('fill="#eaf6ff"', copying)
+        self.assertIn('stroke="#73c7fa"', copying)
+        self.assertNotIn('fill="#eaf6ff"', active)
+        self.assertNotIn('fill="#eaf6ff"', paused)
         self.assertIn("CLIPBOARD_FLASH_MILLISECONDS = 200", source)
         self.assertIn("this._flashClipboardChange()", source)
         self.assertIn("this._clearClipboardFlash()", source)
@@ -210,6 +311,7 @@ class GnomeExtensionTests(unittest.TestCase):
     def test_recent_clipboard_uses_separate_pipe_only_window(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
         window = (EXTENSION / "recent-clipboard.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
         self.assertIn("this._recentClipboardItem.connect('activate'", source)
         self.assertIn("this._recentClipboardPath,", source)
         self.assertIn("Gio.SubprocessFlags.STDIN_PIPE", source)
@@ -235,6 +337,10 @@ class GnomeExtensionTests(unittest.TestCase):
         )
         self.assertIn("Restore to clipboard", window)
         self.assertIn("Click again: Clear all", window)
+        self.assertIn("Clipboard history — {count}/{limit}", source)
+        self.assertIn("t('Clipboard history')", window)
+        self.assertIn("['Clipboard history', 'Historia schowka']", catalog)
+        self.assertNotIn("Ostatnie wpisy schowka", catalog)
         for forbidden in ("write_file", "append_to", "shell=True", "/bin/sh", "http://", "https://"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source + window)
@@ -249,16 +355,25 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("this._aboutPath", source)
         self.assertIn("this._aboutProcess?.force_exit()", source)
         self.assertIn("About CopyPasteBin", window)
+        self.assertIn("detects potentially sensitive data", window)
+        self.assertIn("redact text and images", window)
+        self.assertIn("Runs locally, with no account, cloud services, or telemetry.", window)
+        self.assertIn("wykrywa potencjalnie wrażliwe dane", translations)
+        self.assertIn("anonimizować tekst i obrazy", translations)
+        self.assertIn("Program działa lokalnie, bez konta, chmury i telemetrii.", translations)
         self.assertIn("Author: Anna Kozłowska", window)
         self.assertIn("License: GPL-3.0-or-later", window)
         self.assertIn("This program comes with no warranty", window)
+        self.assertIn("copypastebin-about-icon", window)
+        self.assertIn("-gtk-icon-shadow", window)
+        self.assertIn("#061827", window)
         self.assertIn("ChatGPT and Codex from OpenAI", window)
         self.assertIn("not an official OpenAI product", window)
         self.assertIn("Autorka: Anna Kozłowska", translations)
         self.assertIn("support from ChatGPT and Codex", metadata)
         self.assertIn('authors = [{name = "Anna Kozłowska"}]', project)
         self.assertIn('license = {text = "GPL-3.0-or-later"}', project)
-        for forbidden in ("http://", "https://", "Gio.File", "Gio.Subprocess"):
+        for forbidden in ("http://", "Gio.File", "Gio.Subprocess"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, window)
 
@@ -279,13 +394,31 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("this.menu.actor.get_theme_node().get_background_color()", source)
         self.assertIn("FILTERS = new Map", editor)
         self.assertIn("Gtk.CheckButton", editor)
-        self.assertIn("[ENTRY_POINT, 'ui', ...arguments_]", editor)
+        self.assertIn("backendCommand('ui', ...arguments_)", editor)
         self.assertIn("['filter-set', category, enabled ? 'on' : 'off']", editor)
         self.assertIn("payload.filters.length !== expected.length", editor)
         self.assertIn("Changes are saved immediately", editor)
         for forbidden in ("shell=True", "/bin/sh", "eval(", "http://", "https://"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source + editor)
+
+    def test_filter_and_rules_save_lock_input_without_fading_all_controls(self):
+        filters = (EXTENSION / "filter-editor.js").read_text(encoding="utf-8")
+        rules = (EXTENSION / "rules-editor.js").read_text(encoding="utf-8")
+
+        self.assertNotIn("_setBusy", filters + rules)
+        self.assertIn("this._setSaving(true)", filters)
+        self.assertIn("check.sensitive = this._available", filters)
+        self.assertIn("check.can_target = interactive", filters)
+        self.assertIn("check.focusable = interactive", filters)
+        self.assertIn("if (check.active !== active)", filters)
+
+        self.assertIn("this._setSaving(true)", rules)
+        self.assertIn("row._enabled.sensitive = this._available", rules)
+        self.assertIn("control.can_target = interactive", rules)
+        self.assertIn("control.focusable = interactive", rules)
+        self.assertIn("this._setAvailable(false)", rules)
+        self.assertIn("this._setSaving(false)", rules)
 
     def test_nested_settings_menus_share_the_main_menu_background(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
@@ -323,8 +456,8 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("this._rulesProcess?.force_exit()", extension)
         self.assertIn("MAX_RULES = 32", editor)
         self.assertIn("MAX_EXCLUSIONS = 32", editor)
-        self.assertIn("[ENTRY_POINT, 'ui', 'rules']", editor)
-        self.assertIn("[ENTRY_POINT, 'ui', 'rules-save']", editor)
+        self.assertIn("backendCommand('ui', 'rules')", editor)
+        self.assertIn("backendCommand('ui', 'rules-save')", editor)
         self.assertIn("Gio.SubprocessFlags.STDIN_PIPE", editor)
         self.assertIn("Do not enter a real password", editor)
         self.assertIn("Add an exception", editor)
@@ -358,7 +491,7 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("this._applyEditedClipboard(edited, false)", extension)
         self.assertIn("The change was not applied because pause is active.", extension)
         self.assertIn("this._ignoreOwnerTimeoutId", extension)
-        self.assertIn("[ENTRY_POINT, 'ui', 'redact']", editor)
+        self.assertIn("backendCommand('ui', 'redact')", editor)
         self.assertIn("Anonymize detected data", editor)
         self.assertIn("Replace clipboard", editor)
         for forbidden in ("wl-paste", "wl-copy", "setenv", "shell=True"):
@@ -448,7 +581,7 @@ class GnomeExtensionTests(unittest.TestCase):
     def test_editor_highlights_detection_positions_without_receiving_content_back(self):
         editor = (EXTENSION / "editor.js").read_text(encoding="utf-8")
         self.assertIn("Highlight detected data", editor)
-        self.assertIn("[ENTRY_POINT, 'ui', 'detections']", editor)
+        self.assertIn("backendCommand('ui', 'detections')", editor)
         self.assertIn("payload.detections.length > MAX_DETECTIONS", editor)
         self.assertIn("this._buffer.apply_tag(", editor)
         self.assertIn("background: '#f6d365'", editor)
@@ -507,7 +640,7 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("detection.risk !== 'low' && detection.risk !== 'medium'", editor)
         self.assertIn("item.start === selectionCandidate.start", editor)
         self.assertIn("item.end === selectionCandidate.end", editor)
-        self.assertIn("[ENTRY_POINT, 'ui', 'exclusion-add']", editor)
+        self.assertIn("backendCommand('ui', 'exclusion-add')", editor)
         self.assertIn("Gio.SubprocessFlags.STDIN_PIPE", editor)
         self.assertIn("literal: candidate.literal", editor)
         self.assertNotIn("`${candidate.literal}", editor)

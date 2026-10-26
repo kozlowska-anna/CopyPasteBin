@@ -1,0 +1,34 @@
+CopyPasteBin 1.1 Debian package
+===============================
+
+This package installs CopyPasteBin as a system GNOME Shell extension. It does
+not enable the extension during package installation because package manager
+actions run as root and must not modify an arbitrary user's GNOME settings.
+
+After installation, log out and back in to GNOME Wayland. Open the application
+menu and choose "Enable CopyPasteBin" (Polish: "Włącz CopyPasteBin"). This
+explicit action enables only the CopyPasteBin extension for the currently
+logged-in user. It does not enable the extension for other accounts. The
+launcher refuses activation while a user-local extension with the same UUID
+exists, preventing GNOME from silently selecting older code.
+
+The package contains AppStream metadata, the GPL-3.0-or-later project license,
+the developer name, homepage and product icon. A graphical installer may still
+describe a locally downloaded DEB as untrusted or from an unknown publisher
+because it does not come from a configured, signed package repository. A
+native DEB is not sandboxed, so Ubuntu may also describe its permissions as
+unrestricted. These system warnings are not hidden or bypassed by the package.
+
+If CopyPasteBin was previously installed from the offline archive, run that
+archive's current uninstall.sh before installing this package. The offline
+uninstaller preserves ~/.config/copypastebin and ~/.local/state/copypastebin.
+A user-local extension with the same UUID takes precedence over this system
+extension. CopyPasteBin 1.1 uses `/usr/bin/cpb` first when both backends are
+available, but an older user-local copy of the extension does not contain that
+resolver and could keep using the old user-local backend. The DEB launcher
+therefore requires removal of the old offline program code before activation;
+it does not remove that code or private data automatically.
+
+Removing this package removes only package-owned program files. User settings
+and metadata history under ~/.config/copypastebin and
+~/.local/state/copypastebin are not package-owned and remain in place.

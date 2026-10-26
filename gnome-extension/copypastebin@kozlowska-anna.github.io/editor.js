@@ -6,6 +6,7 @@ import GLibUnix from 'gi://GLibUnix?version=2.0';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import System from 'system';
+import {backendCommand} from './backend-path.js';
 import {languageFromArgs, translate} from './i18n.js';
 
 const SUGGEST_REDACTION = ARGV.includes('--suggest-redaction');
@@ -23,24 +24,14 @@ const MAX_DETECTIONS = 1000;
 const MAX_EXCLUSION_REQUEST_BYTES = 2048;
 const CLICK_MOVE_TOLERANCE = 6;
 const EXCLUDABLE_CATEGORY_LABELS = new Map([
-    ['EMAIL', 'E-mail'],
-    ['PHONE', 'Phone'],
+    ['EMAIL', 'Email address'],
+    ['PHONE', 'Phone number'],
     ['IBAN', 'IBAN'],
     ['HOME_PATH', 'Home path'],
     ['IP_ADDRESS', 'IP address'],
-    ['MONEY_AMOUNT_PLN_USD', 'Fiat amount'],
+    ['MONEY_AMOUNT_PLN_USD', 'Currency amount'],
     ['CRYPTO_AMOUNT_BTC_XRP', 'Cryptocurrency amount'],
 ]);
-const ENTRY_POINT = GLib.build_filenamev([
-    GLib.get_home_dir(),
-    '.local',
-    'share',
-    'copypastebin',
-    'venv',
-    'bin',
-    'cpb',
-]);
-
 function readStdin() {
     const stream = new GioUnix.InputStream({fd: 0, close_fd: false});
     const chunks = [];
@@ -448,7 +439,7 @@ class EditorApplication extends Gtk.Application {
         this._status.label = t('Checking detected data…');
         try {
             this._process = Gio.Subprocess.new(
-                [ENTRY_POINT, 'ui', 'detections'],
+                backendCommand('ui', 'detections'),
                 Gio.SubprocessFlags.STDIN_PIPE |
                     Gio.SubprocessFlags.STDOUT_PIPE |
                     Gio.SubprocessFlags.STDERR_SILENCE
@@ -786,7 +777,7 @@ class EditorApplication extends Gtk.Application {
         this._status.label = t('Saving exception…');
         try {
             this._process = Gio.Subprocess.new(
-                [ENTRY_POINT, 'ui', 'exclusion-add'],
+                backendCommand('ui', 'exclusion-add'),
                 Gio.SubprocessFlags.STDIN_PIPE |
                     Gio.SubprocessFlags.STDOUT_PIPE |
                     Gio.SubprocessFlags.STDERR_SILENCE
@@ -849,7 +840,7 @@ class EditorApplication extends Gtk.Application {
         this._status.label = t('Preparing suggestion…');
         try {
             this._process = Gio.Subprocess.new(
-                [ENTRY_POINT, 'ui', 'redact'],
+                backendCommand('ui', 'redact'),
                 Gio.SubprocessFlags.STDIN_PIPE |
                     Gio.SubprocessFlags.STDOUT_PIPE |
                     Gio.SubprocessFlags.STDERR_SILENCE

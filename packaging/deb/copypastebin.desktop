@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=Enable CopyPasteBin
+Name[pl]=Włącz CopyPasteBin
+GenericName=Clipboard privacy assistant
+GenericName[pl]=Asystent prywatności schowka
+Comment=Enable local clipboard protection for this user
+Comment[pl]=Włącz lokalną ochronę schowka dla tego użytkownika
+Exec=/usr/bin/gjs -m /usr/share/copypastebin/enable-extension.js
+Icon=copypastebin
+Terminal=false
+Categories=Utility;
+Keywords=clipboard;privacy;redaction;GNOME;
+Keywords[pl]=schowek;prywatność;anonimizacja;GNOME;
+StartupNotify=false

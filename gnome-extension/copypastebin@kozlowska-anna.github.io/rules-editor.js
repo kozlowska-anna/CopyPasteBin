@@ -4,6 +4,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import System from 'system';
+import {backendCommand} from './backend-path.js';
 import {languageFromArgs, translate} from './i18n.js';
 
 const SUGGEST_EXCLUSION = ARGV.includes('--suggest-exclusion');
@@ -17,24 +18,14 @@ const MAX_EXCLUSIONS = 32;
 const MAX_RULES_BYTES = 64 * 1024;
 const MAX_SUGGESTION_BYTES = 512;
 const EXCLUDABLE_CATEGORIES = new Map([
-    ['EMAIL', 'E-mail'],
-    ['PHONE', 'Phone'],
+    ['EMAIL', 'Email address'],
+    ['PHONE', 'Phone number'],
     ['IBAN', 'IBAN'],
     ['HOME_PATH', 'Home path'],
     ['IP_ADDRESS', 'IP address'],
-    ['MONEY_AMOUNT_PLN_USD', 'Fiat amount'],
+    ['MONEY_AMOUNT_PLN_USD', 'Currency amount'],
     ['CRYPTO_AMOUNT_BTC_XRP', 'Cryptocurrency amount'],
 ]);
-const ENTRY_POINT = GLib.build_filenamev([
-    GLib.get_home_dir(),
-    '.local',
-    'share',
-    'copypastebin',
-    'venv',
-    'bin',
-    'cpb',
-]);
-
 function readSuggestedExclusion() {
     if (!SUGGEST_EXCLUSION)
         return null;
@@ -82,6 +73,8 @@ class RulesApplication extends Gtk.Application {
         this._process = null;
         this._rows = [];
         this._sections = {};
+        this._available = false;
+        this._saving = false;
     }
 
     vfunc_activate() {
@@ -225,30 +218,53 @@ class RulesApplication extends Gtk.Application {
         return column;
     }
 
-    _setBusy(busy) {
+    _refreshInteractivity() {
         const rules = this._rows.filter(row => row._kind === 'rule').length;
         const exclusions = this._rows.filter(
             row => row._kind === 'exclusion'
         ).length;
-        this._add.sensitive = !busy && rules < MAX_RULES;
-        this._addExclusion.sensitive = !busy && exclusions < MAX_EXCLUSIONS;
-        this._save.sensitive = !busy;
+        this._add.sensitive = this._available && rules < MAX_RULES;
+        this._addExclusion.sensitive =
+            this._available && exclusions < MAX_EXCLUSIONS;
+        this._save.sensitive = this._available;
+        const controls = [this._add, this._addExclusion, this._save];
         for (const row of this._rows) {
-            row._enabled.sensitive = !busy;
-            row._literal.sensitive = !busy;
+            row._enabled.sensitive = this._available;
+            row._literal.sensitive = this._available;
             if (row._risk)
-                row._risk.sensitive = !busy;
+                row._risk.sensitive = this._available;
             if (row._category)
-                row._category.sensitive = !busy;
-            row._remove.sensitive = !busy;
+                row._category.sensitive = this._available;
+            row._remove.sensitive = this._available;
+            controls.push(
+                row._enabled,
+                row._literal,
+                row._risk ?? row._category,
+                row._remove
+            );
+        }
+        const interactive = this._available && !this._saving;
+        for (const control of controls) {
+            control.can_target = interactive;
+            control.focusable = interactive;
         }
     }
 
+    _setAvailable(available) {
+        this._available = available;
+        this._refreshInteractivity();
+    }
+
+    _setSaving(saving) {
+        this._saving = saving;
+        this._refreshInteractivity();
+    }
+
     _loadRules() {
-        this._setBusy(true);
+        this._setAvailable(false);
         try {
             this._process = Gio.Subprocess.new(
-                [ENTRY_POINT, 'ui', 'rules'],
+                backendCommand('ui', 'rules'),
                 Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE
             );
         } catch (_error) {
@@ -272,7 +288,7 @@ class RulesApplication extends Gtk.Application {
                         false
                     );
                 this._process = null;
-                this._setBusy(false);
+                this._setAvailable(true);
                 this._applySuggestedExclusion();
             } catch (_error) {
                 this._loadFailed();
@@ -428,7 +444,7 @@ class RulesApplication extends Gtk.Application {
         row._state = enabled ? 'active' : 'inactive';
         this._sections[kind][row._state].list.append(row);
         this._rows.push(row);
-        this._setBusy(false);
+        this._refreshInteractivity();
         this._updateStatus();
         if (focus)
             row._literal.grab_focus();
@@ -440,7 +456,7 @@ class RulesApplication extends Gtk.Application {
             return;
         this._rows.splice(index, 1);
         this._sections[row._kind][row._state].list.remove(row);
-        this._setBusy(false);
+        this._refreshInteractivity();
         this._updateStatus();
     }
 
@@ -520,11 +536,11 @@ class RulesApplication extends Gtk.Application {
             this._status.label = error.message;
             return;
         }
-        this._setBusy(true);
+        this._setSaving(true);
         this._status.label = t('Saving rules…');
         try {
             this._process = Gio.Subprocess.new(
-                [ENTRY_POINT, 'ui', 'rules-save'],
+                backendCommand('ui', 'rules-save'),
                 Gio.SubprocessFlags.STDIN_PIPE |
                     Gio.SubprocessFlags.STDOUT_PIPE |
                     Gio.SubprocessFlags.STDERR_SILENCE
@@ -544,7 +560,7 @@ class RulesApplication extends Gtk.Application {
                     JSON.stringify({rules, exclusions}))
                     throw new Error('closed rules failure');
                 this._process = null;
-                this._setBusy(false);
+                this._setSaving(false);
                 this._updateStatus(t('Saved'));
             } catch (_error) {
                 this._saveFailed();
@@ -554,13 +570,13 @@ class RulesApplication extends Gtk.Application {
 
     _loadFailed() {
         this._process = null;
-        this._setBusy(true);
+        this._setAvailable(false);
         this._status.label = t('Rules could not be loaded safely.');
     }
 
     _saveFailed() {
         this._process = null;
-        this._setBusy(false);
+        this._setSaving(false);
         this._status.label = t('Rules could not be saved safely.');
     }
 });

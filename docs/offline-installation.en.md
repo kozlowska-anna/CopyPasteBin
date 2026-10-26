@@ -1,41 +1,37 @@
-# Offline installation on a computer
+# Installing CopyPasteBin 1.1
 
-The `CopyPasteBin-offline-linux-1.0.0.tar.gz` package provides a controlled,
-local installation of CopyPasteBin 1.0.0. The confirmed supported environment
-is GNOME Shell 50 on Wayland with Python 3.11 or newer.
+CopyPasteBin 1.1 has two installers from the same source set:
 
-## [⬇ Download CopyPasteBin 1.0.0 for Linux (.tar.gz)](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz)
+- [Debian package `copypastebin_1.1-1_all.deb`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb) for a system installation managed by APT;
+- [archive `CopyPasteBin-linux-1.1.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz) for a user-local installation.
 
-**Required verification file:**
-[Download the SHA-256 checksum (.sha256)](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.0.0/CopyPasteBin-offline-linux-1.0.0.tar.gz.sha256)
+Also download [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) and verify the selected file before opening it. Do not install both variants at the same time.
 
-Download both files into the same directory. The expected SHA-256 of the
-archive is:
+The supported scope is GNOME Shell 50 on Wayland with Python 3.11 or newer.
+KDE Plasma, Cinnamon, and Xfce integration has not been verified. There is no
+CopyPasteBin APT repository, so a locally downloaded DEB does not receive
+automatic updates.
 
-```text
-5146736df8eb04bf2d5e477d48d1b02a984a490f486915d283e71bc71d7bbb6b
-```
-
-## Verify and extract the download
+## User-local tar.gz
 
 Open a terminal in the download directory and verify the archive before
 extracting it:
 
 ```sh
-sha256sum --check CopyPasteBin-offline-linux-1.0.0.tar.gz.sha256
+sha256sum --check --ignore-missing SHA256SUMS
 ```
 
 Continue only if the command reports:
 
 ```text
-CopyPasteBin-offline-linux-1.0.0.tar.gz: OK
+CopyPasteBin-linux-1.1.tar.gz: OK
 ```
 
 Extract the verified archive and enter its directory:
 
 ```sh
-tar -xzf CopyPasteBin-offline-linux-1.0.0.tar.gz
-cd CopyPasteBin-offline-linux-1.0.0
+tar -xzf CopyPasteBin-linux-1.1.tar.gz
+cd CopyPasteBin-linux-1.1
 ```
 
 ## Check compatibility and install
@@ -66,8 +62,10 @@ The package contains:
 - the local Python core as a wheel with no network dependencies;
 - the complete `copypastebin@kozlowska-anna.github.io` extension;
 - the locally compiled GSettings schema for the `Super+Shift+V` shortcut;
-- the launcher, scalable application icon, and hidden icon mappings for five
+- the launcher, scalable application icon, and hidden icon mappings for six
   GTK windows;
+- the on-demand image editor for local PNG and JPEG files, saving redacted
+  output as a new PNG;
 - an installer with a read-only check mode;
 - a conservative uninstaller that preserves settings and history;
 - SHA-256 checksums for every payload file.
@@ -114,10 +112,56 @@ settings and history.
 
 ## Supported environment
 
-Version 1.0.0 supports GNOME Shell 50 on Wayland with Python 3.11 or newer,
+Version 1.1 supports GNOME Shell 50 on Wayland with Python 3.11 or newer,
 including `venv`, GJS, GTK 4, GioUnix, GNOME Extensions, and `sha256sum`.
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in this
 release. The installer stops safely when GNOME Shell is unavailable.
+
+## Debian package
+
+Verify the checksum and inspect the downloaded package:
+
+```sh
+sha256sum copypastebin_1.1-1_all.deb
+dpkg-deb --info copypastebin_1.1-1_all.deb
+```
+
+Install it after explicitly approving administrative access:
+
+```sh
+sudo apt install ./copypastebin_1.1-1_all.deb
+```
+
+The package does not start CopyPasteBin as root, has no maintainer scripts,
+and does not enable the extension during installation. Log out and back in to
+GNOME Wayland, then choose **Enable CopyPasteBin** from the application menu.
+Use the same APT command with a newer local file to update. Ubuntu Software
+did not upgrade an existing local DEB during testing, so APT is the documented
+manual update method.
+
+Remove package-owned code with:
+
+```sh
+sudo apt remove copypastebin
+```
+
+Removal preserves `~/.config/copypastebin` and
+`~/.local/state/copypastebin`. A graphical installer may describe the local,
+unsigned DEB as coming from an unknown publisher or having unrestricted
+permissions. Package metadata cannot honestly remove those warnings without a
+signed repository or sandbox.
+
+## Changing installation method
+
+For tar.gz to DEB, first run `./uninstall.sh` from the current archive, then
+install the DEB. This preserves private state while removing the user-local
+backend, launchers, and same-UUID extension that would otherwise take
+precedence over the system extension. The DEB activation helper refuses to
+proceed while that conflict exists; it never removes user files automatically.
+
+For DEB to tar.gz, first remove the DEB with `apt remove`, then run
+`./install.sh` from the archive. Do not keep both installation methods active
+at the same time. Reinstalling the same version does not remove private state.
 
 ## If CopyPasteBin does not start automatically
 

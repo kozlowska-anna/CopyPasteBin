@@ -1,0 +1,16 @@
+Package: copypastebin
+Version: 1.1-1
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Anna Kozłowska <342168094+kozlowska-anna@users.noreply.github.com>
+Depends: python3 (>= 3.11), gjs, gnome-shell (>= 50~), gnome-shell (<< 51~), gir1.2-gdkpixbuf-2.0, gir1.2-glib-2.0, gir1.2-gtk-4.0
+Homepage: https://github.com/kozlowska-anna/CopyPasteBin
+Description: local clipboard privacy assistant for GNOME
+ CopyPasteBin detects selected kinds of sensitive clipboard text and secrets,
+ warns when sensitive content is detected, and helps the user redact text
+ before sharing.
+ It also provides manual redaction of selected areas in local photos and
+ screenshots. Analysis and editing stay on the device; no data is sent to a
+ cloud service. This release supports GNOME Shell 50 on Wayland and requires
+ explicit per-user activation after installation.

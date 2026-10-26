@@ -148,7 +148,7 @@ class RecentClipboardApplication extends Gtk.Application {
     vfunc_activate() {
         const window = new Gtk.ApplicationWindow({
             application: this,
-            title: `CopyPasteBin — ${t('Recent clipboard')}`,
+            title: `CopyPasteBin — ${t('Clipboard history')}`,
             default_width: 1020,
             default_height: 700,
         });
@@ -286,7 +286,7 @@ class RecentClipboardApplication extends Gtk.Application {
             writeAction(1, this._selected.id);
             this.quit();
         } catch (_error) {
-            this._status.label = t('The recent clipboard action could not be returned safely.');
+            this._status.label = t('The clipboard history action could not be returned safely.');
         }
     }
 
@@ -294,7 +294,7 @@ class RecentClipboardApplication extends Gtk.Application {
         if (!this._clearArmed) {
             this._clearArmed = true;
             this._clear.label = t('Click again: Clear all');
-            this._status.label = t('Click again to clear all recent items from memory.');
+            this._status.label = t('Click again to clear all history items from memory.');
             return;
         }
         try {
@@ -303,7 +303,7 @@ class RecentClipboardApplication extends Gtk.Application {
         } catch (_error) {
             this._clearArmed = false;
             this._clear.label = t('Clear all');
-            this._status.label = t('The recent clipboard action could not be returned safely.');
+            this._status.label = t('The clipboard history action could not be returned safely.');
         }
     }
 });

@@ -330,11 +330,10 @@ stanowi alternatywnego trybu aktualnego produktu.
 ## Publikacja
 
 Rozszerzenie ma stabilny publiczny UUID oraz angielską bazę komunikatów z
-polskim tłumaczeniem. Pierwsze wydanie publiczne jest dystrybuowane jako
-lokalne archiwum offline z zewnętrzną sumą SHA-256. Publikacja w GNOME
-Extensions i osobne, confined pakowanie rdzenia wymagają późniejszego review i
-nie należą do zakresu 1.0. Licencja projektu została ustalona jako
-`GPL-3.0-or-later`, a nota BSD-3-Clause dla danych BIP-39 jest zachowana w
-dystrybucji. Pozostałe prace nie mogą osłabić opisanych wyżej granic
-prywatności.
-
+polskim tłumaczeniem. Wersja 1.1 jest dystrybuowana przez GitHub Release jako
+pakiet Debiana i lokalne dla użytkownika archiwum tar.gz, z zewnętrznymi sumami
+SHA-256. Publikacja w GNOME Extensions i osobne, izolowane pakowanie rdzenia
+wymagają późniejszego review i pozostają poza obsługiwanym zakresem. Projekt
+jest udostępniany na licencji `GPL-3.0-or-later`, a nota BSD-3-Clause dla danych
+BIP-39 jest zachowana w dystrybucji. Pozostałe prace nie mogą osłabić opisanych
+wyżej granic prywatności.

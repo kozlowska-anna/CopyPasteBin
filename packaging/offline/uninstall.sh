@@ -5,6 +5,7 @@ readonly UUID="copypastebin@kozlowska-anna.github.io"
 readonly LEGACY_UUID="copypastebin@local"
 readonly WINDOW_APPLICATION_IDS=(
     "io.github.copypastebin.Editor"
+    "io.github.copypastebin.ImageRedactor"
     "io.github.copypastebin.FilterEditor"
     "io.github.copypastebin.RulesEditor"
     "io.github.copypastebin.RecentClipboard"

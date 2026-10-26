@@ -271,7 +271,7 @@ Niezależnie od tej technicznej historii rozszerzenie trzyma podręcznie najwyż
 15 ostatnich skopiowanych tekstów wyłącznie w RAM. Limit jednego wpisu wynosi
 256 KiB, a całości 2 MiB; większe teksty nadal są analizowane, lecz nie trafiają
 na listę.
-Pozycja „Ostatnie wpisy schowka” otwiera osobne okno GTK z bezpiecznym
+Pozycja „Historia schowka” otwiera osobne okno GTK z bezpiecznym
 podglądem, przywróceniem wybranej treści i potwierdzanym czyszczeniem całej
 listy. Okno dostaje chwilową migawkę przez anonimowe stdin i zwraca tylko
 zamknięty identyfikator akcji przez stdout. Treść nie trafia do pliku, argv,

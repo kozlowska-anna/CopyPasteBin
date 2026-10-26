@@ -1,5 +1,6 @@
 import GLib from 'gi://GLib';
 import GLibUnix from 'gi://GLibUnix?version=2.0';
+import Gdk from 'gi://Gdk?version=4.0';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import System from 'system';
@@ -7,7 +8,10 @@ import {languageFromArgs, translate} from './i18n.js';
 
 const LANGUAGE = languageFromArgs(ARGV);
 const t = (message, values = {}) => translate(LANGUAGE, message, values);
-const VERSION = '1.0.0';
+const VERSION = '1.1';
+// Official URL from website/index.html's canonical configuration.
+const WEBSITE_URL = 'https://kozlowska-anna.github.io/CopyPasteBin/';
+const ISSUES_URL = 'https://github.com/kozlowska-anna/CopyPasteBin/issues';
 
 function informationLabel(label, options = {}) {
     return new Gtk.Label({
@@ -52,6 +56,19 @@ class AboutApplication extends Gtk.Application {
             resizable: false,
         });
         this._window = window;
+        this._cssProvider = new Gtk.CssProvider();
+        this._cssProvider.load_from_string(`
+            .copypastebin-about-icon {
+                -gtk-icon-shadow:
+                    0 0 1px #061827,
+                    0 0 2px rgba(6, 24, 39, 0.9);
+            }
+        `);
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            this._cssProvider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        );
         const layout = new Gtk.Box({
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10,
@@ -60,21 +77,23 @@ class AboutApplication extends Gtk.Application {
             margin_start: 28,
             margin_end: 28,
         });
-        layout.append(new Gtk.Image({
+        const icon = new Gtk.Image({
             icon_name: 'copypastebin',
             pixel_size: 72,
             margin_bottom: 4,
-        }));
+        });
+        icon.add_css_class('copypastebin-about-icon');
+        layout.append(icon);
         const name = informationLabel('CopyPasteBin');
         name.add_css_class('title-1');
         layout.append(name);
         layout.append(informationLabel(t('Version {version}', {version: VERSION})));
         layout.append(informationLabel(
-            t('CopyPasteBin helps stop sensitive text before it is shared with the wrong recipient.'),
+            t('CopyPasteBin is a clipboard manager for GNOME that detects potentially sensitive data, warns after it is copied, and lets you redact text and images as well as edit content before pasting.'),
             {marginTop: 8}
         ));
         layout.append(informationLabel(
-            t('Works locally, without cloud services or telemetry.')
+            t('Runs locally, with no account, cloud services, or telemetry.')
         ));
         layout.append(new Gtk.Separator({
             orientation: Gtk.Orientation.HORIZONTAL,
@@ -111,6 +130,21 @@ class AboutApplication extends Gtk.Application {
         );
         warranty.add_css_class('dim-label');
         layout.append(warranty);
+        const links = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 16,
+            halign: Gtk.Align.CENTER,
+        });
+        // Gtk.LinkButton opens the system default browser only on activation.
+        links.append(new Gtk.LinkButton({
+            label: t('Website'),
+            uri: WEBSITE_URL,
+        }));
+        links.append(new Gtk.LinkButton({
+            label: t('Report an issue'),
+            uri: ISSUES_URL,
+        }));
+        layout.append(links);
         const close = new Gtk.Button({
             label: t('Close'),
             halign: Gtk.Align.END,
@@ -120,6 +154,11 @@ class AboutApplication extends Gtk.Application {
         layout.append(close);
         window.set_child(layout);
         window.connect('close-request', () => {
+            Gtk.StyleContext.remove_provider_for_display(
+                Gdk.Display.get_default(),
+                this._cssProvider
+            );
+            this._cssProvider = null;
             this._window = null;
             this.quit();
             return false;

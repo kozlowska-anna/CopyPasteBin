@@ -349,9 +349,10 @@ alternative mode of the current product.
 ## Publication
 
 The extension has a stable public UUID and English base messages with a Polish
-translation. The first public release is distributed as a local offline
-archive with an external SHA-256 checksum. Publication on GNOME Extensions and
-separate confined packaging of the core require later review and are outside
-the scope of 1.0. The project is licensed under `GPL-3.0-or-later`, and the
-BSD-3-Clause notice for BIP-39 data is preserved in the distribution. Future
-work must not weaken the privacy boundaries described above.
+translation. Version 1.1 is distributed through GitHub Release as a Debian
+package and a user-local tar.gz archive, with external SHA-256 checksums.
+Publication on GNOME Extensions and separate confined packaging of the core
+require later review and remain outside the supported scope. The project is
+licensed under `GPL-3.0-or-later`, and the BSD-3-Clause notice for BIP-39 data
+is preserved in the distribution. Future work must not weaken the privacy
+boundaries described above.
