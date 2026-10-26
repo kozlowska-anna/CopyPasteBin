@@ -107,8 +107,8 @@ a {
 }
 
 .brand img {
-  width: 2rem;
-  height: 2rem;
+  width: 2.75rem;
+  height: 2.75rem;
   filter: drop-shadow(0 0 1px #061827) drop-shadow(0 0 1.4px rgba(6, 24, 39, 0.9));
 }
 
@@ -744,6 +744,21 @@ code {
   padding: 0.15rem 0.35rem;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.88em;
+}
+
+.verification-command {
+  overflow-x: auto;
+  margin: 0.75rem 0 1.25rem;
+  border: 1px solid #d2e0ed;
+  border-radius: 0.25rem;
+  background: #f7fbff;
+  padding: 0.85rem 1rem;
+}
+
+.verification-command code {
+  border: 0;
+  background: transparent;
+  padding: 0;
 }
 
 .note {

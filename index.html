@@ -12,7 +12,7 @@
     <link rel="alternate" hreflang="en" href="https://kozlowska-anna.github.io/CopyPasteBin/en/">
     <link rel="alternate" hreflang="x-default" href="https://kozlowska-anna.github.io/CopyPasteBin/">
     <link rel="icon" type="image/svg+xml" href="assets/images/logo-web.svg">
-    <link rel="stylesheet" href="assets/css/styles.css?v=20261022-12">
+    <link rel="stylesheet" href="assets/css/styles.css?v=20261026-1">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="CopyPasteBin">
     <meta property="og:locale" content="pl_PL">
@@ -20,11 +20,12 @@
     <meta property="og:title" content="CopyPasteBin | Menedżer schowka dla GNOME">
     <meta property="og:description" content="CopyPasteBin to menedżer schowka dla GNOME z wykrywaniem danych wrażliwych, ostrzeżeniami przed wklejeniem, anonimizacją tekstu i obrazów oraz podręcznym edytorem treści.">
     <meta property="og:url" content="https://kozlowska-anna.github.io/CopyPasteBin/">
-    <meta property="og:image" content="https://kozlowska-anna.github.io/CopyPasteBin/assets/images/rules-and-exceptions.png">
-    <meta property="og:image:width" content="1202">
-    <meta property="og:image:height" content="647">
-    <meta property="og:image:alt" content="Okno reguł i wykluczeń CopyPasteBin z danymi demonstracyjnymi">
+    <meta property="og:image" content="https://kozlowska-anna.github.io/CopyPasteBin/assets/images/share-card-1.1.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Logo CopyPasteBin — menedżer schowka dla GNOME">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://kozlowska-anna.github.io/CopyPasteBin/assets/images/share-card-1.1.png">
     <script defer src="assets/js/site.js?v=20261019-6"></script>
   </head>
   <body>
@@ -32,7 +33,7 @@
     <header class="site-header">
       <div class="container nav-shell">
         <a class="brand" href="#top" aria-label="CopyPasteBin — strona główna">
-          <img src="assets/images/logo-web.svg" width="32" height="32" alt="">
+          <img src="assets/images/logo-web.svg" width="44" height="44" alt="">
           <span>CopyPasteBin</span>
         </a>
         <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-navigation" data-menu-button>Menu</button>
@@ -57,7 +58,7 @@
             <h1>Sprawdź, zanim wkleisz.</h1>
             <p class="hero-lede">Kopiujesz jak zwykle. CopyPasteBin ostrzega, gdy tekst przypomina hasło, klucz, dane osobowe lub finansowe. Pomaga Ci sprawdzić, poprawić lub zanonimizować treść przed użyciem — a decyzja, co ostatecznie wkleić, pozostaje po Twojej stronie.</p>
             <div class="hero-actions">
-              <a class="button button-primary" href="#pobierz">Poznaj wersję 1.1</a>
+              <a class="button button-primary" href="#pobierz">Pobierz wersję 1.1</a>
               <a class="button button-secondary" href="#jak-dziala">Zobacz, jak działa</a>
             </div>
             <ul class="hero-proof" aria-label="Najważniejsze informacje">
@@ -130,7 +131,6 @@
             <article class="feature-card"><span class="feature-number">05</span><h3>Cztery poziomy ryzyka</h3><p>Reguły rozróżniają poziomy od niskiego do krytycznego i kategorie takie jak dane kontaktowe, numery finansowe, tokeny czy klucze prywatne.</p></article>
             <article class="feature-card"><span class="feature-number">06</span><h3>Bezpieczne wklejenie</h3><p>Użyj <code>Super+Shift+V</code>, aby sprawdzić tekst znajdujący się w schowku. Jeśli program wykryje ryzyko, otworzy edytor z propozycją anonimizacji. Niczego nie wklei ani nie zmieni bez potwierdzenia.</p></article>
             <article class="feature-card"><span class="feature-number">07</span><h3>Pauza i opcjonalne czyszczenie</h3><p>Podczas pauzy opcje czasu pozostają widoczne, a przycisk wznowienia jest pod ręką. Opcjonalne czyszczenie schowka pozostaje wyłączone domyślnie.</p></article>
-            <article class="feature-card"><span class="feature-number">08</span><h3>Dwa instalatory, jeden kod</h3><p>Pakiet DEB i archiwum tar.gz powstają z tego samego zestawu źródeł i zawierają ten sam kod aplikacji, edytor obrazów, ikony oraz ustawienia domyślne.</p></article>
           </div>
           <div class="feature-facts">
             <article class="facts-card">
@@ -221,10 +221,9 @@
               <li><code>gjs</code>, GTK 4, GdkPixbuf, GioUnix i <code>gnome-extensions</code></li>
               <li><code>sha256sum</code> do kontroli pobranego archiwum</li>
             </ul>
-            <p><strong>Przykładowe zgodne dystrybucje:</strong></p>
+            <p><strong>Przykład zgodnej dystrybucji:</strong></p>
             <ul class="requirements-list">
               <li>Ubuntu 26.04 LTS (GNOME 50, Wayland)</li>
-              <li>Fedora Workstation 44 (GNOME 50, Wayland)</li>
             </ul>
             <p>Obecnie nieobsługiwane środowiska: KDE Plasma, Cinnamon, Xfce oraz sesje X11.</p>
             <p>Zgodność zależy od środowiska graficznego i jego wersji, a nie wyłącznie od nazwy dystrybucji.</p>
@@ -234,9 +233,12 @@
             <h2>Dwa instalatory z tego samego kodu.</h2>
             <p><code>copypastebin_1.1-1_all.deb</code> zapewnia instalację systemową zarządzaną przez APT, a <code>CopyPasteBin-linux-1.1.tar.gz</code> — instalację lokalną dla jednego użytkownika bez <code>sudo</code>.</p>
             <div class="download-actions">
-              <a class="button button-dark" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">Pobierz DEB</a>
-              <a class="button" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">Pobierz tar.gz</a>
+              <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">↓ Pobierz DEB</a>
+              <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">↓ Pobierz tar.gz</a>
+              <a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS">Pobierz SHA256SUMS</a>
             </div>
+            <p>Po pobraniu instalatora i pliku sum sprawdź paczkę w tym samym katalogu:</p>
+            <pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre>
             <p>Archiwum 1.1 tar.gz zawiera dokumentację polską i angielską. Zacznij od <code>README.pl.md</code> i <code>INSTALL.pl.md</code>; odnośniki językowe pozwalają przełączyć język. Obie wersje strony korzystają z tej samej paczki.</p>
             <ol class="install-steps">
               <li>Syntetyczny benchmark detekcji wersji 1.1 zakończył się wynikiem <strong>26/26</strong>.</li>
@@ -244,6 +246,9 @@
             </ol>
             <p>Centrum oprogramowania nie zaktualizowało istniejącego DEB, dlatego ręczna aktualizacja używa APT.</p>
             <p><strong>Nie instaluj obu wariantów jednocześnie.</strong></p>
+            <h3>Aktualizacje</h3>
+            <p>CopyPasteBin nie sprawdza aktualizacji w tle. Nowe wersje są publikowane w GitHub Releases. Aby otrzymywać powiadomienia z GitHuba, wybierz w repozytorium <strong>Watch → Custom → Releases</strong>.</p>
+            <p><a href="https://github.com/kozlowska-anna/CopyPasteBin/releases/latest">Sprawdź najnowsze wydanie →</a></p>
             <p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/CHANGELOG.md">Zobacz zmiany w wersji 1.1 →</a></p>
             <p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.md">Pełna instrukcja instalacji, aktualizacji i odinstalowania →</a></p>
           </div>
