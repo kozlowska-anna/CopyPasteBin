@@ -243,6 +243,8 @@ class StaticSiteTests(unittest.TestCase):
                 "Wydanie · 1.1",
                 "Anonimizacja obrazów",
                 "Dwa instalatory z tego samego kodu",
+                "Pakiet DEB",
+                "Archiwum tar.gz",
                 "copypastebin_1.1-1_all.deb",
                 "CopyPasteBin-linux-1.1.tar.gz",
                 "releases/download/v1.1/copypastebin_1.1-1_all.deb",
@@ -250,14 +252,15 @@ class StaticSiteTests(unittest.TestCase):
                 "releases/download/v1.1/SHA256SUMS",
                 "sha256sum --check --ignore-missing SHA256SUMS",
                 "Watch → Custom → Releases",
-                "26/26",
                 "Oba warianty instalacji sprawdzono w docelowym środowisku GNOME/Wayland",
-                "ręczna aktualizacja używa APT",
+                "Aktualizacja pakietu DEB wymaga obecnie pobrania nowej wersji i zainstalowania jej przez APT",
             ),
             "en": (
                 "Release · 1.1",
                 "Image redaction",
                 "Two installers from the same source",
+                "DEB package",
+                "tar.gz archive",
                 "copypastebin_1.1-1_all.deb",
                 "CopyPasteBin-linux-1.1.tar.gz",
                 "releases/download/v1.1/copypastebin_1.1-1_all.deb",
@@ -265,9 +268,8 @@ class StaticSiteTests(unittest.TestCase):
                 "releases/download/v1.1/SHA256SUMS",
                 "sha256sum --check --ignore-missing SHA256SUMS",
                 "Watch → Custom → Releases",
-                "26/26",
                 "Both installation variants were checked in the target GNOME/Wayland environment",
-                "manual upgrades use APT",
+                "Updating the DEB package currently requires downloading the new version and installing it through APT",
             ),
         }
         for page in PAGES:
@@ -282,6 +284,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertNotIn("remains unpublished", source)
             self.assertNotIn("Pobierz stabilne 1.0.0", source)
             self.assertNotIn("Download stable 1.0.0", source)
+            self.assertNotIn("26/26", source)
 
     def test_public_roadmap_separates_commitments_from_exploration(self) -> None:
         expected_by_language = {
