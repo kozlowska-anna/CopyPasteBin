@@ -509,7 +509,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertNotIn("Bez udawania, że ryzyko znika", source)
             self.assertNotIn("Without pretending risk disappears", source)
             self.assertNotIn('name="keywords"', source.lower())
-            self.assertIn("styles.css?v=20261026-1", source)
+            self.assertIn("styles.css?v=20261026-2", source)
             self.assertIn("site.js?v=20261019-6", source)
         stack_rule = re.search(r"\.risk-stack\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
         banner_rule = re.search(r"\.risk-banner\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
@@ -517,6 +517,13 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIsNotNone(banner_rule)
         self.assertIn("position: relative", stack_rule.group("body"))
         self.assertIn("position: absolute", banner_rule.group("body"))
+        card_rule = re.search(
+            r"\.system-card,\s*\.download-card\s*\{(?P<body>[^}]*)\}",
+            css,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(card_rule)
+        self.assertIn("min-width: 0", card_rule.group("body"))
         for class_name, color in expected.items():
             rule = re.search(rf"\.{class_name}\s*\{{(?P<body>[^}}]*)\}}", css, re.DOTALL)
             self.assertIsNotNone(rule)
