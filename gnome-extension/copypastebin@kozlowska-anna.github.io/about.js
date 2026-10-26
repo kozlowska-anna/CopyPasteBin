@@ -11,6 +11,7 @@ const t = (message, values = {}) => translate(LANGUAGE, message, values);
 const VERSION = '1.1';
 // Official URL from website/index.html's canonical configuration.
 const WEBSITE_URL = 'https://kozlowska-anna.github.io/CopyPasteBin/';
+const LATEST_RELEASE_URL = 'https://github.com/kozlowska-anna/CopyPasteBin/releases/latest';
 const ISSUES_URL = 'https://github.com/kozlowska-anna/CopyPasteBin/issues';
 
 function informationLabel(label, options = {}) {
@@ -141,9 +142,17 @@ class AboutApplication extends Gtk.Application {
             uri: WEBSITE_URL,
         }));
         links.append(new Gtk.LinkButton({
+            label: t('Download the latest version'),
+            uri: LATEST_RELEASE_URL,
+        }));
+        links.append(new Gtk.LinkButton({
             label: t('Report an issue'),
             uri: ISSUES_URL,
         }));
+        layout.append(informationLabel(
+            t('Updates are not checked automatically. Open the latest release to download a new version.'),
+            {marginTop: 8}
+        ));
         layout.append(links);
         const close = new Gtk.Button({
             label: t('Close'),

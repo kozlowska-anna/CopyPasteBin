@@ -1,12 +1,10 @@
-<h1>
-  <img align="right" width="160" alt="CopyPasteBin logo" src="docs/screenshots/ikona.png" />
-  <br /><br /><br />
-  CopyPasteBin
-</h1>
+# CopyPasteBin
 
 **English** | [Polski](README.pl.md)
 
-[Download / Installation](#install-version-11)
+**[Open the CopyPasteBin website](https://kozlowska-anna.github.io/CopyPasteBin/en/)**
+
+[Download version 1.1](#install-version-11) · [Documentation](#documentation) · [Security model](SECURITY.md)
 
 ## More control before you paste
 
@@ -147,7 +145,11 @@ Choose one installation method:
 
 - [⬇ Download the Debian package](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb) for a system installation managed by APT.
 - [⬇ Download the tar.gz archive](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz) for a user-local installation without `sudo`.
-- [Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) and verify the selected file before opening it.
+- [Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) and verify the selected file before opening it:
+
+```sh
+sha256sum --check --ignore-missing SHA256SUMS
+```
 
 **Do not install both variants at the same time.** Follow the
 [complete English installation guide](docs/offline-installation.en.md) for
@@ -176,6 +178,13 @@ should then start automatically.
 To update the archive installation, run `./install.sh` from the new package.
 To update a local DEB, use APT with the new file. Updates and removal preserve
 the user's private configuration and history.
+
+### Learning about new versions
+
+CopyPasteBin does not check for updates in the background. New versions are
+published on the [releases page](https://github.com/kozlowska-anna/CopyPasteBin/releases).
+To receive GitHub notifications, choose **Watch → Custom → Releases** in the
+repository.
 
 ## Privacy and security
 

@@ -26,7 +26,7 @@ case "${1:-}" in
 esac
 
 if [[ ${EUID:-$(id -u)} -eq 0 ]]; then
-    printf '%s\n' "CopyPasteBin: uruchom diagnostykę jako zwykła użytkowniczka, bez sudo." >&2
+    printf '%s\n' "CopyPasteBin: uruchom diagnostykę jako zwykły użytkownik, bez sudo." >&2
     exit 1
 fi
 if [[ -z "${HOME:-}" || "$HOME" != /* || "$HOME" == "/" ]]; then

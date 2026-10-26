@@ -1,12 +1,10 @@
-<h1>
-  <img align="right" width="160" alt="Logo CopyPasteBin" src="docs/screenshots/ikona.png" />
-  <br /><br /><br />
-  CopyPasteBin
-</h1>
+# CopyPasteBin
 
 [English](README.md) | **Polski**
 
-[Pobieranie / Instalacja](#instalacja-wersji-11)
+**[Otwórz stronę CopyPasteBin](https://kozlowska-anna.github.io/CopyPasteBin/)**
+
+[Pobierz wersję 1.1](#instalacja-wersji-11) · [Dokumentacja](#dokumentacja) · [Model bezpieczeństwa](docs/security.pl.md)
 
 ## Więcej kontroli zanim wkleisz
 
@@ -148,7 +146,11 @@ Wybierz jeden sposób instalacji:
 
 - [⬇ Pobierz pakiet Debiana](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb) do instalacji systemowej zarządzanej przez APT.
 - [⬇ Pobierz archiwum tar.gz](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz) do instalacji lokalnej bez `sudo`.
-- [Pobierz `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) i sprawdź wybrany plik przed jego otwarciem.
+- [Pobierz `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) i sprawdź wybrany plik przed jego otwarciem:
+
+```sh
+sha256sum --check --ignore-missing SHA256SUMS
+```
 
 **Nie instaluj obu wariantów jednocześnie.** Pełną weryfikację, instalację,
 aktualizację, zmianę metody oraz odinstalowanie opisuje
@@ -177,6 +179,13 @@ CopyPasteBin powinien uruchomić się automatycznie.
 Aby zaktualizować instalację archiwalną, uruchom `./install.sh` z nowej paczki.
 Lokalny DEB aktualizuj przez APT z nowym plikiem. Aktualizacja i usuwanie
 zachowują prywatną konfigurację oraz historię użytkownika.
+
+### Informacje o nowych wersjach
+
+CopyPasteBin nie sprawdza aktualizacji w tle. Nowe wersje są publikowane na
+[stronie wydań](https://github.com/kozlowska-anna/CopyPasteBin/releases). Aby
+otrzymywać powiadomienia z GitHuba, wybierz w repozytorium
+**Watch → Custom → Releases**.
 
 ## Prywatność i bezpieczeństwo
 

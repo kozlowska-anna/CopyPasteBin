@@ -8,7 +8,7 @@ Copyright © 2026 Anna Kozłowska. Licencja: GPL-3.0-or-later.
 Pełne warunki oraz informacje o danych stron trzecich zawierają pliki LICENSE
 i NOTICE dołączone do pakietu.
 
-Pakiet instaluje CopyPasteBin tylko dla bieżącej użytkowniczki. Nie wymaga
+Pakiet instaluje CopyPasteBin tylko dla bieżącego użytkownika. Nie wymaga
 sudo, nie łączy się z siecią i nie przenosi ustawień, historii ani zawartości
 schowka z pierwszego komputera.
 

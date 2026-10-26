@@ -37,17 +37,15 @@ EXPECTED_METADATA = {
 EXPECTED_COMPATIBILITY = {
     "pl": (
         "Wymagane środowisko.",
-        "Przykładowe zgodne dystrybucje:",
+        "Przykład zgodnej dystrybucji:",
         "Ubuntu 26.04 LTS (GNOME 50, Wayland)",
-        "Fedora Workstation 44 (GNOME 50, Wayland)",
         "Obecnie nieobsługiwane środowiska: KDE Plasma, Cinnamon, Xfce oraz sesje X11.",
         "Zgodność zależy od środowiska graficznego i jego wersji, a nie wyłącznie od nazwy dystrybucji.",
     ),
     "en": (
         "Required environment.",
-        "Examples of compatible Linux distributions:",
+        "Example of a compatible Linux distribution:",
         "Ubuntu 26.04 LTS (GNOME 50, Wayland)",
-        "Fedora Workstation 44 (GNOME 50, Wayland)",
         "Currently unsupported: KDE Plasma, Cinnamon, Xfce, and X11 sessions.",
         "Compatibility depends on the desktop environment and its version, not just the Linux distribution.",
     ),
@@ -170,6 +168,8 @@ class StaticSiteTests(unittest.TestCase):
             self.assertEqual(meta_content(parser, prop="og:title"), expected["title"])
             self.assertEqual(meta_content(parser, prop="og:description"), expected["description"])
             self.assertTrue(meta_content(parser, prop="og:image").startswith("https://"))
+            self.assertTrue(meta_content(parser, prop="og:image").endswith("share-card-1.1.png"))
+            self.assertEqual(meta_content(parser, name="twitter:image"), meta_content(parser, prop="og:image"))
             titles.add(parser.title.strip())
             descriptions.add(description)
         self.assertEqual(len(titles), len(PAGES))
@@ -242,11 +242,14 @@ class StaticSiteTests(unittest.TestCase):
             "pl": (
                 "Wydanie · 1.1",
                 "Anonimizacja obrazów",
-                "Dwa instalatory, jeden kod",
+                "Dwa instalatory z tego samego kodu",
                 "copypastebin_1.1-1_all.deb",
                 "CopyPasteBin-linux-1.1.tar.gz",
                 "releases/download/v1.1/copypastebin_1.1-1_all.deb",
                 "releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz",
+                "releases/download/v1.1/SHA256SUMS",
+                "sha256sum --check --ignore-missing SHA256SUMS",
+                "Watch → Custom → Releases",
                 "26/26",
                 "Oba warianty instalacji sprawdzono w docelowym środowisku GNOME/Wayland",
                 "ręczna aktualizacja używa APT",
@@ -254,11 +257,14 @@ class StaticSiteTests(unittest.TestCase):
             "en": (
                 "Release · 1.1",
                 "Image redaction",
-                "Two installers, one codebase",
+                "Two installers from the same source",
                 "copypastebin_1.1-1_all.deb",
                 "CopyPasteBin-linux-1.1.tar.gz",
                 "releases/download/v1.1/copypastebin_1.1-1_all.deb",
                 "releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz",
+                "releases/download/v1.1/SHA256SUMS",
+                "sha256sum --check --ignore-missing SHA256SUMS",
+                "Watch → Custom → Releases",
                 "26/26",
                 "Both installation variants were checked in the target GNOME/Wayland environment",
                 "manual upgrades use APT",
@@ -500,7 +506,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertNotIn("Bez udawania, że ryzyko znika", source)
             self.assertNotIn("Without pretending risk disappears", source)
             self.assertNotIn('name="keywords"', source.lower())
-            self.assertIn("styles.css?v=20261022-12", source)
+            self.assertIn("styles.css?v=20261026-1", source)
             self.assertIn("site.js?v=20261019-6", source)
         stack_rule = re.search(r"\.risk-stack\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
         banner_rule = re.search(r"\.risk-banner\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
@@ -517,8 +523,11 @@ class StaticSiteTests(unittest.TestCase):
         css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8").lower()
         app_logo = SITE / "assets" / "images" / "logo.svg"
         web_logo = SITE / "assets" / "images" / "logo-web.svg"
+        share_card = SITE / "assets" / "images" / "share-card-1.1.png"
         self.assertTrue(app_logo.is_file())
         self.assertTrue(web_logo.is_file())
+        self.assertTrue(share_card.is_file())
+        self.assertGreater(share_card.stat().st_size, 10_000)
         ET.parse(app_logo)
         ET.parse(web_logo)
         web_logo_source = web_logo.read_text(encoding="utf-8").lower()

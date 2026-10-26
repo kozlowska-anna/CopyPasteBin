@@ -20,6 +20,8 @@ class GnomeExtensionTests(unittest.TestCase):
         canonical = re.search(r'rel="canonical" href="([^"]+)"', site).group(1)
         for constant, url, english, polish in (
             ("WEBSITE_URL", canonical, "Website", "Strona internetowa"),
+            ("LATEST_RELEASE_URL", "https://github.com/kozlowska-anna/CopyPasteBin/releases/latest",
+             "Download the latest version", "Pobierz najnowszą wersję"),
             ("ISSUES_URL", "https://github.com/kozlowska-anna/CopyPasteBin/issues",
              "Report an issue", "Zgłoś błąd"),
         ):
@@ -34,7 +36,15 @@ class GnomeExtensionTests(unittest.TestCase):
                 self.assertIn(f"['{english}', '{polish}']", catalog)
                 self.assertEqual("https", urlsplit(url).scheme)
                 self.assertEqual("", urlsplit(url).query)
-        self.assertEqual(2, window.count("new Gtk.LinkButton("))
+        self.assertEqual(3, window.count("new Gtk.LinkButton("))
+        self.assertIn(
+            "Updates are not checked automatically. Open the latest release to download a new version.",
+            window,
+        )
+        self.assertIn(
+            "Aktualizacje nie są sprawdzane automatycznie. Otwórz najnowsze wydanie, aby pobrać nową wersję.",
+            catalog,
+        )
         # Keep GTK's default, user-triggered URI handler; no eager launch or upload.
         for forbidden in ("activate-link", "launch_default_for_uri", "fetch(",
                           "Soup", "Gio.Subprocess"):

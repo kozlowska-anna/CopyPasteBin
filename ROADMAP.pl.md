@@ -47,13 +47,13 @@ użytkownika archiwum tar.gz.
 Planowane jest rozwijanie podręcznego edytora i reguł własnych, w tym możliwość
 użycia wyrażeń regularnych po zaprojektowaniu bezpiecznych limitów i czytelnego
 przeglądu dopasowań. Celem jest łatwiejsze przygotowanie treści, a nie
-automatyczne podejmowanie decyzji za użytkowniczkę.
+automatyczne podejmowanie decyzji za użytkownika.
 
 ### Udoskonalanie ręcznej anonimizacji obrazów
 
 Po wersji 1.1 ręczny przepływ anonimizacji obrazów może być udoskonalany na
 podstawie rzeczywistego użycia. Podstawowa granica pozostaje niezmienna:
-użytkowniczka wybiera lokalny obraz, wskazuje obszary do zakrycia i zapisuje
+użytkownik wybiera lokalny obraz, wskazuje obszary do zakrycia i zapisuje
 nowy plik bez modyfikowania oryginału.
 
 ## Badamy
@@ -61,7 +61,7 @@ nowy plik bez modyfikowania oryginału.
 ### Jawne lokalne OCR
 
 CopyPasteBin może zbadać uruchamiany na żądanie, wyłącznie lokalny etap OCR do
-przeglądania tekstu w obrazie wybranym przez użytkowniczkę. Ta funkcja nie jest
+przeglądania tekstu w obrazie wybranym przez użytkownika. Ta funkcja nie jest
 zaimplementowana. Wymagałaby jawnej akcji i przeglądu; nie monitorowałaby po
 cichu obrazów ani nie wykonywałaby automatycznej anonimizacji.
 
@@ -99,7 +99,7 @@ Obecny kierunek produktu nie obejmuje:
 
 CopyPasteBin zachowuje zasadę: **sugestia może być automatyczna, wykonanie
 nie**. Zapis zanonimizowanej treści albo zmiana konfiguracji wymagają jawnej
-decyzji użytkowniczki.
+decyzji użytkownika.
 
 ## Uwagi i propozycje
 

@@ -1,5 +1,7 @@
 const POLISH = new Map([
     ['Website', 'Strona internetowa'],
+    ['Download the latest version', 'Pobierz najnowszą wersję'],
+    ['Updates are not checked automatically. Open the latest release to download a new version.', 'Aktualizacje nie są sprawdzane automatycznie. Otwórz najnowsze wydanie, aby pobrać nową wersję.'],
     ['Report an issue', 'Zgłoś błąd'],
     ['Detection filters', 'Filtry wykrywania'],
     ['Enable or disable how CopyPasteBin responds to each type of data.', 'Włącz lub wyłącz reakcję CopyPasteBin na poszczególne rodzaje danych.'],
