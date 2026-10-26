@@ -20,9 +20,9 @@ EXPECTED_METADATA = {
         "title": "CopyPasteBin | Menedżer schowka dla GNOME",
         "h1": "Sprawdź, zanim wkleisz.",
         "description": (
-            "CopyPasteBin to menedżer schowka dla GNOME z wykrywaniem danych "
-            "wrażliwych, ostrzeżeniami przed wklejeniem, anonimizacją tekstu i obrazów "
-            "oraz podręcznym edytorem treści."
+            "CopyPasteBin to menedżer schowka dla GNOME, który wykrywa dane "
+            "wrażliwe, ostrzega przed wklejeniem i umożliwia lokalną anonimizację "
+            "tekstu i obrazów."
         ),
     },
     "en": {
