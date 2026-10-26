@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="navy-paper" x1="24" y1="18" x2="105" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#173a5e"/>
+      <stop offset="0.58" stop-color="#102d4b"/>
+      <stop offset="1" stop-color="#0a223b"/>
+    </linearGradient>
+    <linearGradient id="blue-outline" x1="30" y1="18" x2="98" y2="111" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#73c7fa"/>
+      <stop offset="0.55" stop-color="#4da9e8"/>
+      <stop offset="1" stop-color="#2d77c5"/>
+    </linearGradient>
+    <linearGradient id="risk-low" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4aa5ed"/>
+      <stop offset="1" stop-color="#2e6da8"/>
+    </linearGradient>
+    <linearGradient id="risk-medium" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d89b1a"/>
+      <stop offset="1" stop-color="#986300"/>
+    </linearGradient>
+    <linearGradient id="risk-high" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e23b52"/>
+      <stop offset="1" stop-color="#b71931"/>
+    </linearGradient>
+    <linearGradient id="risk-critical" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a91832"/>
+      <stop offset="1" stop-color="#730a1b"/>
+    </linearGradient>
+    <filter id="document-shadow" x="7" y="7" width="118" height="119" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.4" flood-color="#071523" flood-opacity=".58"/>
+    </filter>
+    <filter id="outline-glow" x="8" y="6" width="117" height="119" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="1.6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g filter="url(#document-shadow)">
+    <rect x="15" y="14" width="73" height="91" rx="12" fill="url(#navy-paper)"/>
+    <rect x="15" y="14" width="73" height="91" rx="12" fill="none" stroke="url(#blue-outline)" stroke-width="4" filter="url(#outline-glow)"/>
+    <g fill="#7d94b5">
+      <rect x="27" y="34" width="42" height="4" rx="2"/>
+      <rect x="27" y="47" width="42" height="4" rx="2" opacity=".9"/>
+      <rect x="27" y="60" width="42" height="4" rx="2" opacity=".82"/>
+      <rect x="27" y="73" width="42" height="4" rx="2" opacity=".74"/>
+      <rect x="27" y="86" width="25" height="4" rx="2" opacity=".68"/>
+    </g>
+  </g>
+
+  <g filter="url(#document-shadow)">
+    <rect x="45" y="27" width="69" height="90" rx="12" fill="url(#navy-paper)"/>
+    <rect x="45" y="27" width="69" height="90" rx="12" fill="none" stroke="url(#blue-outline)" stroke-width="4" filter="url(#outline-glow)"/>
+    <g fill="#8097b8">
+      <rect x="56" y="43" width="43" height="4" rx="2"/>
+      <rect x="56" y="62" width="17" height="4" rx="2" opacity=".9"/>
+      <rect x="83" y="62" width="19" height="4" rx="2" opacity=".82"/>
+      <rect x="56" y="75" width="46" height="4" rx="2" opacity=".76"/>
+      <rect x="56" y="94" width="21" height="4" rx="2" opacity=".7"/>
+      <rect x="84" y="94" width="18" height="4" rx="2" opacity=".66"/>
+      <rect x="56" y="107" width="35" height="4" rx="2" opacity=".62"/>
+    </g>
+    <rect x="78" y="55" width="24" height="7" rx="3.5" fill="url(#risk-low)"/>
+    <rect x="56" y="68" width="31" height="7" rx="3.5" fill="url(#risk-medium)"/>
+    <rect x="78" y="87" width="24" height="7" rx="3.5" fill="url(#risk-high)"/>
+    <rect x="56" y="100" width="31" height="7" rx="3.5" fill="url(#risk-critical)"/>
+  </g>
+</svg>
