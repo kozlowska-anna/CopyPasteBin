@@ -231,7 +231,11 @@
           <div class="download-card">
             <span class="version-badge">Wydanie · 1.1</span>
             <h2>Dwa instalatory z tego samego kodu.</h2>
-            <p><code>copypastebin_1.1-1_all.deb</code> zapewnia instalację systemową zarządzaną przez APT, a <code>CopyPasteBin-linux-1.1.tar.gz</code> — instalację lokalną dla jednego użytkownika bez <code>sudo</code>.</p>
+            <p>Wybierz jeden sposób instalacji:</p>
+            <ul class="requirements-list">
+              <li><strong>Pakiet DEB</strong> — instalacja systemowa zarządzana przez APT.</li>
+              <li><strong>Archiwum tar.gz</strong> — instalacja lokalna dla jednego użytkownika, bez <code>sudo</code>.</li>
+            </ul>
             <div class="download-actions">
               <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">↓ Pobierz DEB</a>
               <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">↓ Pobierz tar.gz</a>
@@ -240,11 +244,8 @@
             <p>Po pobraniu instalatora i pliku sum sprawdź paczkę w tym samym katalogu:</p>
             <pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre>
             <p>Archiwum 1.1 tar.gz zawiera dokumentację polską i angielską. Zacznij od <code>README.pl.md</code> i <code>INSTALL.pl.md</code>; odnośniki językowe pozwalają przełączyć język. Obie wersje strony korzystają z tej samej paczki.</p>
-            <ol class="install-steps">
-              <li>Syntetyczny benchmark detekcji wersji 1.1 zakończył się wynikiem <strong>26/26</strong>.</li>
-              <li>Oba warianty instalacji sprawdzono w docelowym środowisku GNOME/Wayland.</li>
-            </ol>
-            <p>Centrum oprogramowania nie zaktualizowało istniejącego DEB, dlatego ręczna aktualizacja używa APT.</p>
+            <p>Oba warianty instalacji sprawdzono w docelowym środowisku GNOME/Wayland.</p>
+            <p>Aktualizacja pakietu DEB wymaga obecnie pobrania nowej wersji i zainstalowania jej przez APT.</p>
             <p><strong>Nie instaluj obu wariantów jednocześnie.</strong></p>
             <h3>Aktualizacje</h3>
             <p>CopyPasteBin nie sprawdza aktualizacji w tle. Nowe wersje są publikowane w GitHub Releases. Aby otrzymywać powiadomienia z GitHuba, wybierz w repozytorium <strong>Watch → Custom → Releases</strong>.</p>
