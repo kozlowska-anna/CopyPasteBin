@@ -68,15 +68,6 @@ paste text on your behalf.
 
 ## CopyPasteBin screenshots
 
-### GNOME Desktop Integration
-
-The panel menu shows whether monitoring is active and opens the session-only
-recent clipboard, detection filters, custom rules and exact exclusions,
-automatic clearing, language settings, the clipboard editor, pause controls,
-and the local About window.
-
-<img width="533" height="616" alt="CopyPasteBin 1.1 menu in GNOME with clipboard history, detection filters, text and image redaction, automatic clearing, and pause controls" src="docs/screenshots/01-copypastebin-1-1-clipboard-manager-menu-gnome-EN.png" />
-
 ### Sensitive Data Warning
 
 When an enabled pattern matches, CopyPasteBin displays a risk-colored banner
@@ -93,6 +84,25 @@ canceling leaves it unchanged. The screenshot uses synthetic demonstration
 text.
 
 <img width="1088" height="618" alt="CopyPasteBin 1.1 clipboard editor highlighting a demonstration email address and password before redaction" src="docs/screenshots/03-copypastebin-1-1-clipboard-editor-risk-highlighting-EN.png" />
+
+### Local Image Redaction
+
+The local image editor lets the user manually cover selected areas and save a
+new PNG copy without modifying the original image.
+
+<img width="1128" height="789" alt="CopyPasteBin 1.1 image redaction editor covering a synthetic postal address, email address, and signature with three manual masks" src="docs/screenshots/06-copypastebin-1-1-local-image-redaction-editor-EN.png" />
+
+<details>
+<summary><strong>More CopyPasteBin screenshots</strong></summary>
+
+### GNOME Desktop Integration
+
+The panel menu shows whether monitoring is active and opens the session-only
+recent clipboard, detection filters, custom rules and exact exclusions,
+automatic clearing, language settings, the clipboard editor, pause controls,
+and the local About window.
+
+<img width="533" height="616" alt="CopyPasteBin 1.1 menu in GNOME with clipboard history, detection filters, text and image redaction, automatic clearing, and pause controls" src="docs/screenshots/01-copypastebin-1-1-clipboard-manager-menu-gnome-EN.png" />
 
 ### Selective Anonymization
 
@@ -113,13 +123,6 @@ exclusions.
 
 <img width="1208" height="649" alt="CopyPasteBin 1.1 window with synthetic custom detection rules and exact exceptions for an example email address and documentation IP address" src="docs/screenshots/05-copypastebin-1-1-custom-rules-exact-exceptions-EN.png" />
 
-### Local Image Redaction
-
-The local image editor lets the user manually cover selected areas and save a
-new PNG copy without modifying the original image.
-
-<img width="1128" height="789" alt="CopyPasteBin 1.1 image redaction editor covering a synthetic postal address, email address, and signature with three manual masks" src="docs/screenshots/06-copypastebin-1-1-local-image-redaction-editor-EN.png" />
-
 ### Recent clipboard in session memory
 
 The separate window shows up to 15 recently copied text entries held only in
@@ -130,6 +133,7 @@ HMAC but no clipboard text.
 
 <img width="1048" height="722" alt="CopyPasteBin 1.1 clipboard history window showing eight synthetic recent text items stored only in temporary session memory" src="docs/screenshots/07-copypastebin-1-1-session-only-clipboard-history-EN.png" />
 
+</details>
 
 ## Compatibility
 
@@ -164,8 +168,6 @@ verification, installation, update, switching methods, and removal.
 
 For the user-local archive, run the read-only compatibility check after
 extracting it:
-
-Run the read-only compatibility check:
 
 ```sh
 ./install.sh --check-only

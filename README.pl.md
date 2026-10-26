@@ -70,14 +70,6 @@ nie wkleja tekstu w imieniu użytkownika.
 
 ## CopyPasteBin na ekranie
 
-### Integracja z pulpitem GNOME
-
-Menu pokazuje stan monitorowania i daje dostęp do sesyjnej listy ostatnich
-tekstów, filtrów, reguł i wykluczeń, automatycznego czyszczenia, ustawień
-języka, edytora, pauzy oraz lokalnego okna „O programie”.
-
-<img width="411" height="613" alt="Menu CopyPasteBin 1.1 w GNOME z historią schowka, filtrami wykrywania, regułami własnymi, anonimizacją tekstu i obrazów oraz ustawieniami pauzy" src="docs/screenshots/01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png" />
-
 ### Ostrzeżenie o danych wrażliwych
 
 Po wykryciu aktywnego wzorca CopyPasteBin pokazuje banner w kolorze poziomu
@@ -93,6 +85,24 @@ propozycję anonimizacji. Schowek zmienia się dopiero po kliknięciu „Zastąp
 schowek”; anulowanie nie wprowadza zmian. Zrzut używa syntetycznych danych.
 
 <img width="1076" height="606" alt="Edytor schowka CopyPasteBin 1.1 z podświetlonym demonstracyjnym adresem e-mail i hasłem przed anonimizacją" src="docs/screenshots/03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png" />
+
+### Lokalna anonimizacja obrazów
+
+Lokalny edytor pozwala ręcznie zakryć wybrane obszary i zapisać nową,
+bezpieczną kopię PNG bez modyfikowania oryginalnego obrazu.
+
+<img width="1128" height="789" alt="Edytor anonimizacji obrazów CopyPasteBin 1.1 z czterema ręcznymi zakryciami syntetycznego odbiorcy, adresu, adresu e-mail i podpisu" src="docs/screenshots/06-copypastebin-1-1-lokalny-edytor-anonimizacji-obrazow-PL.png" />
+
+<details>
+<summary><strong>Więcej zrzutów CopyPasteBin</strong></summary>
+
+### Integracja z pulpitem GNOME
+
+Menu pokazuje stan monitorowania i daje dostęp do sesyjnej listy ostatnich
+tekstów, filtrów, reguł i wykluczeń, automatycznego czyszczenia, ustawień
+języka, edytora, pauzy oraz lokalnego okna „O programie”.
+
+<img width="411" height="613" alt="Menu CopyPasteBin 1.1 w GNOME z historią schowka, filtrami wykrywania, regułami własnymi, anonimizacją tekstu i obrazów oraz ustawieniami pauzy" src="docs/screenshots/01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png" />
 
 ### Anonimizacja wybranego fragmentu
 
@@ -114,13 +124,6 @@ sekretów nie należy zapisywać jako reguł lub wykluczeń.
 
 <img width="1208" height="649" alt="Okno CopyPasteBin 1.1 z syntetycznymi regułami wykrywania oraz dokładnymi wykluczeniami dla przykładowego adresu e-mail i dokumentacyjnego adresu IP" src="docs/screenshots/05-copypastebin-1-1-reguly-wlasne-dokladne-wykluczenia-PL.png" />
 
-### Lokalna anonimizacja obrazów
-
-Lokalny edytor pozwala ręcznie zakryć wybrane obszary i zapisać nową,
-bezpieczną kopię PNG bez modyfikowania oryginalnego obrazu.
-
-<img width="1128" height="789" alt="Edytor anonimizacji obrazów CopyPasteBin 1.1 z czterema ręcznymi zakryciami syntetycznego odbiorcy, adresu, adresu e-mail i podpisu" src="docs/screenshots/06-copypastebin-1-1-lokalny-edytor-anonimizacji-obrazow-PL.png" />
-
 ### Ostatnie wpisy tylko w pamięci sesji
 
 Osobne okno pokazuje do 15 ostatnio skopiowanych tekstów przechowywanych
@@ -130,6 +133,8 @@ oddzielona od trwałej historii, która zapisuje ograniczone metadane i HMAC,
 lecz nie treść schowka.
 
 <img width="1048" height="721" alt="Historia schowka CopyPasteBin 1.1 z ośmioma syntetycznymi wpisami tekstowymi przechowywanymi wyłącznie w pamięci podręcznej sesji" src="docs/screenshots/07-copypastebin-1-1-tymczasowa-historia-schowka-PL.png" />
+
+</details>
 
 ## Zgodność
 
@@ -165,8 +170,6 @@ aktualizację, zmianę metody oraz odinstalowanie opisuje
 
 Po rozpakowaniu wariantu lokalnego uruchom kontrolę zgodności, która niczego
 nie zmienia:
-
-Uruchom kontrolę zgodności, która niczego nie zmienia:
 
 ```sh
 ./install.sh --check-only
