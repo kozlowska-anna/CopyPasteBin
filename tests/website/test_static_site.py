@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import unittest
 import xml.etree.ElementTree as ET
@@ -174,6 +175,32 @@ class StaticSiteTests(unittest.TestCase):
             descriptions.add(description)
         self.assertEqual(len(titles), len(PAGES))
         self.assertEqual(len(descriptions), len(PAGES))
+
+    def test_software_application_structured_data_is_factual_and_bilingual(self) -> None:
+        for page in PAGES:
+            parser = parse_page(page)
+            source = page.read_text(encoding="utf-8")
+            match = re.search(
+                r'<script type="application/ld\+json">\s*(.*?)\s*</script>',
+                source,
+                flags=re.DOTALL,
+            )
+            self.assertIsNotNone(match, page)
+            data = json.loads(match.group(1))
+            lang = parser.html_lang
+            self.assertEqual(data["@context"], "https://schema.org")
+            self.assertEqual(data["@type"], "SoftwareApplication")
+            self.assertEqual(data["name"], "CopyPasteBin")
+            self.assertEqual(data["softwareVersion"], "1.1")
+            self.assertEqual(data["applicationCategory"], "SecurityApplication")
+            self.assertEqual(data["mainEntityOfPage"], EXPECTED_CANONICALS[lang])
+            self.assertEqual(data["description"], EXPECTED_METADATA[lang]["description"])
+            self.assertEqual(data["offers"]["price"], 0)
+            self.assertTrue(data["isAccessibleForFree"])
+            self.assertEqual(len(data["downloadUrl"]), 2)
+            self.assertGreaterEqual(len(data["featureList"]), 4)
+            self.assertNotIn("aggregateRating", data)
+            self.assertNotIn("review", data)
 
     def test_all_local_links_and_resources_resolve(self) -> None:
         for page in PAGES:
