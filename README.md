@@ -1,4 +1,4 @@
-# CopyPasteBin
+# <img src="website/assets/images/logo-web.svg" alt="CopyPasteBin icon" width="44" height="44"> CopyPasteBin
 
 **English** | [Polski](README.pl.md)
 
@@ -68,15 +68,6 @@ paste text on your behalf.
 
 ## CopyPasteBin screenshots
 
-### GNOME Desktop Integration
-
-The panel menu shows whether monitoring is active and opens the session-only
-recent clipboard, detection filters, custom rules and exact exclusions,
-automatic clearing, language settings, the clipboard editor, pause controls,
-and the local About window.
-
-<img width="533" height="616" alt="CopyPasteBin 1.1 menu in GNOME with clipboard history, detection filters, text and image redaction, automatic clearing, and pause controls" src="docs/screenshots/01-copypastebin-1-1-clipboard-manager-menu-gnome-EN.png" />
-
 ### Sensitive Data Warning
 
 When an enabled pattern matches, CopyPasteBin displays a risk-colored banner
@@ -103,6 +94,15 @@ new PNG copy without modifying the original image.
 
 <details>
 <summary><strong>More CopyPasteBin screenshots</strong></summary>
+
+### GNOME Desktop Integration
+
+The panel menu shows whether monitoring is active and opens the session-only
+recent clipboard, detection filters, custom rules and exact exclusions,
+automatic clearing, language settings, the clipboard editor, pause controls,
+and the local About window.
+
+<img width="533" height="616" alt="CopyPasteBin 1.1 menu in GNOME with clipboard history, detection filters, text and image redaction, automatic clearing, and pause controls" src="docs/screenshots/01-copypastebin-1-1-clipboard-manager-menu-gnome-EN.png" />
 
 ### Selective Anonymization
 

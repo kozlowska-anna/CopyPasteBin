@@ -1,4 +1,4 @@
-# CopyPasteBin
+# <img src="website/assets/images/logo-web.svg" alt="Ikona CopyPasteBin" width="44" height="44"> CopyPasteBin
 
 [English](README.md) | **Polski**
 
@@ -70,14 +70,6 @@ nie wkleja tekstu w imieniu użytkownika.
 
 ## CopyPasteBin na ekranie
 
-### Integracja z pulpitem GNOME
-
-Menu pokazuje stan monitorowania i daje dostęp do sesyjnej listy ostatnich
-tekstów, filtrów, reguł i wykluczeń, automatycznego czyszczenia, ustawień
-języka, edytora, pauzy oraz lokalnego okna „O programie”.
-
-<img width="411" height="613" alt="Menu CopyPasteBin 1.1 w GNOME z historią schowka, filtrami wykrywania, regułami własnymi, anonimizacją tekstu i obrazów oraz ustawieniami pauzy" src="docs/screenshots/01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png" />
-
 ### Ostrzeżenie o danych wrażliwych
 
 Po wykryciu aktywnego wzorca CopyPasteBin pokazuje banner w kolorze poziomu
@@ -103,6 +95,14 @@ bezpieczną kopię PNG bez modyfikowania oryginalnego obrazu.
 
 <details>
 <summary><strong>Więcej zrzutów CopyPasteBin</strong></summary>
+
+### Integracja z pulpitem GNOME
+
+Menu pokazuje stan monitorowania i daje dostęp do sesyjnej listy ostatnich
+tekstów, filtrów, reguł i wykluczeń, automatycznego czyszczenia, ustawień
+języka, edytora, pauzy oraz lokalnego okna „O programie”.
+
+<img width="411" height="613" alt="Menu CopyPasteBin 1.1 w GNOME z historią schowka, filtrami wykrywania, regułami własnymi, anonimizacją tekstu i obrazów oraz ustawieniami pauzy" src="docs/screenshots/01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png" />
 
 ### Anonimizacja wybranego fragmentu
 
