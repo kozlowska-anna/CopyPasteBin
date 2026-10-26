@@ -429,20 +429,33 @@ class StaticSiteTests(unittest.TestCase):
             self.assertEqual(positions, sorted(positions), page)
 
     def test_gallery_contains_full_uncropped_screenshot_set(self) -> None:
-        expected = {
-            "gnome-panel.png",
-            "high-risk-warning.png",
-            "clipboard-editor.png",
-            "selective-anonymization.png",
-            "rules-and-exceptions.png",
-            "recent-clipboard.png",
+        expected_by_language = {
+            "pl": {
+                "01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png",
+                "02-copypastebin-1-1-ostrzezenie-przed-wklejeniem-danych-wrazliwych-PL.png",
+                "03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png",
+                "04-copypastebin-1-1-selektywna-anonimizacja-narzedzia-edycji-PL.png",
+                "05-copypastebin-1-1-reguly-wlasne-dokladne-wykluczenia-PL.png",
+                "06-copypastebin-1-1-lokalny-edytor-anonimizacji-obrazow-PL.png",
+                "07-copypastebin-1-1-tymczasowa-historia-schowka-PL.png",
+            },
+            "en": {
+                "01-copypastebin-1-1-clipboard-manager-menu-gnome-EN.png",
+                "02-copypastebin-1-1-sensitive-data-paste-warning-EN.png",
+                "03-copypastebin-1-1-clipboard-editor-risk-highlighting-EN.png",
+                "04-copypastebin-1-1-selective-anonymization-editing-tools-EN.png",
+                "05-copypastebin-1-1-custom-rules-exact-exceptions-EN.png",
+                "06-copypastebin-1-1-local-image-redaction-editor-EN.png",
+                "07-copypastebin-1-1-session-only-clipboard-history-EN.png",
+            },
         }
         for page in PAGES:
+            parser = parse_page(page)
             sources = {
                 Path(image.get("src", "")).name
-                for image in parse_page(page).images
+                for image in parser.images
             }
-            self.assertTrue(expected.issubset(sources), page)
+            self.assertTrue(expected_by_language[parser.html_lang].issubset(sources), page)
 
         css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8")
         gallery_rule = re.search(r"\.gallery-button img\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)

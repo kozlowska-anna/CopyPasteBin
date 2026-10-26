@@ -76,7 +76,7 @@ Menu pokazuje stan monitorowania i daje dostęp do sesyjnej listy ostatnich
 tekstów, filtrów, reguł i wykluczeń, automatycznego czyszczenia, ustawień
 języka, edytora, pauzy oraz lokalnego okna „O programie”.
 
-<img width="359" height="608" alt="Menu CopyPasteBin w panelu GNOME" src="docs/screenshots/01-gnome-panel.png" />
+<img width="411" height="613" alt="Menu CopyPasteBin 1.1 w GNOME z historią schowka, filtrami wykrywania, regułami własnymi, anonimizacją tekstu i obrazów oraz ustawieniami pauzy" src="docs/screenshots/01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png" />
 
 ### Ostrzeżenie o danych wrażliwych
 
@@ -84,7 +84,7 @@ Po wykryciu aktywnego wzorca CopyPasteBin pokazuje banner w kolorze poziomu
 ryzyka. Widoczne są wyłącznie bezpieczne nazwy kategorii i liczba trafień,
 nigdy treść schowka. Przycisk otwiera edytor.
 
-<img width="704" height="159" alt="Ostrzeżenie CopyPasteBin wysokiego ryzyka dla wykrytej karty płatniczej" src="docs/screenshots/02-high-risk-warning.png" />
+<img width="594" height="140" alt="Ostrzeżenie CopyPasteBin 1.1 o wysokim ryzyku po wykryciu demonstracyjnej karty płatniczej w schowku" src="docs/screenshots/02-copypastebin-1-1-ostrzezenie-przed-wklejeniem-danych-wrazliwych-PL.png" />
 
 ### Edytor schowka
 
@@ -92,7 +92,7 @@ Edytor podświetla fragmenty znalezione przez lokalny detektor i przygotowuje
 propozycję anonimizacji. Schowek zmienia się dopiero po kliknięciu „Zastąp
 schowek”; anulowanie nie wprowadza zmian. Zrzut używa syntetycznych danych.
 
-<img width="1079" height="608" alt="Edytor schowka z podświetlonym syntetycznym adresem e-mail i hasłem" src="docs/screenshots/03-clipboard-editor.png" />
+<img width="1076" height="606" alt="Edytor schowka CopyPasteBin 1.1 z podświetlonym demonstracyjnym adresem e-mail i hasłem przed anonimizacją" src="docs/screenshots/03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png" />
 
 ### Anonimizacja wybranego fragmentu
 
@@ -102,7 +102,7 @@ dokładne, rozróżniające wielkość liter wykluczenie dla tej wartości i
 kategorii. Trafienia wysokiego i krytycznego ryzyka można anonimizować, ale nie
 można ich wykluczać.
 
-<img width="1079" height="608" alt="Menu anonimizacji lub wykluczenia wybranego syntetycznego adresu e-mail" src="docs/screenshots/04-selective-anonymization.png" />
+<img width="1076" height="606" alt="Edytor CopyPasteBin 1.1 z zaznaczonym adresem e-mail, otwartymi działaniami anonimizacji i wykluczenia oraz widocznymi narzędziami poprawiania tekstu" src="docs/screenshots/04-copypastebin-1-1-selektywna-anonimizacja-narzedzia-edycji-PL.png" />
 
 ### Reguły własne i wykluczenia
 
@@ -112,7 +112,14 @@ włączać i wyłączać. Dokładne wykluczenia działają tylko dla obsługiwan
 trafień niskiego i średniego ryzyka. Prawdziwych haseł, kluczy ani innych
 sekretów nie należy zapisywać jako reguł lub wykluczeń.
 
-<img width="1202" height="647" alt="Okno reguł własnych i dokładnych wykluczeń CopyPasteBin" src="docs/screenshots/05-custom-rules-and-exceptions.png" />
+<img width="1208" height="649" alt="Okno CopyPasteBin 1.1 z syntetycznymi regułami wykrywania oraz dokładnymi wykluczeniami dla przykładowego adresu e-mail i dokumentacyjnego adresu IP" src="docs/screenshots/05-copypastebin-1-1-reguly-wlasne-dokladne-wykluczenia-PL.png" />
+
+### Lokalna anonimizacja obrazów
+
+Lokalny edytor pozwala ręcznie zakryć wybrane obszary i zapisać nową,
+bezpieczną kopię PNG bez modyfikowania oryginalnego obrazu.
+
+<img width="1128" height="789" alt="Edytor anonimizacji obrazów CopyPasteBin 1.1 z czterema ręcznymi zakryciami syntetycznego odbiorcy, adresu, adresu e-mail i podpisu" src="docs/screenshots/06-copypastebin-1-1-lokalny-edytor-anonimizacji-obrazow-PL.png" />
 
 ### Ostatnie wpisy tylko w pamięci sesji
 
@@ -122,7 +129,7 @@ lub zatrzymaniu rozszerzenia, a przywrócenie wpisu wymaga jawnej akcji. Jest
 oddzielona od trwałej historii, która zapisuje ograniczone metadane i HMAC,
 lecz nie treść schowka.
 
-<img width="1039" height="718" alt="Sesyjna lista syntetycznych wpisów schowka" src="docs/screenshots/06-clipboard-history.png" />
+<img width="1048" height="721" alt="Historia schowka CopyPasteBin 1.1 z ośmioma syntetycznymi wpisami tekstowymi przechowywanymi wyłącznie w pamięci podręcznej sesji" src="docs/screenshots/07-copypastebin-1-1-tymczasowa-historia-schowka-PL.png" />
 
 ## Zgodność
 

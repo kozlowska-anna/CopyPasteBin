@@ -75,7 +75,7 @@ recent clipboard, detection filters, custom rules and exact exclusions,
 automatic clearing, language settings, the clipboard editor, pause controls,
 and the local About window.
 
-<img width="359" height="608" alt="CopyPasteBin menu in the GNOME panel" src="docs/screenshots/01-gnome-panel.png" />
+<img width="533" height="616" alt="CopyPasteBin 1.1 menu in GNOME with clipboard history, detection filters, text and image redaction, automatic clearing, and pause controls" src="docs/screenshots/01-copypastebin-1-1-clipboard-manager-menu-gnome-EN.png" />
 
 ### Sensitive Data Warning
 
@@ -83,7 +83,7 @@ When an enabled pattern matches, CopyPasteBin displays a risk-colored banner
 with safe category names and counts, never the clipboard text itself. The
 single action opens the editor for review.
 
-<img width="704" height="159" alt="High-risk CopyPasteBin banner for a detected payment card" src="docs/screenshots/02-high-risk-warning.png" />
+<img width="596" height="158" alt="CopyPasteBin 1.1 high-risk warning in GNOME after detecting a demonstration payment card in the clipboard" src="docs/screenshots/02-copypastebin-1-1-sensitive-data-paste-warning-EN.png" />
 
 ### Clipboard Editor & Risk Highlighting
 
@@ -92,7 +92,7 @@ redaction suggestion. The clipboard changes only after **Replace clipboard**;
 canceling leaves it unchanged. The screenshot uses synthetic demonstration
 text.
 
-<img width="1079" height="608" alt="Clipboard editor highlighting a synthetic email address and password" src="docs/screenshots/03-clipboard-editor.png" />
+<img width="1088" height="618" alt="CopyPasteBin 1.1 clipboard editor highlighting a demonstration email address and password before redaction" src="docs/screenshots/03-copypastebin-1-1-clipboard-editor-risk-highlighting-EN.png" />
 
 ### Selective Anonymization
 
@@ -101,7 +101,7 @@ can anonymize only that selection or, after confirmation, add an exact,
 case-sensitive exclusion for that value and category. High- and critical-risk
 matches can be anonymized but cannot be excluded.
 
-<img width="1079" height="608" alt="Context menu for anonymizing or excluding a selected synthetic email address" src="docs/screenshots/04-selective-anonymization.png" />
+<img width="1080" height="738" alt="CopyPasteBin 1.1 clipboard editor with an email address selected, anonymization and exclusion actions open, and quick text tools visible" src="docs/screenshots/04-copypastebin-1-1-selective-anonymization-editing-tools-EN.png" />
 
 ### Custom Rules & Exceptions
 
@@ -111,7 +111,14 @@ are available only for supported low- and medium-risk detections; real
 passwords, keys, and other secrets should never be saved as rules or
 exclusions.
 
-<img width="1202" height="647" alt="CopyPasteBin editor for synthetic custom rules and exact exclusions" src="docs/screenshots/05-custom-rules-and-exceptions.png" />
+<img width="1208" height="649" alt="CopyPasteBin 1.1 window with synthetic custom detection rules and exact exceptions for an example email address and documentation IP address" src="docs/screenshots/05-copypastebin-1-1-custom-rules-exact-exceptions-EN.png" />
+
+### Local Image Redaction
+
+The local image editor lets the user manually cover selected areas and save a
+new PNG copy without modifying the original image.
+
+<img width="1128" height="789" alt="CopyPasteBin 1.1 image redaction editor covering a synthetic postal address, email address, and signature with three manual masks" src="docs/screenshots/06-copypastebin-1-1-local-image-redaction-editor-EN.png" />
 
 ### Recent clipboard in session memory
 
@@ -121,7 +128,7 @@ clears the list. Restoring an entry requires an explicit action. This list is
 separate from the persistent history, which stores limited metadata and an
 HMAC but no clipboard text.
 
-<img width="1039" height="718" alt="Session-only list of synthetic recent clipboard entries" src="docs/screenshots/06-clipboard-history.png" />
+<img width="1048" height="722" alt="CopyPasteBin 1.1 clipboard history window showing eight synthetic recent text items stored only in temporary session memory" src="docs/screenshots/07-copypastebin-1-1-session-only-clipboard-history-EN.png" />
 
 
 ## Compatibility
