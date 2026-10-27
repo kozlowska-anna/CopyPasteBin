@@ -42,7 +42,7 @@
         "softwareRequirements": "Python 3.11 lub nowszy, GJS, GTK 4, GioUnix i GNOME Extensions",
         "softwareVersion": "1.1",
         "datePublished": "2026-10-26",
-        "dateModified": "2026-10-26",
+        "dateModified": "2026-10-27",
         "isAccessibleForFree": true,
         "license": "https://github.com/kozlowska-anna/CopyPasteBin/blob/main/LICENSE",
         "author": {
@@ -268,9 +268,9 @@
               <li><code>gjs</code>, GTK 4, GdkPixbuf, GioUnix i <code>gnome-extensions</code></li>
               <li><code>sha256sum</code> do kontroli pobranego archiwum</li>
             </ul>
-            <p><strong>Przykład zgodnej dystrybucji:</strong></p>
+            <p><strong>Obsługiwana dystrybucja:</strong></p>
             <ul class="requirements-list">
-              <li>Ubuntu 26.04 LTS (GNOME 50, Wayland)</li>
+              <li>Fedora Workstation 44, x86_64 (GNOME Shell 50.0, Wayland) — instalacja przez archiwum tar.gz</li>
             </ul>
             <p>Obecnie nieobsługiwane środowiska: KDE Plasma, Cinnamon, Xfce oraz sesje X11.</p>
             <p>Zgodność zależy od środowiska graficznego i jego wersji, a nie wyłącznie od nazwy dystrybucji.</p>
@@ -283,6 +283,7 @@
               <li><strong>Pakiet DEB</strong> — instalacja systemowa zarządzana przez APT.</li>
               <li><strong>Archiwum tar.gz</strong> — instalacja lokalna dla jednego użytkownika, bez <code>sudo</code>.</li>
             </ul>
+            <p>Na Fedorze wybierz archiwum tar.gz; pakiet DEB jest przeznaczony dla systemów zarządzanych przez APT.</p>
             <div class="download-actions">
               <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">↓ Pobierz DEB</a>
               <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">↓ Pobierz tar.gz</a>
@@ -291,7 +292,6 @@
             <p>Po pobraniu instalatora i pliku sum sprawdź paczkę w tym samym katalogu:</p>
             <pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre>
             <p>Archiwum 1.1 tar.gz zawiera dokumentację polską i angielską. Zacznij od <code>README.pl.md</code> i <code>INSTALL.pl.md</code>; odnośniki językowe pozwalają przełączyć język. Obie wersje strony korzystają z tej samej paczki.</p>
-            <p>Oba warianty instalacji sprawdzono w docelowym środowisku GNOME/Wayland.</p>
             <p>Aktualizacja pakietu DEB wymaga obecnie pobrania nowej wersji i zainstalowania jej przez APT.</p>
             <p><strong>Nie instaluj obu wariantów jednocześnie.</strong></p>
             <h3>Aktualizacje</h3>
