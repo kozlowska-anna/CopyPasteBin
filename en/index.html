@@ -12,7 +12,7 @@
     <link rel="alternate" hreflang="en" href="https://kozlowska-anna.github.io/CopyPasteBin/en/">
     <link rel="alternate" hreflang="x-default" href="https://kozlowska-anna.github.io/CopyPasteBin/">
     <link rel="icon" type="image/svg+xml" href="../assets/images/logo-web.svg">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=20261026-3">
+    <link rel="stylesheet" href="../assets/css/styles.css?v=20261101-1">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="CopyPasteBin">
     <meta property="og:locale" content="en_US">
@@ -42,7 +42,7 @@
         "softwareRequirements": "Python 3.11 or later, GJS, GTK 4, GioUnix, and GNOME Extensions",
         "softwareVersion": "1.1",
         "datePublished": "2026-10-26",
-        "dateModified": "2026-10-27",
+        "dateModified": "2026-11-01",
         "isAccessibleForFree": true,
         "license": "https://github.com/kozlowska-anna/CopyPasteBin/blob/main/LICENSE",
         "author": {
@@ -111,12 +111,24 @@
 
       <section class="section" id="how-it-works">
         <div class="container">
-          <div class="product-positioning">
-            <div class="product-positioning-copy">
-              <p class="eyebrow">Why use it · Privacy-focused Clipboard Manager</p>
-              <h2>A manager, but not a traditional clipboard archive.</h2>
-              <p>Traditional clipboard managers focus mainly on storing, searching, and reusing copies. CopyPasteBin also provides a short history, but prioritizes spotting risk, preparing text, and protecting you from an unfortunate click on “Paste”.</p>
+          <div class="why-grid">
+            <div class="origin-story">
+              <p class="eyebrow">The story behind the project</p>
+              <h2>Why was CopyPasteBin created?</h2>
+              <div class="origin-story-copy">
+                <p>CopyPasteBin grew out of everyday work with text, images, and AI tools. Copying pieces of information, preparing prompts, and sharing screenshots had become a natural part of that work. But not everything we copy is something we also want to pass on.</p>
+                <p>What was missing was a simple tool that could help you check what copied content contains, warn you about accidentally exposing sensitive data, and let you redact it without unnecessary extra steps.</p>
+                <p>That is how CopyPasteBin came to be: a local app that helps make working with information safer and more convenient, while leaving you in control of what you share.</p>
+                <p>Although working with AI provided the original inspiration, its uses extend much further. Wherever we copy, edit, and pass on information, it is worth knowing what is really being shared.</p>
+              </div>
             </div>
+            <aside class="product-positioning" aria-label="The role of CopyPasteBin">
+              <div class="product-positioning-copy">
+                <p class="eyebrow">Why use it · Privacy-focused Clipboard Manager</p>
+                <h3>A manager, but not a traditional clipboard archive.</h3>
+                <p>Traditional clipboard managers focus mainly on storing, searching, and reusing copies. CopyPasteBin also provides a short history, but prioritizes spotting risk, preparing text, and protecting you from an unfortunate click on “Paste”.</p>
+              </div>
+            </aside>
           </div>
           <div class="trust-strip" role="group" aria-label="Key benefits"><div class="trust-item"><strong>Notice risk earlier</strong><span>A warning appears when text resembles a supported kind of sensitive information.</span></div><div class="trust-item"><strong>Keep the decision</strong><span>The app does not paste text or change the clipboard automatically by default.</span></div><div class="trust-item"><strong>Keep data on your device</strong><span>Detection and redaction run locally without uploading clipboard content.</span></div><div class="trust-item"><strong>Prepare safer text</strong><span>The editor helps remove or anonymize selected values before use.</span></div></div>
         </div>
@@ -128,7 +140,7 @@
           <ul class="use-case-list" aria-label="Four situations where CopyPasteBin may help">
             <li><strong>When writing a message:</strong> check whether copied text accidentally contains personal, contact, or financial information.</li>
             <li><strong>When working with code or a terminal:</strong> notice tokens, keys, and connection strings before pasting them into a conversation, issue, or documentation.</li>
-            <li><strong>When using an AI tool:</strong> review copied text from a document, code, log, or command and redact sensitive data locally before pasting.</li>
+            <li><strong>When using an AI tool:</strong> draft or expand a prompt without opening a separate editor, review copied text from a document, code, log, or command, and redact sensitive data locally before pasting.</li>
             <li><strong>When sharing an image:</strong> manually cover selected areas of a photo or screenshot and save a new PNG copy.</li>
           </ul>
         </div>
@@ -138,10 +150,10 @@
         <div class="container">
           <div class="section-heading"><p class="eyebrow">Core features</p><h2>Practical help for everyday copying and pasting.</h2></div>
           <div class="feature-grid">
-            <article class="feature-card"><span class="feature-number">01</span><h3>Handy text editor</h3><p>Open copied content, make manual changes, or redact detected fragments. The clipboard changes only after your confirmation.</p></article>
+            <article class="feature-card"><span class="feature-number">01</span><h3>Handy text editor</h3><p>Open copied content, revise or expand it, or redact detected fragments. The editor replaces the clipboard content only after your confirmation.</p></article>
             <article class="feature-card"><span class="feature-number">02</span><h3>Image redaction</h3><p>Open a local PNG or JPEG, cover selected areas with rectangles, and save a new PNG. The original file remains unchanged.</p></article>
             <article class="feature-card"><span class="feature-number">03</span><h3>Rules and exact exceptions</h3><p>Custom markers stay local. Exceptions are limited to one exact low- or medium-risk detection.</p></article>
-            <article class="feature-card"><span class="feature-number">04</span><h3>15-item clipboard history</h3><p>The history contains up to 15 recently copied text items and remains only in current-session RAM. Locking the screen, logging out, or disabling the extension clears it.</p></article>
+            <article class="feature-card"><span class="feature-number">04</span><h3>15-item clipboard history</h3><p>Return to one of the 15 most recently copied text items without CopyPasteBin creating a persistent content archive. The list stays in current-session RAM and is cleared when you lock the screen, log out, or disable the extension.</p></article>
             <article class="feature-card"><span class="feature-number">05</span><h3>Four risk levels</h3><p>Rules distinguish low, medium, high, and critical risk, with categories for contact details, financial data, tokens, private keys, and more.</p></article>
             <article class="feature-card"><span class="feature-number">06</span><h3>Safe Paste</h3><p>Use <code>Super+Shift+V</code> to check the text currently in the clipboard. If CopyPasteBin detects a risk, it opens the editor with a redaction suggestion. It will not paste or change anything without confirmation.</p></article>
             <article class="feature-card"><span class="feature-number">07</span><h3>Pause and optional clearing</h3><p>Pause durations remain visible while protection is paused, with Resume close at hand. Optional clipboard clearing stays off by default.</p></article>
@@ -179,7 +191,7 @@
       <section class="section section-soft" id="download">
         <div class="container download-grid">
           <div class="system-card"><p class="eyebrow">System requirements</p><h2>Required environment.</h2><ul class="requirements-list"><li>Linux with GNOME Shell 50</li><li>a Wayland session</li><li>Python 3.11 or newer with <code>venv</code></li><li><code>gjs</code>, GTK 4, GdkPixbuf, GioUnix, and <code>gnome-extensions</code></li><li><code>sha256sum</code> to verify the downloaded archive</li></ul><p><strong>Supported distributions:</strong></p><ul class="requirements-list"><li>Ubuntu 26.04 LTS (GNOME Shell 50, Wayland)</li><li>Fedora Workstation 44, x86_64 (GNOME Shell 50.0, Wayland) — installation from the tar.gz archive</li></ul><p>Currently unsupported: KDE Plasma, Cinnamon, Xfce, and X11 sessions.</p><p>Compatibility depends on the desktop environment and its version, not just the Linux distribution.</p></div>
-          <div class="download-card"><span class="version-badge">Release · 1.1</span><h2>Two installers from the same source.</h2><p>Choose one installation method:</p><ul class="requirements-list"><li><strong>DEB package</strong> — a system installation managed by APT.</li><li><strong>tar.gz archive</strong> — a user-local installation without <code>sudo</code>.</li></ul><p>On Fedora, choose the tar.gz archive; the DEB package is intended for systems managed by APT.</p><div class="download-actions"><a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">↓ Download DEB</a><a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">↓ Download tar.gz</a><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS">Download SHA256SUMS</a></div><p>After downloading an installer and the checksum file, verify the package in the same directory:</p><pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre><p>The 1.1 tar.gz includes English and Polish documentation. Start with <code>README.md</code> and <code>INSTALL.md</code>; use the language links to switch to Polish. Both site languages use the same archive.</p><p>Updating the DEB package currently requires downloading the new version and installing it through APT.</p><p><strong>Do not install both variants at the same time.</strong></p><h3>Updates</h3><p>CopyPasteBin does not check for updates in the background. New versions are published in GitHub Releases. To receive GitHub notifications, choose <strong>Watch → Custom → Releases</strong> in the repository.</p><p><a href="https://github.com/kozlowska-anna/CopyPasteBin/releases/latest">Check the latest release →</a></p><p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/CHANGELOG.md">See what changed in version 1.1 →</a></p><p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.en.md">Full installation, upgrade, and uninstall guide →</a></p></div>
+          <div class="download-card"><span class="version-badge">Release · 1.1</span><h2>Two installers from the same source.</h2><p>Choose one installation method:</p><ul class="requirements-list"><li><strong>DEB package</strong> — a system installation managed by APT.</li><li><strong>tar.gz archive</strong> — a user-local installation without <code>sudo</code>.</li></ul><p>On Fedora, choose the tar.gz archive; the DEB package is intended for systems managed by APT.</p><div class="download-actions"><a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">↓ Download DEB</a><a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">↓ Download tar.gz</a><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS">Download SHA256SUMS</a></div><p>After downloading an installer and the checksum file, verify the package in the same directory:</p><pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre><p>The 1.1 tar.gz includes English and Polish documentation. Start with <code>README.md</code> and <code>INSTALL.md</code>; use the language links to switch to Polish. Both site languages use the same archive.</p><p>Both installation variants were checked in the target GNOME/Wayland environment.</p><p>Updating the DEB package currently requires downloading the new version and installing it through APT.</p><p><strong>Do not install both variants at the same time.</strong></p><h3>Updates</h3><p>CopyPasteBin does not check for updates in the background. New versions are published in GitHub Releases. To receive GitHub notifications, choose <strong>Watch → Custom → Releases</strong> in the repository.</p><p><a href="https://github.com/kozlowska-anna/CopyPasteBin/releases/latest">Check the latest release →</a></p><p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/CHANGELOG.md">See what changed in version 1.1 →</a></p><p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.en.md">Full installation, upgrade, and uninstall guide →</a></p></div>
         </div>
       </section>
 

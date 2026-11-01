@@ -12,7 +12,7 @@
     <link rel="alternate" hreflang="en" href="https://kozlowska-anna.github.io/CopyPasteBin/en/">
     <link rel="alternate" hreflang="x-default" href="https://kozlowska-anna.github.io/CopyPasteBin/">
     <link rel="icon" type="image/svg+xml" href="assets/images/logo-web.svg">
-    <link rel="stylesheet" href="assets/css/styles.css?v=20261026-3">
+    <link rel="stylesheet" href="assets/css/styles.css?v=20261101-1">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="CopyPasteBin">
     <meta property="og:locale" content="pl_PL">
@@ -42,7 +42,7 @@
         "softwareRequirements": "Python 3.11 lub nowszy, GJS, GTK 4, GioUnix i GNOME Extensions",
         "softwareVersion": "1.1",
         "datePublished": "2026-10-26",
-        "dateModified": "2026-10-27",
+        "dateModified": "2026-11-01",
         "isAccessibleForFree": true,
         "license": "https://github.com/kozlowska-anna/CopyPasteBin/blob/main/LICENSE",
         "author": {
@@ -132,12 +132,24 @@
 
       <section class="section" id="jak-dziala">
         <div class="container">
-          <div class="product-positioning">
-            <div class="product-positioning-copy">
-              <p class="eyebrow">Dlaczego warto · Privacy-focused Clipboard Manager</p>
-              <h2>Menedżer, ale nie klasyczne archiwum schowka.</h2>
-              <p>Klasyczne menedżery schowków skupiają się przede wszystkim na przechowywaniu, wyszukiwaniu i ponownym używaniu kopii. CopyPasteBin również daje dostęp do krótkiej historii, lecz jego priorytetem jest wychwycenie ryzyka, przygotowanie tekstu i ochrona przed niefortunnym kliknięciem „Wklej”.</p>
+          <div class="why-grid">
+            <div class="origin-story">
+              <p class="eyebrow">Historia projektu</p>
+              <h2>Dlaczego powstał CopyPasteBin?</h2>
+              <div class="origin-story-copy">
+                <p>CopyPasteBin narodził się z codziennej pracy z tekstem, obrazami i narzędziami AI. Kopiowanie fragmentów informacji, przygotowywanie promptów czy udostępnianie zrzutów ekranu stało się naturalną częścią tej pracy. Ale nie wszystko, co kopiujemy, chcemy również przekazać dalej.</p>
+                <p>Brakowało prostego narzędzia, które pozwoliłoby sprawdzić, co znajduje się w kopiowanych treściach, ostrzegło przed przypadkowym ujawnieniem danych wrażliwych i umożliwiło ich anonimizację bez zbędnych dodatkowych kroków.</p>
+                <p>Tak powstał CopyPasteBin. Lokalny program, który pomaga bezpieczniej i wygodniej pracować z informacjami, pozostawiając użytkownikowi kontrolę nad tym, co udostępnia.</p>
+                <p>Choć inspiracją była praca z AI, jego zastosowanie jest znacznie szersze. Wszędzie tam, gdzie kopiujemy, edytujemy i przekazujemy informacje, warto wiedzieć, co naprawdę trafia dalej.</p>
+              </div>
             </div>
+            <aside class="product-positioning" aria-label="Rola CopyPasteBin">
+              <div class="product-positioning-copy">
+                <p class="eyebrow">Dlaczego warto · Privacy-focused Clipboard Manager</p>
+                <h3>Menedżer, ale nie klasyczne archiwum schowka.</h3>
+                <p>Klasyczne menedżery schowków skupiają się przede wszystkim na przechowywaniu, wyszukiwaniu i ponownym używaniu kopii. CopyPasteBin również daje dostęp do krótkiej historii, lecz jego priorytetem jest wychwycenie ryzyka, przygotowanie tekstu i ochrona przed niefortunnym kliknięciem „Wklej”.</p>
+              </div>
+            </aside>
           </div>
           <div class="trust-strip" role="group" aria-label="Najważniejsze korzyści">
             <div class="trust-item"><strong>Zauważasz ryzyko wcześniej</strong><span>Ostrzeżenie pojawia się, gdy tekst przypomina obsługiwany rodzaj danych wrażliwych.</span></div>
@@ -157,7 +169,7 @@
           <ul class="use-case-list" aria-label="Cztery sytuacje, w których może przydać się CopyPasteBin">
             <li><strong>Gdy piszesz wiadomość:</strong> sprawdź, czy kopiowany tekst nie zawiera przypadkowo danych osobowych, kontaktowych lub finansowych.</li>
             <li><strong>Gdy pracujesz z kodem lub terminalem:</strong> zwróć uwagę na tokeny, klucze i ciągi połączeń przed ich wklejeniem do rozmowy, zgłoszenia lub dokumentacji.</li>
-            <li><strong>Gdy korzystasz z narzędzia AI:</strong> sprawdź kopiowany fragment dokumentu, kodu, logu lub polecenia i w razie potrzeby zanonimizuj wrażliwe dane przed wklejeniem.</li>
+            <li><strong>Gdy korzystasz z narzędzia AI:</strong> przygotuj lub rozbuduj prompt bez otwierania osobnego edytora, sprawdź kopiowany fragment dokumentu, kodu, logu lub polecenia i w razie potrzeby zanonimizuj wrażliwe dane przed wklejeniem.</li>
             <li><strong>Gdy udostępniasz obraz:</strong> ręcznie zakryj wybrane obszary zdjęcia lub screenshota i zapisz nową kopię PNG.</li>
           </ul>
         </div>
@@ -170,10 +182,10 @@
             <h2>Praktyczna pomoc w codziennym kopiowaniu i wklejaniu.</h2>
           </div>
           <div class="feature-grid">
-            <article class="feature-card"><span class="feature-number">01</span><h3>Podręczny edytor treści</h3><p>Otwórz skopiowaną treść, wprowadź ręczne poprawki lub zanonimizuj wykryte fragmenty. Schowek zmieni się dopiero po Twojej akceptacji.</p></article>
+            <article class="feature-card"><span class="feature-number">01</span><h3>Podręczny edytor treści</h3><p>Otwórz skopiowaną treść, popraw ją, rozbuduj lub zanonimizuj wykryte fragmenty. Edytor zastąpi zawartość schowka dopiero po Twojej akceptacji.</p></article>
             <article class="feature-card"><span class="feature-number">02</span><h3>Anonimizacja obrazów</h3><p>Otwórz lokalny plik PNG lub JPEG, zakryj wybrane fragmenty prostokątami i zapisz nowy PNG. Oryginał pozostaje bez zmian.</p></article>
             <article class="feature-card"><span class="feature-number">03</span><h3>Reguły i dokładne wykluczenia</h3><p>Własne znaczniki działają lokalnie. Wykluczenia są dozwolone tylko dla dokładnego trafienia o niskim lub średnim ryzyku.</p></article>
-            <article class="feature-card"><span class="feature-number">04</span><h3>Historia ostatnich 15 kopiowań</h3><p>Historia obejmuje do 15 ostatnio skopiowanych tekstów i pozostaje wyłącznie w pamięci RAM bieżącej sesji. Znika po blokadzie ekranu, wylogowaniu lub wyłączeniu rozszerzenia.</p></article>
+            <article class="feature-card"><span class="feature-number">04</span><h3>Historia ostatnich 15 kopiowań</h3><p>Wróć do jednego z 15 ostatnio skopiowanych tekstów bez tworzenia przez CopyPasteBin trwałego archiwum treści. Lista pozostaje w RAM bieżącej sesji i znika po blokadzie ekranu, wylogowaniu lub wyłączeniu rozszerzenia.</p></article>
             <article class="feature-card"><span class="feature-number">05</span><h3>Cztery poziomy ryzyka</h3><p>Reguły rozróżniają poziomy od niskiego do krytycznego i kategorie takie jak dane kontaktowe, numery finansowe, tokeny czy klucze prywatne.</p></article>
             <article class="feature-card"><span class="feature-number">06</span><h3>Bezpieczne wklejenie</h3><p>Użyj <code>Super+Shift+V</code>, aby sprawdzić tekst znajdujący się w schowku. Jeśli program wykryje ryzyko, otworzy edytor z propozycją anonimizacji. Niczego nie wklei ani nie zmieni bez potwierdzenia.</p></article>
             <article class="feature-card"><span class="feature-number">07</span><h3>Pauza i opcjonalne czyszczenie</h3><p>Podczas pauzy opcje czasu pozostają widoczne, a przycisk wznowienia jest pod ręką. Opcjonalne czyszczenie schowka pozostaje wyłączone domyślnie.</p></article>
@@ -293,6 +305,7 @@
             <p>Po pobraniu instalatora i pliku sum sprawdź paczkę w tym samym katalogu:</p>
             <pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre>
             <p>Archiwum 1.1 tar.gz zawiera dokumentację polską i angielską. Zacznij od <code>README.pl.md</code> i <code>INSTALL.pl.md</code>; odnośniki językowe pozwalają przełączyć język. Obie wersje strony korzystają z tej samej paczki.</p>
+            <p>Oba warianty instalacji sprawdzono w docelowym środowisku GNOME/Wayland.</p>
             <p>Aktualizacja pakietu DEB wymaga obecnie pobrania nowej wersji i zainstalowania jej przez APT.</p>
             <p><strong>Nie instaluj obu wariantów jednocześnie.</strong></p>
             <h3>Aktualizacje</h3>
