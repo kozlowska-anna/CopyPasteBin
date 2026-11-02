@@ -354,7 +354,7 @@ class StaticSiteTests(unittest.TestCase):
     def test_product_positioning_and_privacy_summary_are_bilingual(self) -> None:
         expected_by_language = {
             "pl": (
-                "Privacy-focused Clipboard Manager",
+                "Dlaczego warto",
                 "Menedżer, ale nie klasyczne archiwum schowka.",
                 "ochrona przed niefortunnym kliknięciem",
                 "Lokalnie, bez konta i chmury.",
@@ -418,8 +418,8 @@ class StaticSiteTests(unittest.TestCase):
 
     def test_clipboard_editor_is_presented_as_a_general_text_tool(self) -> None:
         expected_by_language = {
-            "pl": ("Podręczny edytor treści", "wprowadź ręczne poprawki", "dopiero po Twojej akceptacji"),
-            "en": ("Handy text editor", "make manual changes", "only after your confirmation"),
+            "pl": ("Podręczny edytor treści", "popraw ją, rozbuduj", "dopiero po Twojej akceptacji"),
+            "en": ("Handy text editor", "revise or expand it", "only after your confirmation"),
         }
         for page in PAGES:
             parser = parse_page(page)
@@ -553,7 +553,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertNotIn("Bez udawania, że ryzyko znika", source)
             self.assertNotIn("Without pretending risk disappears", source)
             self.assertNotIn('name="keywords"', source.lower())
-            self.assertIn("styles.css?v=20261026-3", source)
+            self.assertIn("styles.css?v=20261101-2", source)
             self.assertIn("site.js?v=20261019-6", source)
         stack_rule = re.search(r"\.risk-stack\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
         banner_rule = re.search(r"\.risk-banner\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
