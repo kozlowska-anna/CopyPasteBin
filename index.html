@@ -262,6 +262,7 @@
                 <li><strong>Dodaj PPA:</strong><pre class="verification-command"><code>sudo add-apt-repository ppa:annakozlowska/copypastebin</code></pre></li>
                 <li><strong>Odśwież listę pakietów:</strong><pre class="verification-command"><code>sudo apt update</code></pre></li>
                 <li><strong>Zainstaluj program:</strong><pre class="verification-command"><code>sudo apt install copypastebin</code></pre></li>
+                <li><strong>Aktywuj rozszerzenie:</strong> wyloguj się i zaloguj ponownie do sesji GNOME, a następnie uruchom CopyPasteBin z menu aplikacji, aby aktywować rozszerzenie dla bieżącego użytkownika.</li>
               </ol>
               <div class="update-note"><h4>Jak aktualizować</h4><p>Aktualizacje z PPA przychodzą przez APT razem z aktualizacjami systemu. CopyPasteBin sam nie sprawdza wersji w tle.</p></div>
               <p><a class="button button-primary" href="https://launchpad.net/~annakozlowska/+archive/ubuntu/copypastebin">Otwórz PPA na Launchpadzie</a></p>
@@ -275,6 +276,7 @@
                 <li><strong>Sprawdź pobrany plik:</strong><pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre></li>
                 <li><strong>Rozpakuj archiwum i uruchom:</strong><pre class="verification-command"><code>./install.sh --check-only
 ./install.sh</code></pre></li>
+                <li><strong>Rozpocznij nową sesję:</strong> wyloguj się i zaloguj ponownie do sesji GNOME. CopyPasteBin powinien uruchomić się automatycznie.</li>
               </ol>
               <div class="update-note"><h4>Jak aktualizować</h4><p>Pobierz nowsze archiwum z GitHub Release, ponownie sprawdź sumę i uruchom zawarty w nim <code>install.sh</code>. Ustawienia użytkownika pozostają zachowane.</p></div>
             </article>
@@ -283,12 +285,13 @@
             <strong>Potrzebujesz ręcznej instalacji systemowej?</strong>
             GitHub Release zawiera również trzy zgodne pakiety DEB w tej samej wersji. To wariant dodatkowy dla osób, które nie chcą używać PPA.
             <a href="https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2">Zobacz pakiety DEB →</a>
+            <p><strong>Po ręcznej instalacji DEB wykonaj krok 4 opisany przy instalacji z PPA.</strong></p>
           </aside>
           <div class="compatibility-card">
             <div>
               <p class="eyebrow">Wymagane środowisko</p>
               <h3>GNOME Shell 50 na Waylandzie.</h3>
-              <p>Wymagane są Python 3.11 lub nowszy, GJS, GTK 4, GdkPixbuf, GioUnix i GNOME Extensions. Po instalacji lub aktualizacji wyloguj się i zaloguj ponownie.</p>
+              <p>Wymagane są Python 3.11 lub nowszy, GJS, GTK 4, GdkPixbuf, GioUnix i GNOME Extensions.</p>
             </div>
             <div>
               <h4>Sprawdzone przykłady</h4>

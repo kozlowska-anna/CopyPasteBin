@@ -203,6 +203,7 @@
                 <li><strong>Add the PPA:</strong><pre class="verification-command"><code>sudo add-apt-repository ppa:annakozlowska/copypastebin</code></pre></li>
                 <li><strong>Refresh package information:</strong><pre class="verification-command"><code>sudo apt update</code></pre></li>
                 <li><strong>Install CopyPasteBin:</strong><pre class="verification-command"><code>sudo apt install copypastebin</code></pre></li>
+                <li><strong>Activate the extension:</strong> log out and back in to the GNOME session, then launch CopyPasteBin from the application menu to activate the extension for the current user.</li>
               </ol>
               <div class="update-note"><h4>How to update</h4><p>PPA updates arrive through APT with normal system updates. CopyPasteBin does not check for new versions in the background.</p></div>
               <p><a class="button button-primary" href="https://launchpad.net/~annakozlowska/+archive/ubuntu/copypastebin">Open the PPA on Launchpad</a></p>
@@ -216,13 +217,14 @@
                 <li><strong>Verify the download:</strong><pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre></li>
                 <li><strong>Extract the archive and run:</strong><pre class="verification-command"><code>./install.sh --check-only
 ./install.sh</code></pre></li>
+                <li><strong>Start a new session:</strong> log out and back in to the GNOME session. CopyPasteBin should then start automatically.</li>
               </ol>
               <div class="update-note"><h4>How to update</h4><p>Download the newer archive from GitHub Release, verify it again, and run its included <code>install.sh</code>. Your user settings are preserved.</p></div>
             </article>
           </div>
-          <aside class="manual-deb-note"><strong>Need a manual system installation?</strong> GitHub Release also provides three matching DEB packages at the same version. This is an additional option for people who do not want to use the PPA. <a href="https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2">View the DEB packages →</a></aside>
+          <aside class="manual-deb-note"><strong>Need a manual system installation?</strong> GitHub Release also provides three matching DEB packages at the same version. This is an additional option for people who do not want to use the PPA. <a href="https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2">View the DEB packages →</a><p><strong>After a manual DEB installation, follow step 4 shown for the PPA installation.</strong></p></aside>
           <div class="compatibility-card">
-            <div><p class="eyebrow">Required environment</p><h3>GNOME Shell 50 on Wayland.</h3><p>Python 3.11 or newer, GJS, GTK 4, GdkPixbuf, GioUnix, and GNOME Extensions are required. Log out and back in after installation or upgrade.</p></div>
+            <div><p class="eyebrow">Required environment</p><h3>GNOME Shell 50 on Wayland.</h3><p>Python 3.11 or newer, GJS, GTK 4, GdkPixbuf, GioUnix, and GNOME Extensions are required.</p></div>
             <div><h4>Confirmed examples</h4><ul class="requirements-list"><li><strong>Ubuntu 26.04 LTS</strong> — PPA version <code>1.2-2</code> passed installation, upgrade, removal, and final LIVE testing.</li><li><strong>Fedora Workstation 44, x86_64</strong> — GNOME 50 and Wayland passed broad LIVE testing with the 1.1 tar.gz archive; release 1.2 was not separately tested there.</li></ul></div>
             <p class="compatibility-limit"><strong>Do not mix a PPA/DEB installation with the user-local tar.gz installation.</strong> KDE Plasma, Cinnamon, Xfce, and X11 sessions remain outside the confirmed scope.</p>
           </div>
