@@ -74,7 +74,7 @@ When an enabled pattern matches, CopyPasteBin displays a risk-colored banner
 with safe category names and counts, never the clipboard text itself. The
 single action opens the editor for review.
 
-<img width="596" height="158" alt="CopyPasteBin 1.1 high-risk warning in GNOME after detecting a demonstration payment card in the clipboard" src="docs/screenshots/02-copypastebin-1-1-sensitive-data-paste-warning-EN.png" />
+<img width="596" height="158" alt="CopyPasteBin high-risk warning in GNOME after detecting a demonstration payment card in the clipboard" src="docs/screenshots/02-copypastebin-1-1-sensitive-data-paste-warning-EN.png" />
 
 ### Clipboard Editor & Risk Highlighting
 
@@ -83,26 +83,26 @@ redaction suggestion. The clipboard changes only after **Replace clipboard**;
 canceling leaves it unchanged. The screenshot uses synthetic demonstration
 text.
 
-<img width="1088" height="618" alt="CopyPasteBin 1.1 clipboard editor highlighting a demonstration email address and password before redaction" src="docs/screenshots/03-copypastebin-1-1-clipboard-editor-risk-highlighting-EN.png" />
+<img width="1088" height="618" alt="CopyPasteBin clipboard editor highlighting a demonstration email address and password before redaction" src="docs/screenshots/03-copypastebin-1-1-clipboard-editor-risk-highlighting-EN.png" />
 
 ### Local Image Redaction
 
 The local image editor lets the user manually cover selected areas and save a
 new PNG copy without modifying the original image.
 
-<img width="1128" height="789" alt="CopyPasteBin 1.1 image redaction editor covering a synthetic postal address, email address, and signature with three manual masks" src="docs/screenshots/06-copypastebin-1-1-local-image-redaction-editor-EN.png" />
+<img width="1128" height="789" alt="CopyPasteBin image redaction editor covering a synthetic postal address, email address, and signature with three manual masks" src="docs/screenshots/06-copypastebin-1-1-local-image-redaction-editor-EN.png" />
 
 <details>
 <summary><strong>More CopyPasteBin screenshots</strong></summary>
 
 ### GNOME Desktop Integration
 
-The panel menu shows whether monitoring is active and opens the session-only
-recent clipboard, detection filters, custom rules and exact exclusions,
-automatic clearing, language settings, the clipboard editor, pause controls,
-and the local About window.
+The version 1.2 panel menu shows monitoring and clipboard-history status, a
+separate action for enabling or disabling history saving, detection filters,
+custom rules and exact exclusions, automatic clearing, language settings,
+text and image redaction, and pause controls.
 
-<img width="533" height="616" alt="CopyPasteBin 1.1 menu in GNOME with clipboard history, detection filters, text and image redaction, automatic clearing, and pause controls" src="docs/screenshots/01-copypastebin-1-1-clipboard-manager-menu-gnome-EN.png" />
+<img width="480" height="660" alt="English CopyPasteBin 1.2 menu in GNOME with clipboard-history status, a separate history-saving control, detection filters, custom rules, text and image redaction, automatic clearing, language settings, and pause controls" src="website/assets/images/01-copypastebin-1-2-clipboard-history-menu-gnome-EN.png" />
 
 ### Selective Anonymization
 
@@ -111,7 +111,7 @@ can anonymize only that selection or, after confirmation, add an exact,
 case-sensitive exclusion for that value and category. High- and critical-risk
 matches can be anonymized but cannot be excluded.
 
-<img width="1080" height="738" alt="CopyPasteBin 1.1 clipboard editor with an email address selected, anonymization and exclusion actions open, and quick text tools visible" src="docs/screenshots/04-copypastebin-1-1-selective-anonymization-editing-tools-EN.png" />
+<img width="1080" height="738" alt="CopyPasteBin clipboard editor with an email address selected, anonymization and exclusion actions open, and quick text tools visible" src="docs/screenshots/04-copypastebin-1-1-selective-anonymization-editing-tools-EN.png" />
 
 ### Custom Rules & Exceptions
 
@@ -121,7 +121,7 @@ are available only for supported low- and medium-risk detections; real
 passwords, keys, and other secrets should never be saved as rules or
 exclusions.
 
-<img width="1208" height="649" alt="CopyPasteBin 1.1 window with synthetic custom detection rules and exact exceptions for an example email address and documentation IP address" src="docs/screenshots/05-copypastebin-1-1-custom-rules-exact-exceptions-EN.png" />
+<img width="1208" height="649" alt="CopyPasteBin window with synthetic custom detection rules and exact exceptions for an example email address and documentation IP address" src="docs/screenshots/05-copypastebin-1-1-custom-rules-exact-exceptions-EN.png" />
 
 ### Recent clipboard in session memory
 
@@ -131,7 +131,7 @@ clears the list. Restoring an entry requires an explicit action. This list is
 separate from the persistent history, which stores limited metadata and an
 HMAC but no clipboard text.
 
-<img width="1048" height="722" alt="CopyPasteBin 1.1 clipboard history window showing eight synthetic recent text items stored only in temporary session memory" src="docs/screenshots/07-copypastebin-1-1-session-only-clipboard-history-EN.png" />
+<img width="1048" height="722" alt="CopyPasteBin clipboard history window showing eight synthetic recent text items stored only in temporary session memory" src="docs/screenshots/07-copypastebin-1-1-session-only-clipboard-history-EN.png" />
 
 </details>
 
@@ -154,20 +154,31 @@ version 1.2. The installer stops safely when GNOME Shell is unavailable.
 
 Choose one installation method:
 
-- Download the three exactly matching Debian packages—`copypastebin-backend`,
-  `gnome-shell-extension-copypastebin`, and `copypastebin`—from the
-  [v1.2 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2)
-  for a system installation managed by APT.
-- [⬇ Download the tar.gz archive](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz) for a user-local installation without `sudo`.
-- [Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/SHA256SUMS) and verify the selected files before opening them:
+- **Stable Ubuntu PPA:** a system installation that requires administrator
+  privileges. Add `ppa:annakozlowska/copypastebin`; APT installs CopyPasteBin
+  and supplies later updates. [Open the stable PPA on Launchpad](https://launchpad.net/~annakozlowska/+archive/ubuntu/copypastebin).
+- **Manual DEB installation:** download `copypastebin-backend`,
+  `gnome-shell-extension-copypastebin`, and `copypastebin` in exactly the same
+  version from the [v1.2 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2)
+  and install them system-wide through APT with administrator privileges.
+  Without the PPA, later versions must be downloaded and installed manually.
+- **User-local tar.gz installation:** [download the archive](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz)
+  for the current user without `sudo`; updates are manual.
+
+[Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/SHA256SUMS) and verify downloaded release files before opening them:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
 ```
 
-**Do not install both variants at the same time.** Follow the
+**Do not combine a PPA/DEB system installation with the user-local tar.gz
+installation.** Follow the
 [complete English installation guide](docs/offline-installation.en.md) for
 verification, installation, update, switching methods, and removal.
+
+After a PPA or DEB system installation, log out and back in to the GNOME
+session, then launch CopyPasteBin from the application menu to activate the
+extension for the current user.
 
 For the user-local archive, run the read-only compatibility check after
 extracting it:
@@ -183,13 +194,14 @@ user:
 ./install.sh
 ```
 
-Installation does not require `sudo`, a package manager, or network access.
-Log out and log back in to activate the GNOME Shell extension. CopyPasteBin
-should then start automatically.
+The tar.gz installation does not require `sudo`, a package manager, or network
+access. Log out and back in after installing it; CopyPasteBin should then start
+automatically.
 
 To update the archive installation, run `./install.sh` from the new package.
-To update a local DEB, use APT with the new file. Updates and removal preserve
-the user's private configuration and history.
+To update manually installed DEB packages, use APT with the three new matching
+files. Updates and removal preserve the user's private configuration and
+history.
 
 ### Learning about new versions
 

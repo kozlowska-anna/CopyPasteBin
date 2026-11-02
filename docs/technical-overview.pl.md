@@ -133,13 +133,14 @@ ponownym zalogowaniu; testy automatyczne nie stanowią LIVE PASS.
 
 ## Instalacja offline na komputerze
 
-Gotowy pakiet `CopyPasteBin-offline-linux-1.0.0.tar.gz` instaluje aktualną
-wersję lokalnie dla jednego użytkownika. Nie wymaga `sudo`, nie korzysta z
-sieci i nie przenosi konfiguracji, historii ani zawartości schowka z komputera,
-na którym został zbudowany.
+Archiwum `CopyPasteBin-linux-1.2.tar.gz` instaluje wydanie 1.2 lokalnie dla
+jednego użytkownika. Nie wymaga `sudo`, nie korzysta z sieci i nie przenosi
+konfiguracji, historii ani zawartości schowka z komputera, na którym zostało
+zbudowane.
 
 Obsługiwany komputer musi mieć GNOME Shell 50 na Waylandzie, Python 3.11 lub
-nowszy z modułem `venv`, `gjs`, GTK 4 i narzędzie `gnome-extensions`.
+nowszy z modułem `venv`, `gjs`, GTK 4, GdkPixbuf, GioUnix i narzędzie
+`gnome-extensions`.
 Po rozpakowaniu należy najpierw wykonać bezpieczną kontrolę bez zmian:
 
 ```text
