@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 COPYPASTEBIN 1.2 - INSTALACJA OFFLINE
 
 Autorka: Anna Kozłowska

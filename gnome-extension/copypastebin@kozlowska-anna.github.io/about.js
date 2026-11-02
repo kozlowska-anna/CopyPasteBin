@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 import GLib from 'gi://GLib';
 import GLibUnix from 'gi://GLibUnix?version=2.0';
 import Gdk from 'gi://Gdk?version=4.0';

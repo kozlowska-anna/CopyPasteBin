@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 # Model bezpieczeństwa CopyPasteBin V1
 
 **Polski** | [English](../SECURITY.md)

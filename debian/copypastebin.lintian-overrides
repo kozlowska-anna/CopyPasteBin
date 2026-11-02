@@ -1,5 +1,2 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 # This package intentionally contains only exact-version dependencies.
 copypastebin: empty-binary-package

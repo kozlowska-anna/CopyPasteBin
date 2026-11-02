@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 # <img src="website/assets/images/logo-web.svg" alt="CopyPasteBin icon" width="44" height="44"> CopyPasteBin
 
 **English** | [Polski](README.pl.md)

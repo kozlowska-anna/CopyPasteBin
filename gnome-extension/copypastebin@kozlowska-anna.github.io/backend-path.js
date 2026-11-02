@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 import GLib from 'gi://GLib';
 
 export const SYSTEM_BACKEND_PATH = '/usr/bin/cpb';

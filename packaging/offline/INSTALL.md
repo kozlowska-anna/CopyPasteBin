@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 # Offline installation
 
 **English** | [Polski](INSTALL.pl.md) | [Overview](README.md)

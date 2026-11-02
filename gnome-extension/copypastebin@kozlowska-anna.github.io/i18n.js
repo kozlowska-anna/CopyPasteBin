@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 const POLISH = new Map([
     ['Website', 'Strona internetowa'],
     ['Check for updates', 'Sprawdź aktualizacje'],

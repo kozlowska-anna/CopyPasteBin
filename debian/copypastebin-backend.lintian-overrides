@@ -1,5 +1,2 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 # This word list is runtime detector data, not user documentation.
 copypastebin-backend: package-contains-documentation-outside-usr-share-doc [usr/lib/python3/dist-packages/copypastebin/data/bip39_english.txt]

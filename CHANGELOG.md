@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 # Changelog
 
 Wszystkie istotne zmiany CopyPasteBin są zapisywane w tym pliku.

@@ -1,6 +1,3 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
 # Installing CopyPasteBin 1.2
 
 CopyPasteBin 1.2 has two installation methods from the same source set:
