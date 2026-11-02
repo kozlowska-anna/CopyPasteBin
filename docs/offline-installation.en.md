@@ -97,6 +97,11 @@ Download and verify the new release, extract it into a new directory, and run
 its `./install.sh`. Do not uninstall the existing version first. The update
 preserves the user's private configuration and history.
 
+To receive notifications about new versions, open the [CopyPasteBin GitHub
+repository](https://github.com/kozlowska-anna/CopyPasteBin) and select **Watch
+→ Custom → Releases**. Notifications require a GitHub account and do not
+update CopyPasteBin automatically.
+
 ## Remove the installed code
 
 Run the uninstaller from the current package:

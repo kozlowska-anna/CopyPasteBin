@@ -72,6 +72,14 @@ zachowując wszystkie pozostałe wpisy i usuwając wyłącznie dawny roboczy UUI
 Nie wymaga to usługi, opóźnienia ani dodatkowego dostępu do schowka. Po
 ponownym zalogowaniu CopyPasteBin powinien uruchomić się automatycznie.
 
+Aby ręcznie zaktualizować instalację tar.gz, pobierz i sprawdź nowe wydanie,
+rozpakuj je do nowego katalogu i uruchom zawarty w nim `./install.sh`. Nie
+odinstalowuj najpierw istniejącej wersji. Aby otrzymywać powiadomienia o nowych
+wersjach, otwórz [repozytorium CopyPasteBin na
+GitHubie](https://github.com/kozlowska-anna/CopyPasteBin) i wybierz **Watch →
+Custom → Releases**. Powiadomienia wymagają konta GitHub i nie aktualizują
+programu automatycznie.
+
 Deinstalacja używa `./uninstall.sh` z bieżącego pakietu. Nie należy uruchamiać
 deinstalatora ze starego rozpakowanego katalogu, ponieważ starsza wersja może
 nie znać publicznego UUID. Bieżący skrypt usuwa kod i launcher dla publicznego
