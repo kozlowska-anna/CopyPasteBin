@@ -1,5 +1,9 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import os
 import subprocess
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -28,6 +32,7 @@ FIRST_ACTIVATION_DIAGNOSTIC = (
 WINDOW_LAUNCHER = ROOT / "packaging" / "copypastebin-window.desktop"
 APP_ICON = ROOT / "packaging" / "copypastebin-app.svg"
 ENABLEMENT_HELPER = ROOT / "packaging" / "persist-extension-enablement.js"
+ICON_CACHE_HELPER = ROOT / "packaging" / "offline" / "refresh-user-icon-cache.sh"
 WINDOW_APPLICATION_IDS = (
     "io.github.copypastebin.Editor",
     "io.github.copypastebin.ImageRedactor",
@@ -77,7 +82,7 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("pip install --no-index --no-deps", source)
         self.assertIn("python3 -m venv", source)
         self.assertIn("$HOME/.local/share/copypastebin", source)
-        self.assertIn("schemas/gschemas.compiled", source)
+        self.assertNotIn("schemas/gschemas.compiled", source)
         self.assertIn("$HOME/.local/share/gnome-shell/extensions", source)
         self.assertIn("XDG_SESSION_TYPE", source)
         self.assertIn("trap rollback EXIT", source)
@@ -94,6 +99,8 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn('[[ ! -L "$LEGACY_EXTENSION_DIR" ]]', source)
         self.assertIn('if $LEGACY_MIGRATED; then', source)
         self.assertIn('persist-extension-enablement.js', source)
+        self.assertIn('ICON_CACHE_HELPER="$SCRIPT_DIR/refresh-user-icon-cache.sh"', source)
+        self.assertIn('"$ICON_CACHE_HELPER" || true', source)
         self.assertIn('gnome-extensions enable "$UUID" >/dev/null 2>&1 || true', source)
         self.assertNotIn('chmod 700 -- "$APP_DIR" "$EXTENSIONS_DIR"', source)
         for forbidden in ("sudo apt", "sudo cp", "curl ", "wget ", "http://", "https://"):
@@ -111,13 +118,15 @@ class OfflineInstallerTests(unittest.TestCase):
             'rm -rf -- "$APP_DIR" "$EXTENSION_DIR" "$LEGACY_EXTENSION_DIR"',
             source,
         )
+        self.assertIn('ICON_CACHE_HELPER="$SCRIPT_DIR/refresh-user-icon-cache.sh"', source)
+        self.assertIn('"$ICON_CACHE_HELPER" || true', source)
 
     def test_bundle_builder_includes_only_product_payload(self):
         source = BUILDER.read_text(encoding="utf-8")
         self.assertIn("pip wheel --no-deps --no-build-isolation", source)
         self.assertIn('UUID="copypastebin@kozlowska-anna.github.io"', source)
         self.assertIn('gnome-extension/$UUID', source)
-        self.assertIn("glib-compile-schemas", source)
+        self.assertNotIn("glib-compile-schemas", source)
         self.assertIn("SHA256SUMS", source)
         self.assertIn('cp -- "$ROOT/LICENSE" "$STAGE_DIR/LICENSE"', source)
         self.assertIn('cp -- "$ROOT/NOTICE" "$STAGE_DIR/NOTICE"', source)
@@ -127,14 +136,82 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn(
             '"$PAYLOAD_DIR/persist-extension-enablement.js"', source
         )
+        self.assertIn(
+            '"$STAGE_DIR/refresh-user-icon-cache.sh"', source
+        )
         self.assertIn("GNU GENERAL PUBLIC LICENSE", LICENSE.read_text(encoding="utf-8"))
         self.assertIn("BSD-3-Clause", NOTICE.read_text(encoding="utf-8"))
         for forbidden in (".config/copypastebin", ".local/state/copypastebin"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)
 
+    @unittest.skipUnless(
+        Path("/usr/bin/gtk-update-icon-cache").is_file(),
+        "gtk-update-icon-cache is required for the cache migration test",
+    )
+    def test_icon_cache_helper_removes_stale_product_entry_only_by_reindexing(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary) / "home"
+            icon_root = home / ".local" / "share" / "icons" / "hicolor"
+            app_dir = icon_root / "scalable" / "apps"
+            app_dir.mkdir(parents=True)
+            icon = app_dir / "copypastebin.svg"
+            unrelated_icon = app_dir / "unrelated.svg"
+            icon.write_bytes(APP_ICON.read_bytes())
+            unrelated_icon.write_bytes(APP_ICON.read_bytes())
+            subprocess.run(
+                [
+                    "/usr/bin/gtk-update-icon-cache",
+                    "--force",
+                    "--ignore-theme-index",
+                    str(icon_root),
+                ],
+                check=True,
+                capture_output=True,
+            )
+            cache = icon_root / "icon-theme.cache"
+            self.assertIn(b"copypastebin", cache.read_bytes())
+            icon.unlink()
+
+            environment = os.environ.copy()
+            environment["HOME"] = str(home)
+            subprocess.run(
+                ["/usr/bin/bash", str(ICON_CACHE_HELPER)],
+                check=True,
+                env=environment,
+            )
+
+            if cache.exists():
+                cache_bytes = cache.read_bytes()
+                self.assertNotIn(b"copypastebin", cache_bytes)
+                self.assertIn(b"unrelated", cache_bytes)
+
+    def test_icon_cache_helper_is_local_bounded_and_non_critical(self):
+        source = ICON_CACHE_HELPER.read_text(encoding="utf-8")
+        self.assertIn(
+            'readonly ICON_ROOT="$HOME/.local/share/icons/hicolor"',
+            source,
+        )
+        self.assertIn('[[ -d "$ICON_ROOT" && ! -L "$ICON_ROOT" ]]', source)
+        self.assertIn("/usr/bin/gtk-update-icon-cache", source)
+        self.assertIn("--force --ignore-theme-index", source)
+        self.assertIn(">/dev/null 2>&1 || true", source)
+        for forbidden in (
+            "sudo ",
+            "rm ",
+            "curl ",
+            "wget ",
+            "http://",
+            "https://",
+            ".config/copypastebin",
+            ".local/state/copypastebin",
+            "clipboard",
+        ):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, source)
+
     def test_release_version_is_consistent(self):
-        expected = "1.1"
+        expected = "1.2"
         self.assertIn(f'version = "{expected}"', PYPROJECT.read_text(encoding="utf-8"))
         self.assertIn(
             f'__version__ = "{expected}"',
@@ -145,7 +222,7 @@ class OfflineInstallerTests(unittest.TestCase):
             ABOUT_WINDOW.read_text(encoding="utf-8"),
         )
         self.assertIn(
-            f'readonly VERSION="{expected}"',
+            f'VERSION="{expected}"',
             BUILDER.read_text(encoding="utf-8"),
         )
         self.assertIn(
@@ -159,12 +236,50 @@ class OfflineInstallerTests(unittest.TestCase):
             OFFLINE_DOCUMENTATION.read_text(encoding="utf-8"),
         )
 
+    def test_development_bundle_is_separate_and_clearly_labeled(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary)
+            environment = os.environ.copy()
+            environment.update({
+                "CPB_BUNDLE_CHANNEL": "development",
+                "CPB_BUNDLE_DIST_DIR": str(destination),
+            })
+            completed = subprocess.run(
+                [str(BUILDER)],
+                check=True,
+                capture_output=True,
+                text=True,
+                env=environment,
+            )
+            archive = destination / "CopyPasteBin-linux-1.3-dev.tar.gz"
+            self.assertTrue(archive.is_file(), completed.stdout)
+            self.assertTrue((destination / "SHA256SUMS").is_file())
+
+            prefix = "CopyPasteBin-linux-1.3-dev/payload/"
+            with tarfile.open(archive, "r:gz") as bundle:
+                names = set(bundle.getnames())
+                wheel_names = {
+                    name for name in names
+                    if name.startswith(prefix) and name.endswith(".whl")
+                }
+                self.assertEqual(1, len(wheel_names))
+                self.assertIn("copypastebin-1.3.dev0", next(iter(wheel_names)))
+
+                about = bundle.extractfile(
+                    prefix + "copypastebin@kozlowska-anna.github.io/about.js"
+                ).read().decode("utf-8")
+                metadata = bundle.extractfile(
+                    prefix + "copypastebin@kozlowska-anna.github.io/metadata.json"
+                ).read().decode("utf-8")
+                self.assertIn("const VERSION = '1.3-dev';", about)
+                self.assertIn('"version": 8', metadata)
+
     def test_release_archive_has_normalized_metadata_and_no_silent_overwrite(self):
         source = BUILDER.read_text(encoding="utf-8")
 
         for expected in (
             "umask 022",
-            'readonly SOURCE_DATE_EPOCH="1792454400"',
+            'readonly SOURCE_DATE_EPOCH="1793491200"',
             'readonly BUILD_SOURCE_DIR="$WORK_DIR/source"',
             'cp -a -- "$ROOT/src/." "$BUILD_SOURCE_DIR/src/"',
             'find "$BUILD_SOURCE_DIR" -type f -exec chmod 0644',

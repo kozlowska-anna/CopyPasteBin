@@ -1,6 +1,43 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # Changelog
 
 Wszystkie istotne zmiany CopyPasteBin są zapisywane w tym pliku.
+
+## [1.2] - 2026-11-01
+
+### Zmieniono
+
+- rozpoznane sekrety oraz trafienia wysokiego i krytycznego ryzyka nie trafiają
+  do pamięciowej historii tekstowej, niezależnie od ustawień filtrów bannera;
+- osobna heurystyka historii pomija samodzielne ciągi o wysokiej entropii bez
+  wyświetlania dodatkowych ostrzeżeń;
+- zapisywanie historii można niezależnie wyłączyć z menu GNOME; wyłączenie
+  natychmiast czyści listę i zamyka jej okno, ale nie zatrzymuje analizy,
+  bannerów ani edytora;
+- ustawienie historii zapisuje wyłącznie wersję dokumentu i wartość logiczną,
+  bez treści, skrótów i identyfikatorów wpisów;
+- odpowiedź backendu zawiera zamkniętą decyzję `history_eligible`, dlatego
+  zgodny backend i rozszerzenie używają protokołu 2;
+- menu GNOME rozdziela małą sekcję historii separatorami oraz pokazuje tekstowy
+  stan i pomocniczy akcent koloru;
+- nieco większe punkty stanu są wyrównane w jednej kolumnie po lewej stronie;
+  punkt historii znajduje się przy wierszu „Historia schowka”, który jest nad
+  jednoznaczną akcją „Włącz/Wyłącz zapisywanie historii”;
+- wiersz stanu historii zachowuje obsługę kliknięcia i klawiatury po zmianie
+  układu oraz otwiera okno zapisanych wpisów;
+- okno „O programie” kieruje do polskiej albo angielskiej strony produktu
+  zgodnie z wybranym językiem interfejsu;
+- ręczne sprawdzanie aktualizacji otwiera właściwą językowo sekcję pobierania;
+  program nadal nie wykonuje automatycznych zapytań sieciowych;
+- osobista nota autorki pozostaje komentarzem źródłowym i nie jest wyświetlana
+  w interfejsie aplikacji;
+- polecenie wyjścia otwiera klasyczne okno potwierdzenia z bezpiecznie
+  domyślnym przyciskiem „Anuluj”, zamiast wymagać ponownego otwarcia menu;
+- paczki rozwojowe po zamknięciu wydania są budowane w oddzielnym kanale jako
+  `1.3-dev`, bez
+  nadpisywania ani zmiany artefaktów wydania 1.1.
 
 ## [1.1] - 2026-10-26
 

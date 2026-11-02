@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 from __future__ import annotations
 
 import ipaddress
@@ -678,9 +681,17 @@ def _literal_exclusion_spans(
     return frozenset(spans)
 
 
-def analyze_text(
+def detect_text(
     text: str,
     custom_rules: tuple[CustomLiteralRule, ...] = (),
+) -> tuple[Detection, ...]:
+    """Run detectors once, before warning filters and literal exclusions."""
+    return tuple(_raw_detections(text, custom_rules, load_bip39_words()))
+
+
+def analysis_from_detections(
+    text: str,
+    detections: tuple[Detection, ...],
     disabled_categories: frozenset[Category] = frozenset(),
     custom_exclusions: tuple[CustomLiteralExclusion, ...] = (),
 ) -> AnalysisResult:
@@ -698,11 +709,14 @@ def analyze_text(
         for exclusion in custom_exclusions
     ):
         raise TypeError("custom_exclusions must contain CustomLiteralExclusion values")
-    bip39_words = load_bip39_words()
+    if type(detections) is not tuple or any(
+        type(detection) is not Detection for detection in detections
+    ):
+        raise TypeError("detections must contain Detection values")
     excluded_spans = _literal_exclusion_spans(text, custom_exclusions)
     found = (
         detection
-        for detection in _raw_detections(text, custom_rules, bip39_words)
+        for detection in detections
         if detection.category not in disabled_categories
         and (
             detection.risk not in {RiskLevel.LOW, RiskLevel.MEDIUM}
@@ -728,3 +742,17 @@ def analyze_text(
     pieces.append(text[cursor:])
     highest = min((item.risk for item in selected), key=lambda value: _PRIORITY[value], default=RiskLevel.NONE)
     return AnalysisResult(selected, "".join(pieces), highest)
+
+
+def analyze_text(
+    text: str,
+    custom_rules: tuple[CustomLiteralRule, ...] = (),
+    disabled_categories: frozenset[Category] = frozenset(),
+    custom_exclusions: tuple[CustomLiteralExclusion, ...] = (),
+) -> AnalysisResult:
+    return analysis_from_detections(
+        text,
+        detect_text(text, custom_rules),
+        disabled_categories,
+        custom_exclusions,
+    )

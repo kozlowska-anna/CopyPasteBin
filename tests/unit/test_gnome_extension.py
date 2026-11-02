@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import json
 import unittest
 from pathlib import Path
@@ -10,23 +13,109 @@ LAUNCHER = ROOT / "packaging" / "copypastebin.desktop"
 
 
 class GnomeExtensionTests(unittest.TestCase):
+    def test_history_policy_setting_and_menu_are_fail_closed_and_independent(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+        stylesheet = (EXTENSION / "stylesheet.css").read_text(encoding="utf-8")
+
+        self.assertIn("typeof payload.history_eligible !== 'boolean'", source)
+        self.assertIn("if (bridgeResult.historyEligible)", source)
+        remember = source[source.index("    _rememberRecentClipboard("):
+                          source.index("    _updateRecentClipboardLabel(")]
+        self.assertIn("if (!this._historyEnabled", remember)
+
+        apply_setting = source[source.index("\n    _applyHistorySaving(enabled)"):
+                               source.index("    _showHistorySettingError(")]
+        self.assertIn("clearRecentClipboardState", apply_setting)
+        self.assertIn("this._recentClipboardSequence++", apply_setting)
+        self.assertIn("this._recentClipboardProcess?.force_exit()", apply_setting)
+        self.assertIn("this._recentClipboardProcess = null", apply_setting)
+        self.assertIn("this._historySettingPending = enabled", source)
+        self.assertIn("if (this._historySettingPending !== null ||", source)
+        self.assertIn("this._historySavingItem.reactive = false", source)
+        self.assertIn("this._historySettingRetry ?? !this._historyEnabled", source)
+        self.assertIn("this._historySettingRetry = requested", source)
+
+        history_open = source[source.index("    _openRecentClipboard("):
+                              source.index("    _launchRecentClipboard(")]
+        self.assertIn("if (!this._historyEnabled)", history_open)
+        self.assertIn(
+            "this._recentClipboardItem.setSensitive(this._historyEnabled)",
+            source,
+        )
+        self.assertNotIn(
+            "this._recentClipboardItem.reactive = this._historyEnabled",
+            source,
+        )
+        self.assertIn("Enable history saving", source + catalog)
+        self.assertIn("Disable history saving", source + catalog)
+        self.assertIn("Clipboard history — Disabled", source + catalog)
+        self.assertIn("Clipboard history — unavailable", source + catalog)
+        self.assertNotIn("History saving — Enabled", source + catalog)
+        self.assertNotIn("History saving — Disabled", source + catalog)
+        history_menu = source[source.index(
+            "this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());"
+        ):source.index("this._filterStates = new Map();")]
+        history_item = history_menu[:history_menu.index(
+            "this._historySavingItem = new PopupMenu.PopupMenuItem"
+        )]
+        self.assertNotIn("{reactive: false}", history_item)
+        self.assertIn("this._recentClipboardItem.setSensitive(false)", history_item)
+        self.assertNotIn("this._recentClipboardItem.can_focus = false", history_item)
+        self.assertEqual(2, history_menu.count("PopupSeparatorMenuItem"))
+
+        pause_status = source[source.index("    _applyStatus("):
+                              source.index("    _showError(")]
+        self.assertNotIn("_historyEnabled =", pause_status)
+        self.assertIn("cpb-state-active", stylesheet)
+        self.assertIn("cpb-state-inactive", stylesheet)
+        self.assertIn("cpb-state-error", stylesheet)
+        self.assertIn("min-width: 12px", stylesheet)
+        self.assertIn("font-size: 0.9em", stylesheet)
+        self.assertIn("padding-right: 8px", stylesheet)
+        self.assertNotIn("padding-left:", stylesheet)
+
+    def test_creator_note_remains_source_only(self):
+        window = (EXTENSION / "about.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+        note = (
+            "Special thanks to ChatGPT for helping create CopyPasteBin… and "
+            "later questioning whether it actually exists."
+        )
+        self.assertIn(note, window)
+        self.assertIn(" * — Anna Kozłowska\n */", window)
+        self.assertNotIn("Special thanks to ChatGPT", catalog)
+        self.assertNotIn("t('Special thanks to ChatGPT", window)
+        self.assertNotIn("informationLabel('Special thanks to ChatGPT", window)
+
     def test_about_links_use_native_browser_activation_and_translated_labels(self):
-        import re
         from urllib.parse import urlsplit
 
         window = (EXTENSION / "about.js").read_text(encoding="utf-8")
         catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
-        site = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
-        canonical = re.search(r'rel="canonical" href="([^"]+)"', site).group(1)
-        for constant, url, english, polish in (
-            ("WEBSITE_URL", canonical, "Website", "Strona internetowa"),
-            ("LATEST_RELEASE_URL", "https://github.com/kozlowska-anna/CopyPasteBin/releases/latest",
-             "Download the latest version", "Pobierz najnowszą wersję"),
-            ("ISSUES_URL", "https://github.com/kozlowska-anna/CopyPasteBin/issues",
-             "Report an issue", "Zgłoś błąd"),
+        language_urls = {
+            "https://kozlowska-anna.github.io/CopyPasteBin/",
+            "https://kozlowska-anna.github.io/CopyPasteBin/en/",
+            "https://kozlowska-anna.github.io/CopyPasteBin/#pobierz",
+            "https://kozlowska-anna.github.io/CopyPasteBin/en/#download",
+        }
+        for url in language_urls:
+            with self.subTest(url=url):
+                self.assertIn(f"'{url}'", window)
+                self.assertEqual("https", urlsplit(url).scheme)
+                self.assertEqual("", urlsplit(url).query)
+        self.assertIn(
+            "const WEBSITE_URL = LANGUAGE === 'pl'", window
+        )
+        self.assertIn(
+            "const UPDATE_URL = LANGUAGE === 'pl'", window
+        )
+        for constant, english, polish in (
+            ("WEBSITE_URL", "Website", "Strona internetowa"),
+            ("UPDATE_URL", "Check for updates", "Sprawdź aktualizacje"),
+            ("ISSUES_URL", "Report an issue", "Zgłoś błąd"),
         ):
             with self.subTest(link=constant):
-                self.assertIn(f"const {constant} = '{url}';", window)
                 self.assertIn(
                     "new Gtk.LinkButton({\n"
                     f"            label: t('{english}'),\n"
@@ -34,15 +123,13 @@ class GnomeExtensionTests(unittest.TestCase):
                     "        })", window,
                 )
                 self.assertIn(f"['{english}', '{polish}']", catalog)
-                self.assertEqual("https", urlsplit(url).scheme)
-                self.assertEqual("", urlsplit(url).query)
         self.assertEqual(3, window.count("new Gtk.LinkButton("))
         self.assertIn(
-            "Updates are not checked automatically. Open the latest release to download a new version.",
+            "Updates are not checked automatically. Open the download section to check for a new version.",
             window,
         )
         self.assertIn(
-            "Aktualizacje nie są sprawdzane automatycznie. Otwórz najnowsze wydanie, aby pobrać nową wersję.",
+            "Aktualizacje nie są sprawdzane automatycznie. Otwórz sekcję pobierania, aby sprawdzić dostępność nowej wersji.",
             catalog,
         )
         # Keep GTK's default, user-triggered URI handler; no eager launch or upload.
@@ -73,6 +160,98 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertNotIn("Gio.Subprocess", recent + about)
         self.assertIn("SYSTEM_BACKEND_PATH = '/usr/bin/cpb'", resolver)
 
+    def test_backend_probe_gates_clipboard_observation(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        probe = (EXTENSION / "backend-probe.js").read_text(encoding="utf-8")
+
+        self.assertIn("import {BackendProbe} from './backend-probe.js'", source)
+        self.assertIn("[this._entryPoint, 'bridge', 'capabilities']", probe)
+        self.assertIn("MAX_CAPABILITIES_BYTES + 1", probe)
+        self.assertIn("BACKEND_PROBE_TIMEOUT_MILLISECONDS = 3000", probe)
+        self.assertIn("Gio.SubprocessFlags.STDIN_PIPE", probe)
+        self.assertIn("Gio.SubprocessFlags.STDERR_SILENCE", probe)
+        for forbidden in ("/bin/sh", "shell=True", "find_program_in_path", "setenv"):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, probe)
+
+        status_class = source[
+            source.index("const BackendStatusIndicator"):
+            source.index("const CopyPasteBinIndicator")
+        ]
+        self.assertNotIn("get_selection", status_class)
+        self.assertNotIn("owner-changed", status_class)
+        self.assertNotIn("addKeybinding", status_class)
+
+        enable = source[
+            source.index("    enable() {"):
+            source.index("    _finishBackendProbe(")
+        ]
+        self.assertIn("this._showBackendStatus('checking')", enable)
+        self.assertIn("this._showBackendStatus('missing')", enable)
+        self.assertIn("probe.start()", enable)
+        self.assertNotIn("this._createIndicator(", enable)
+        self.assertNotIn("Main.wm.addKeybinding(", enable)
+
+        finish = source[
+            source.index("    _finishBackendProbe("):
+            source.index("    _showBackendStatus(", source.index("    _finishBackendProbe("))
+        ]
+        compatible_gate = finish.index("result.status !== 'compatible'")
+        indicator = finish.index("this._createIndicator(")
+        self.assertLess(compatible_gate, indicator)
+
+    def test_channel_conflict_gates_backend_resolution_and_clipboard_observation(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+        enable = source[
+            source.index("    enable() {"):
+            source.index("    _finishBackendProbe(")
+        ]
+        channel = enable.index("detectExtensionChannelState()")
+        gate = enable.index("channel.status !== 'clear'")
+        resolver = enable.index("resolveBackendPath()")
+        probe = enable.index("new BackendProbe(")
+        self.assertLess(channel, gate)
+        self.assertLess(gate, resolver)
+        self.assertLess(resolver, probe)
+        self.assertIn("this._showBackendStatus(", enable[channel:resolver])
+        self.assertIn("return;", enable[channel:resolver])
+        self.assertIn("entryPoint: null", enable)
+        for label in (
+            "Extension channel conflict",
+            "Option 1: remove the system extension package; keep copypastebin-backend.",
+            "Option 2: remove the user-local extension.",
+            "Then log out and log back in.",
+            "Extension channel check failed",
+            "Clipboard protection is inactive. No extension channel was changed.",
+        ):
+            with self.subTest(label=label):
+                self.assertIn(label, source)
+                self.assertIn(label, catalog)
+
+    def test_backend_probe_cleanup_is_lifecycle_bound_and_fail_closed(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        probe = (EXTENSION / "backend-probe.js").read_text(encoding="utf-8")
+        disable = source[source.index("    disable() {"):]
+
+        self.assertIn("generation !== this._lifecycleGeneration", source)
+        self.assertIn("this._backendProbe?.destroy()", disable)
+        self.assertIn("this._indicator?.destroy()", disable)
+        self.assertIn("this._cancellable?.cancel()", probe)
+        self.assertIn("this._process?.force_exit()", probe)
+        self.assertIn("GLib.source_remove(this._timeoutId)", probe)
+        self.assertIn("this._onResult = null", probe)
+
+        for label in (
+            "Backend: not installed",
+            "Backend: incompatible protocol",
+            "Backend: compatibility check failed",
+            "Required protocol: {required}; backend protocol: {found} "
+            "(product {product}).",
+        ):
+            with self.subTest(label=label):
+                self.assertIn(label, source)
+
     def test_metadata_targets_only_confirmed_shell_generation(self):
         metadata = json.loads((EXTENSION / "metadata.json").read_text(encoding="utf-8"))
         self.assertEqual(PUBLIC_UUID, metadata["uuid"])
@@ -101,36 +280,27 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("transfer_async", source)
         self.assertNotIn("set_owner", source)
 
-    def test_safe_paste_uses_one_standard_shortcut_without_auto_paste(self):
+    def test_safe_paste_and_keyboard_hooks_are_absent(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
         editor = (EXTENSION / "editor.js").read_text(encoding="utf-8")
         metadata = json.loads((EXTENSION / "metadata.json").read_text(encoding="utf-8"))
-        schema = (
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+        self.assertNotIn("settings-schema", metadata)
+        self.assertFalse((
             EXTENSION / "schemas" /
             "org.gnome.shell.extensions.copypastebin.gschema.xml"
-        ).read_text(encoding="utf-8")
-        self.assertEqual(
-            "org.gnome.shell.extensions.copypastebin",
-            metadata["settings-schema"],
-        )
-        self.assertIn("<Super><Shift>v", schema)
-        self.assertNotIn("<Super>v", schema.replace("<Super><Shift>v", ""))
-        self.assertIn("Main.wm.addKeybinding(", source)
-        self.assertIn("Main.wm.removeKeybinding(SAFE_PASTE_KEY)", source)
-        self.assertIn("Shell.ActionMode.NORMAL", source)
-        self.assertIn("[this._entryPoint, 'ui', 'detections']", source)
-        self.assertIn("this._launchEditor(input, true)", source)
-        self.assertIn("this._safePasteProcess?.force_exit()", source)
-        self.assertIn("arguments_.push('--suggest-redaction')", source)
-        self.assertIn("if (SUGGEST_REDACTION)", editor)
+        ).exists())
+        self.assertIn("Edit / anonymize clipboard", source)
         self.assertIn("this._suggestRedaction()", editor)
-        self.assertIn("stdout !== ACTIVE", source)
         for forbidden in (
-            "Ctrl+V", "<Control>v", "grab_accelerator", "fake_key",
-            "notify_keyval", "Clutter.Event", "xdotool", "ydotool",
+            "Safe Paste", "safePaste", "safe-paste", "_safePaste",
+            "--suggest-redaction", "SUGGEST_REDACTION",
+            "Main.wm.addKeybinding", "Main.wm.removeKeybinding",
+            "getSettings()", "Ctrl+V", "<Control>v", "grab_accelerator",
+            "fake_key", "notify_keyval", "Clutter.Event", "xdotool", "ydotool",
         ):
             with self.subTest(forbidden=forbidden):
-                self.assertNotIn(forbidden, source + editor + schema)
+                self.assertNotIn(forbidden, source + editor + catalog)
 
     def test_pause_gate_precedes_selection_transfer(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
@@ -150,10 +320,28 @@ class GnomeExtensionTests(unittest.TestCase):
 
     def test_content_uses_stdin_and_never_argv_or_environment(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
-        self.assertIn("[this._entryPoint, 'bridge', 'observe']", source)
-        self.assertIn("Gio.SubprocessFlags.STDIN_PIPE", source)
-        self.assertIn("new GLib.Bytes(frame)", source)
-        self.assertNotIn("setenv", source)
+        worker = (EXTENSION / "bridge-worker.js").read_text(encoding="utf-8")
+        self.assertIn("[this._entryPoint, 'bridge', 'worker']", worker)
+        self.assertIn("Gio.SubprocessFlags.STDIN_PIPE", worker)
+        self.assertIn("new GLib.Bytes(bytes.slice(offset))", worker)
+        self.assertIn("this._bridgeWorker.request(frame", source)
+        self.assertNotIn("setenv", source + worker)
+
+    def test_worker_is_lazy_single_request_bounded_and_lifecycle_owned(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        worker = (EXTENSION / "bridge-worker.js").read_text(encoding="utf-8")
+        self.assertIn("this._bridgeWorker = new BridgeWorker(this._entryPoint)", source)
+        self.assertIn("if (this._process === null)\n            this._start(frame)", worker)
+        self.assertIn("if (this._destroyed || this._busy", worker)
+        self.assertIn("MAX_WORKER_RESPONSE_BYTES = 2048", worker)
+        self.assertIn("MAX_WORKER_REQUEST_BYTES = 4 + 128 + 10 * 1024 * 1024", worker)
+        self.assertIn("WORKER_IO_TIMEOUT_MILLISECONDS = 5000", worker)
+        self.assertIn("this._bridgeWorker.cancelActive()", source)
+        self.assertIn("this._bridgeWorker.stop()", source)
+        self.assertIn("this._bridgeWorker.destroy()", source)
+        self.assertIn("this._process?.force_exit()", worker)
+        self.assertIn("this._cancellable?.cancel()", worker)
+        self.assertNotIn("/bin/sh", worker)
 
     def test_only_closed_pause_actions_are_exposed(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
@@ -165,10 +353,23 @@ class GnomeExtensionTests(unittest.TestCase):
     def test_resume_action_is_visible_only_while_pause_is_active(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
         recent = source.index("this._recentClipboardItem = new PopupMenu.PopupMenuItem")
+        history_saving = source.index(
+            "this._historySavingItem = new PopupMenu.PopupMenuItem"
+        )
         status = source.index("this._statusItem = new PopupMenu.PopupMenuItem")
         pause_30m = source.index("this._addAction(this._t('Pause for 30 minutes'), '30m')")
-        self.assertLess(recent, status)
+        self.assertLess(recent, history_saving)
+        self.assertLess(history_saving, status)
         self.assertLess(status, pause_30m)
+        self.assertIn(
+            "this._recentClipboardItem.insert_child_at_index(this._historyAccent, 0)",
+            source,
+        )
+        self.assertIn(
+            "this._statusItem.insert_child_at_index(this._statusAccent, 0)",
+            source,
+        )
+        self.assertNotIn("this._historySavingAccent", source)
         self.assertIn("this._resumeItem = this._addAction(this._t('Resume now'), 'resume')", source)
         apply_status = source[
             source.index("    _applyStatus(stdout, automaticCheck) {"):
@@ -242,7 +443,10 @@ class GnomeExtensionTests(unittest.TestCase):
         owner = source[owner_start:owner_end]
         self.assertIn("if (stdout !== ACTIVE)", owner)
         self.assertNotIn("this._flashClipboardChange()", owner)
-        self.assertIn("this._transferText(ownerSequence, sourceApplication)", owner)
+        self.assertIn(
+            "this._transferText(ownerSequence, analysisSequence, sourceApplication)",
+            owner,
+        )
         transfer_start = source.index("    _transferText(")
         transfer_end = source.index("    _clipboardDigest(", transfer_start)
         transfer = source[transfer_start:transfer_end]
@@ -264,6 +468,8 @@ class GnomeExtensionTests(unittest.TestCase):
         owner_end = source.index("    _sourceApplication()", owner_start)
         owner = source[owner_start:owner_end]
         self.assertIn("const ownerSequence = ++this._ownerChangeSequence", owner)
+        self.assertIn("const analysisSequence = ++this._analysisSequence", owner)
+        self.assertIn("this._bridgeWorker.cancelActive()", owner)
         self.assertNotIn("this._cancelAutoClear()", owner)
         self.assertNotIn("++this._eventSequence", owner)
 
@@ -275,13 +481,13 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertLess(transfer.index(duplicate), transfer.index("this._cancelAutoClear()"))
         self.assertLess(
             transfer.index("this._cancelAutoClear()"),
-            transfer.index("const sequence = ++this._eventSequence")
+            transfer.index("const eventSequence = ++this._eventSequence")
         )
         self.assertLess(
-            transfer.index("const sequence = ++this._eventSequence"),
+            transfer.index("const eventSequence = ++this._eventSequence"),
             transfer.index("this._flashClipboardChange()")
         )
-        self.assertIn("this._sendToBridge(sequence, sourceApplication, bytes, digest)", transfer)
+        self.assertIn("analysisSequence, eventSequence,", transfer)
 
     def test_clipboard_identity_is_ram_only_and_cleared_at_session_boundaries(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
@@ -296,16 +502,11 @@ class GnomeExtensionTests(unittest.TestCase):
         destroy_start = source.index("    destroy()")
         self.assertIn("this._resetClipboardIdentity()", source[destroy_start:])
 
-    def test_own_clipboard_writes_update_identity_and_safe_paste_bypasses_it(self):
+    def test_own_clipboard_writes_update_identity(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
         self.assertIn("this._rememberOwnClipboardText('')", source)
         self.assertIn("this._rememberOwnClipboardText(entry.text)", source)
         self.assertIn("this._rememberOwnClipboardText(edited)", source)
-        safe_start = source.index("    safePaste()")
-        safe_end = source.index("    _analyzeSafePaste(", safe_start)
-        safe_paste = source[safe_start:safe_end]
-        self.assertNotIn("_lastClipboardDigest", safe_paste)
-        self.assertNotIn("_pendingClipboardDigest", safe_paste)
 
     def test_recent_clipboard_is_bounded_memory_only_and_session_scoped(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
@@ -450,9 +651,7 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("The clipboard contains no text to analyze.", empty)
         self.assertNotIn("'error'", empty)
         transfer = source.index("if (bytes.length === 0)")
-        bridge = source.index(
-            "this._sendToBridge(sequence, sourceApplication, bytes, digest)", transfer
-        )
+        bridge = source.index("this._sendToBridge(", transfer)
         self.assertIn("this._showEmptyClipboard()", source[transfer:bridge])
         self.assertIn("if (bytes.length > MAX_INPUT_BYTES)", source[transfer:bridge])
 
@@ -523,7 +722,7 @@ class GnomeExtensionTests(unittest.TestCase):
 
     def test_editor_lifecycle_errors_never_leak_clipboard_text(self):
         extension = (EXTENSION / "extension.js").read_text(encoding="utf-8")
-        start = extension.index("    _launchEditor(input, suggestRedaction = false) {")
+        start = extension.index("    _launchEditor(input) {")
         end = extension.index("    _applyEditedClipboard", start)
         lifecycle = extension[start:end]
         self.assertIn("The editor could not be opened.", lifecycle)
@@ -582,7 +781,7 @@ class GnomeExtensionTests(unittest.TestCase):
         ):
             self.assertIn(label, source)
         self.assertIn("['auto-clear-set', String(seconds)]", source)
-        self.assertIn("this._scheduleAutoClear(sequence)", source)
+        self.assertIn("this._scheduleAutoClear(eventSequence)", source)
         self.assertIn("sequence !== this._eventSequence", source)
         self.assertIn("this._cancelAutoClear();", source)
         self.assertIn("this._runPause('status', stdout =>", source)
@@ -687,7 +886,7 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("below + bannerHeight <= monitor.y + monitor.height - BANNER_MARGIN", source)
         self.assertIn("iconY - bannerHeight - 8", source)
         self.assertIn("GLib.timeout_add_seconds", source)
-        self.assertIn("`CPBin: ${result.risk} risk`", source)
+        self.assertIn("`CPB: ${result.risk} risk`", source)
         self.assertIn("this._t('Open editor')", source)
         for color in ("#8a5a00", "#a61b29", "#17663b", "#245f9e"):
             with self.subTest(color=color):
@@ -722,13 +921,26 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertNotIn("_bannerExclusionContent", source)
         self.assertIn("Exclude this detection", editor)
 
-    def test_quit_is_confirmed_and_launcher_only_enables_event_extension(self):
+    def test_quit_uses_safe_confirmation_dialog_and_launcher_only_enables_event_extension(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
         launcher = LAUNCHER.read_text(encoding="utf-8")
         self.assertIn("Quit CopyPasteBin", source)
-        self.assertIn("Click again: Quit CopyPasteBin", source)
+        self.assertIn("new ModalDialog.ModalDialog({", source)
+        self.assertIn("destroyOnClose: false", source)
+        self.assertIn("new Dialog.MessageDialogContent", source)
+        self.assertIn("title: this._t('Quit CopyPasteBin?')", source)
+        self.assertIn("label: this._t('Cancel')", source)
+        self.assertIn("key: Clutter.KEY_Escape", source)
+        self.assertIn("default: true", source)
+        self.assertIn("focused: true", source)
+        self.assertIn("label: this._t('Quit')", source)
         self.assertIn("[GNOME_EXTENSIONS, 'disable', this._uuid]", source)
-        self.assertIn("this._clearQuitResetTimeout()", source)
+        self.assertNotIn("Click again: Quit CopyPasteBin", source)
+        self.assertNotIn("_quitResetTimeoutId", source)
+        self.assertNotIn("_quitArmed", source)
+        self.assertIn("['Quit CopyPasteBin?', 'Zakończyć działanie CopyPasteBin?']", catalog)
+        self.assertIn("['Quit', 'Wyjdź']", catalog)
         self.assertIn(
             f"Exec=/usr/bin/gnome-extensions enable {PUBLIC_UUID}",
             launcher,

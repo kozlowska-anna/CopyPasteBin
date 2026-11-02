@@ -1,0 +1,86 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+copypastebin (1.2-2) resolute; urgency=medium
+
+  * Promote the tested clipboard-history activation fix from 1.2-2~test2.
+  * Keep the normalized, reproducible Debian source-package modes.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Mon, 02 Nov 2026 15:05:00 +0100
+
+copypastebin (1.2-2~test2) resolute; urgency=medium
+
+  * Construct the history row as activatable before temporarily making it
+    insensitive, so GNOME can restore mouse and keyboard activation.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Mon, 02 Nov 2026 11:20:00 +0100
+
+copypastebin (1.2-2~test1) resolute; urgency=medium
+
+  * Restore click and keyboard activation for the clipboard-history status
+    row after its visual reorganization.
+  * Normalize Debian source modes for reproducible signing and rebuilding.
+  * Keep the tested source snapshot below the final 1.2-2 package revision.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Mon, 02 Nov 2026 02:00:00 +0100
+
+copypastebin (1.2-1) resolute; urgency=medium
+
+  * Release CopyPasteBin 1.2 with split, exactly matched backend, GNOME
+    extension and complete-installation packages.
+  * Keep recognized secrets, high-risk data and standalone high-entropy
+    strings out of the in-memory text history.
+  * Add the persistent history-saving control and reorganized GNOME menu.
+  * Use backend protocol 2 for the closed history-eligibility decision.
+  * Preserve private configuration and state across upgrade, removal and
+    reinstallation.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Sun, 01 Nov 2026 22:30:00 +0100
+
+copypastebin (1.2~beta3-0~ppa1) resolute; urgency=medium
+
+  * Keep recognized secrets and high-risk data out of the in-memory text
+    history independently of warning filters.
+  * Add a history-only high-entropy safeguard without extra warning banners.
+  * Add a persistent history-saving switch that clears and closes the list
+    immediately while leaving analysis and the editor active.
+  * Reorganize the GNOME menu with explicit history states and bounded status
+    accents.
+  * Require backend protocol 2 for the closed history-eligibility decision.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Sun, 01 Nov 2026 20:15:00 +0100
+
+copypastebin (1.2~beta2-0~ppa1) resolute; urgency=medium
+
+  * Use the shorter CPB name in risk banner headings.
+  * Label the application launcher CopyPasteBin instead of Enable CopyPasteBin.
+  * Start a new upstream beta snapshot with a unique original source archive.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Sun, 01 Nov 2026 09:33:16 +0100
+
+copypastebin (1.2~beta1-0~ppa1) resolute; urgency=medium
+
+  * Split the backend, GNOME Shell extension, and complete installation into
+    three binary packages with exact-version dependencies.
+  * Add Breaks and Replaces for migration from the monolithic 1.1 package.
+  * Remove Safe Paste, its default shortcut, and its unused GSettings schema.
+  * Detect simultaneous system and user-local extension copies fail-closed.
+  * Add a lazy, bounded bridge worker with lifecycle and stale-result guards.
+  * Keep activation explicit and preserve user configuration and history.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Sat, 31 Oct 2026 12:00:00 +0100
+
+copypastebin (1.1-2~ppa2) resolute; urgency=medium
+
+  * Refresh a stale per-user icon cache during explicit DEB activation.
+  * Keep the migration repair bounded to the current user's icon theme cache.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Thu, 29 Oct 2026 22:37:46 +0100
+
+copypastebin (1.1-2~ppa1) resolute; urgency=medium
+
+  * Prepare a standard Debian source package for isolated APT/PPA testing.
+  * Keep repository enrollment and signing keys outside the application package.
+  * Target the CopyPasteBin test PPA for Ubuntu 26.04 (resolute).
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Tue, 27 Oct 2026 20:30:00 +0100

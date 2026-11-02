@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # CopyPasteBin roadmap
 
 **English** | [Polski](ROADMAP.pl.md)
@@ -30,15 +33,30 @@ into a large, persistent clipboard archive.
 
 ## Current public release
 
-CopyPasteBin 1.1 is the current public stable release. It provides local
-sensitive-data detection, warnings, text redaction, exact low- and medium-risk
-exceptions, Safe Paste, pause controls, and session-only recent clipboard text
-for GNOME Shell 50 on Wayland. Version 1.1 adds manual local PNG/JPEG redaction,
-refreshed application and panel icons, pause-control refinements, and two
-installation formats from the same source set: a Debian package and a
-user-local tar.gz archive.
+CopyPasteBin 1.2 is the current public stable release for GNOME Shell 50 on
+Wayland. It provides local sensitive-data detection, warnings, text and image
+redaction, exact low- and medium-risk exceptions, and pause controls. Its
+session-only text history keeps recognized secrets and high-risk content out
+of the list independently of warning-filter settings, and history saving can
+be disabled without stopping analysis or the editor. Version 1.2 is available
+from an Ubuntu PPA as three matching Debian packages and from GitHub Release as
+the same packages or a user-local tar.gz archive.
 
 ## Planned
+
+### Easier-to-scan menu actions in version 1.3
+
+The GNOME menu is planned to use neutral symbolic icons aligned in one left
+column for two explicit actions:
+
+- `document-edit-symbolic` before “Edit / anonymize clipboard”;
+- `image-x-generic-symbolic` before “Anonymize image”.
+
+The text remains visible, and the complete row—not only the icon—stays
+clickable. The icons do not use the green or red reserved for CopyPasteBin
+states. Before implementation, their readability in light and dark themes,
+alignment with status dots, and mouse and keyboard behavior must be checked
+on a real GNOME Shell session.
 
 ### Easier text preparation
 
@@ -76,10 +94,10 @@ release.
 
 ### Distribution and workflow options
 
-Possible future work includes standard Debian source packaging, DEP-5
-copyright metadata, a signed package repository, optional filter profiles, or
-separating the detection core from desktop-specific integrations. Each option
-needs a concrete user benefit before it expands the product or its maintenance
+Possible future work includes optional filter profiles, broader Ubuntu release
+coverage, a separately reviewed GNOME Extensions submission, or separating
+the detection core from desktop-specific integrations. Each option needs a
+concrete user benefit before it expands the product or its maintenance
 surface.
 
 ## Not planned

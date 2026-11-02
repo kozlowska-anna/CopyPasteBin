@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # Instalacja offline
 
 **Polski** | [English](INSTALL.md) | [Wprowadzenie](README.pl.md)
@@ -40,6 +43,9 @@ W folderze bieżącej paczki uruchom:
 
 Używaj bieżącego skryptu, nie starej wersji. Usuwany jest kod, a konfiguracja
 i historia pozostają w prywatnych katalogach wymienionych wyżej.
+Instalator i deinstalator przebudowują wyłącznie standardowy cache ikon
+`hicolor` bieżącego użytkownika po dodaniu lub usunięciu ikony CopyPasteBin.
+Zapobiega to przesłanianiu późniejszej ikony systemowej przez nieaktualny wpis.
 
 ## Diagnostyka
 
@@ -56,5 +62,5 @@ samodzielnym przekazaniem do zgłoszenia. Nic nie jest wysyłane automatycznie.
 
 ## Używanie i bezpieczeństwo
 
-Super+Shift+V uruchamia Bezpieczne wklejenie na żądanie, nie wkleja automatycznie
-ani nie przechwytuje Ctrl+V. [Ograniczenia ochrony](SECURITY.pl.md).
+Aby ręcznie przejrzeć tekst, użyj pozycji „Edytuj / anonimizuj schowek” w menu
+CopyPasteBin. Program nie przechwytuje Ctrl+V. [Ograniczenia ochrony](SECURITY.pl.md).

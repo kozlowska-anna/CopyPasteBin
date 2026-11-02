@@ -1,0 +1,46 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+#!/bin/sh
+set -eu
+
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/copypastebin-autopkgtest.XXXXXX")
+trap 'rm -rf -- "$temporary"' EXIT HUP INT TERM
+
+test -x /usr/bin/cpb
+test -f /usr/share/gnome-shell/extensions/copypastebin@kozlowska-anna.github.io/extension.js
+test -f /usr/share/metainfo/io.github.kozlowska_anna.CopyPasteBin.metainfo.xml
+dpkg-query -W -f='${Status}\n' copypastebin-backend \
+    | grep -Fx 'install ok installed' >/dev/null
+dpkg-query -W -f='${Status}\n' gnome-shell-extension-copypastebin \
+    | grep -Fx 'install ok installed' >/dev/null
+cpb --help >/dev/null
+cpb bridge capabilities \
+    | grep -E '^\{"document_version":1,"product_version":"1\.2","protocol_version":2\}$' \
+    >/dev/null
+python3 -c 'import copypastebin'
+
+printf 'synthetic@example.invalid\n' \
+    | cpb \
+        --state-dir "$temporary/state" \
+        --config "$temporary/missing.toml" \
+        --purpose email \
+        >"$temporary/output.txt"
+grep -Fx 'risk=medium' "$temporary/output.txt" >/dev/null
+grep -Fx 'category=EMAIL count=1' "$temporary/output.txt" >/dev/null
+grep -Fx '[EMAIL_1]' "$temporary/output.txt" >/dev/null
+if grep -F 'synthetic@example.invalid' "$temporary/output.txt" >/dev/null; then
+    printf 'Autopkgtest output disclosed the synthetic input.\n' >&2
+    exit 1
+fi
+
+cpb \
+    --state-dir "$temporary/state" \
+    --config "$temporary/missing.toml" \
+    history \
+    >"$temporary/history.txt"
+grep -F 'risk=medium' "$temporary/history.txt" >/dev/null
+if grep -F 'synthetic@example.invalid' "$temporary/history.txt" >/dev/null; then
+    printf 'Persistent history disclosed the synthetic input.\n' >&2
+    exit 1
+fi

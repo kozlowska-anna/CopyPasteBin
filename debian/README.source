@@ -1,0 +1,27 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+CopyPasteBin Debian source package
+==================================
+
+This directory prepares the existing upstream tree as a non-native Debian
+source package using the 3.0 (quilt) format and debhelper compatibility level
+13. It builds three binary packages: the backend, GNOME Shell extension and
+complete-installation metapackage. The final 1.2 source can be built locally
+for artifact verification before a separately approved stable upload.
+
+The binary packages deliberately contain no APT source configuration, signing
+key, updater, maintainer script or per-user GNOME setting change. Repository
+enrollment is a separate, explicit administrative action. Production signing
+keys must never be stored in this source tree.
+
+Run packaging/deb/build-source-package.sh from a Git checkout to export the
+selected committed revision, add this debian directory and create an unsigned
+source package under dist/source. The default is HEAD. CPB_DEB_SOURCE_REF may
+select another explicit Git revision for an isolated experiment; the upstream
+and Debian versions must still match.
+
+The current final candidate targets Ubuntu 26.04 (resolute). Every upload must
+use a version that has never previously been published to the selected
+archive. Selecting a Launchpad archive, signing and uploading are deliberately
+outside the local builder and require separate approval.

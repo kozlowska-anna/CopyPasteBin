@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # Roadmapa CopyPasteBin
 
 [English](ROADMAP.md) | **Polski**
@@ -31,16 +34,30 @@ rozbudowane, trwałe archiwum schowka.
 
 ## Aktualne wydanie publiczne
 
-CopyPasteBin 1.1 jest obecnym publicznym wydaniem stabilnym. Zapewnia lokalne
-wykrywanie danych wrażliwych, ostrzeżenia, anonimizację tekstu, dokładne
-wykluczenia niskiego i średniego ryzyka, Bezpieczne wklejenie, pauzę oraz
-ostatnie teksty schowka przechowywane tylko w pamięci sesji GNOME Shell 50 na
-Waylandzie. Wersja 1.1 dodaje ręczną, lokalną anonimizację obrazów PNG/JPEG,
-odświeżone ikony aplikacji i panelu, poprawione sterowanie pauzą oraz dwa
-formaty instalacji z tego samego zestawu źródeł: pakiet Debiana i lokalne dla
-użytkownika archiwum tar.gz.
+CopyPasteBin 1.2 jest obecnym publicznym wydaniem stabilnym dla GNOME Shell 50
+na Waylandzie. Zapewnia lokalne wykrywanie danych wrażliwych, ostrzeżenia,
+anonimizację tekstu i obrazów, dokładne wykluczenia niskiego i średniego ryzyka
+oraz pauzę. Sesyjna historia tekstowa pomija rozpoznane sekrety i treści
+wysokiego ryzyka niezależnie od ustawień filtrów ostrzeżeń, a zapisywanie
+historii można wyłączyć bez zatrzymywania analizy ani edytora. Wersja 1.2 jest
+dostępna z PPA Ubuntu jako trzy zgodne pakiety Debiana oraz z GitHub Release
+jako te same pakiety albo lokalne dla użytkownika archiwum tar.gz.
 
 ## Planowane
+
+### Czytelniejsze akcje menu w wersji 1.3
+
+W menu GNOME planowane są neutralne ikony symboliczne wyrównane w jednej
+kolumnie po lewej stronie dwóch ręcznych akcji:
+
+- `document-edit-symbolic` przed „Edytuj / anonimizuj schowek”;
+- `image-x-generic-symbolic` przed „Anonimizuj obraz”.
+
+Tekst pozostaje widoczny, a klikalny jest cały wiersz, nie tylko ikona. Ikony
+nie używają zieleni ani czerwieni zarezerwowanych dla stanów CopyPasteBin.
+Przed wdrożeniem należy sprawdzić ich czytelność w jasnym i ciemnym motywie,
+wyrównanie z punktami stanu oraz obsługę myszy i klawiatury na rzeczywistym
+GNOME Shell.
 
 ### Wygodniejsze przygotowanie tekstu
 
@@ -78,11 +95,11 @@ wydaniem z ustalonym terminem.
 
 ### Dystrybucja i warianty pracy
 
-Możliwe przyszłe prace obejmują standardowe źródłowe pakowanie Debiana,
-metadane copyright DEP-5, podpisane repozytorium pakietów, opcjonalne profile
-filtrów albo oddzielenie rdzenia detekcji od integracji właściwych dla pulpitu.
-Każda z tych możliwości wymaga konkretnej korzyści dla użytkowników, zanim
-zwiększy zakres produktu lub koszt jego utrzymania.
+Możliwe przyszłe prace obejmują opcjonalne profile filtrów, obsługę kolejnych
+wydań Ubuntu, osobno sprawdzone zgłoszenie do GNOME Extensions albo oddzielenie
+rdzenia detekcji od integracji właściwych dla pulpitu. Każda z tych możliwości
+wymaga konkretnej korzyści dla użytkowników, zanim zwiększy zakres produktu lub
+koszt jego utrzymania.
 
 ## Nie planujemy
 

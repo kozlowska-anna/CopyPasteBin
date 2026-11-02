@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 from __future__ import annotations
 
 import argparse
@@ -10,7 +13,13 @@ from pathlib import Path
 from typing import Sequence, TextIO
 
 from .application import NO_GUARANTEE, inspect_and_record, requires_high_risk_confirmation
-from .bridge import BridgeError, bridge_result_json, observe_framed_event
+from .bridge import (
+    BridgeError,
+    bridge_result_json,
+    capabilities_json,
+    observe_framed_event,
+)
+from .bridge_worker import BridgeWorkerError, run_bridge_worker
 from .clipboard import ClipboardError, read_clipboard, write_clipboard
 from .config import (
     MAX_CUSTOM_EXCLUSIONS,
@@ -21,6 +30,7 @@ from .config import (
 from .detection import Bip39ResourceError, analyze_text
 from .filters import AUTO_CLEAR_CHOICES, FilterError, FilterStore
 from .history import HistoryError, HistoryStore
+from .history_settings import HistorySettingsError, HistorySettingsStore
 from .input_sources import InputError, read_stream, read_text_file
 from .language import LANGUAGE_CHOICES, LanguageError, LanguageStore
 from .launcher import LauncherController, LauncherError
@@ -44,6 +54,7 @@ from .ui import (
     exclusion_result_json,
     filters_json,
     history_json,
+    history_settings_json,
     redacted_suggestion,
 )
 from .service import (
@@ -107,10 +118,17 @@ def _parser() -> SafeArgumentParser:
     bridge = subparsers.add_parser("bridge", help=argparse.SUPPRESS)
     bridge_actions = bridge.add_subparsers(dest="bridge_action", required=True)
     bridge_actions.add_parser("observe", help=argparse.SUPPRESS)
+    bridge_actions.add_parser("capabilities", help=argparse.SUPPRESS)
+    bridge_actions.add_parser("worker", help=argparse.SUPPRESS)
     bridge.set_defaults(command="bridge")
     ui = subparsers.add_parser("ui", help=argparse.SUPPRESS)
     ui_actions = ui.add_subparsers(dest="ui_action", required=True)
     ui_actions.add_parser("history", help=argparse.SUPPRESS)
+    ui_actions.add_parser("history-saving", help=argparse.SUPPRESS)
+    history_saving_set = ui_actions.add_parser(
+        "history-saving-set", help=argparse.SUPPRESS
+    )
+    history_saving_set.add_argument("history_state", choices=("on", "off"))
     ui_actions.add_parser("redact", help=argparse.SUPPRESS)
     ui_actions.add_parser("filters", help=argparse.SUPPRESS)
     ui_actions.add_parser("auto-clear", help=argparse.SUPPRESS)
@@ -287,8 +305,29 @@ def _run_pause(args, output: TextIO) -> int:
     return 0
 
 
-def _run_bridge(args, store: HistoryStore, stdin: TextIO, output: TextIO) -> int:
-    if args.bridge_action != "observe" or not hasattr(stdin, "buffer"):
+def _run_bridge(
+    args,
+    store: HistoryStore | None,
+    stdin: TextIO,
+    output: TextIO,
+) -> int:
+    if args.bridge_action == "capabilities":
+        output.write(capabilities_json())
+        return 0
+    if args.bridge_action == "worker":
+        if not hasattr(stdin, "buffer") or not hasattr(output, "buffer"):
+            raise BridgeWorkerError()
+        return run_bridge_worker(
+            stdin.buffer,
+            output.buffer,
+            state_dir=args.state_dir,
+            config_path=args.config,
+        )
+    if (
+        args.bridge_action != "observe"
+        or store is None
+        or not hasattr(stdin, "buffer")
+    ):
         raise BridgeError()
     result = observe_framed_event(
         stdin.buffer,
@@ -303,6 +342,15 @@ def _run_bridge(args, store: HistoryStore, stdin: TextIO, output: TextIO) -> int
 def _run_ui(args, store: HistoryStore, stdin: TextIO, output: TextIO) -> int:
     if args.ui_action == "history":
         output.write(history_json(store))
+        return 0
+    if args.ui_action in {"history-saving", "history-saving-set"}:
+        history_settings = HistorySettingsStore(args.state_dir)
+        status = (
+            history_settings.set_enabled(args.history_state == "on")
+            if args.ui_action == "history-saving-set"
+            else history_settings.status()
+        )
+        output.write(history_settings_json(status))
         return 0
     filter_store = FilterStore(args.state_dir)
     if args.ui_action in {"language", "language-set"}:
@@ -414,8 +462,12 @@ def main(argv: Sequence[str] | None = None, *, stdin: TextIO = sys.stdin, stdout
             args = parser.parse_args(argv)
     except SystemExit as exc:
         return int(exc.code)
-    store = HistoryStore(args.state_dir)
     try:
+        if args.command == "bridge" and args.bridge_action in {
+            "capabilities", "worker",
+        }:
+            return _run_bridge(args, None, stdin, stdout)
+        store = HistoryStore(args.state_dir)
         if args.command == "history":
             _history_output(store, stdout)
             return 0
@@ -480,6 +532,7 @@ def main(argv: Sequence[str] | None = None, *, stdin: TextIO = sys.stdin, stdout
         ClipboardError,
         ConfigError,
         HistoryError,
+        HistorySettingsError,
         Bip39ResourceError,
         NotificationError,
         ServiceError,
@@ -488,6 +541,7 @@ def main(argv: Sequence[str] | None = None, *, stdin: TextIO = sys.stdin, stdout
         FilterError,
         LanguageError,
         BridgeError,
+        BridgeWorkerError,
         UiError,
     ):
         stderr.write("Operacja nie powiodła się bez ujawniania danych wejściowych.\n")

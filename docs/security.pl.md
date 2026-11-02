@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # Model bezpieczeństwa CopyPasteBin V1
 
 **Polski** | [English](../SECURITY.md)
@@ -330,8 +333,9 @@ stanowi alternatywnego trybu aktualnego produktu.
 ## Publikacja
 
 Rozszerzenie ma stabilny publiczny UUID oraz angielską bazę komunikatów z
-polskim tłumaczeniem. Wersja 1.1 jest dystrybuowana przez GitHub Release jako
-pakiet Debiana i lokalne dla użytkownika archiwum tar.gz, z zewnętrznymi sumami
+polskim tłumaczeniem. Wersja 1.2 jest dystrybuowana przez PPA Ubuntu i GitHub
+Release jako trzy zgodne pakiety Debiana, a alternatywą jest lokalne dla
+użytkownika archiwum tar.gz. Artefakty GitHub Release mają zewnętrzne sumy
 SHA-256. Publikacja w GNOME Extensions i osobne, izolowane pakowanie rdzenia
 wymagają późniejszego review i pozostają poza obsługiwanym zakresem. Projekt
 jest udostępniany na licencji `GPL-3.0-or-later`, a nota BSD-3-Clause dla danych

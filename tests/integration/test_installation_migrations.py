@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import os
 import shutil
 import subprocess
@@ -10,7 +13,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 ARCHIVE_BUILDER = ROOT / "packaging" / "build-offline-bundle.sh"
 DEB_BUILDER = ROOT / "packaging" / "deb" / "build-deb.sh"
-ARCHIVE = ROOT / "dist" / "CopyPasteBin-linux-1.1.tar.gz"
 UUID = "copypastebin@kozlowska-anna.github.io"
 
 
@@ -23,15 +25,25 @@ UUID = "copypastebin@kozlowska-anna.github.io"
 class InstallationMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        subprocess.run([str(ARCHIVE_BUILDER)], check=True, capture_output=True, text=True)
         cls._build_directory = tempfile.TemporaryDirectory()
         environment = os.environ.copy()
+        environment["CPB_BUNDLE_DIST_DIR"] = cls._build_directory.name
+        subprocess.run(
+            [str(ARCHIVE_BUILDER)], check=True, capture_output=True, text=True,
+            env=environment,
+        )
+        cls.archive = Path(cls._build_directory.name) / "CopyPasteBin-linux-1.2.tar.gz"
         environment["CPB_DEB_DIST_DIR"] = cls._build_directory.name
         completed = subprocess.run(
             [str(DEB_BUILDER)], check=True, capture_output=True, text=True,
             env=environment,
         )
-        cls.deb = Path(completed.stdout.strip().splitlines()[-1])
+        cls.debs = [
+            Path(line) for line in completed.stdout.splitlines()
+            if line.strip().endswith(".deb")
+        ]
+        if len(cls.debs) != 3:
+            raise AssertionError("split Debian build did not return three packages")
 
     @classmethod
     def tearDownClass(cls):
@@ -49,12 +61,21 @@ class InstallationMigrationTests(unittest.TestCase):
             (config / "synthetic.toml").write_text("synthetic=true\n", encoding="utf-8")
             (state / "synthetic.state").write_text("synthetic\n", encoding="utf-8")
 
-            with tarfile.open(ARCHIVE, "r:gz") as archive:
+            with tarfile.open(self.archive, "r:gz") as archive:
                 archive.extractall(root / "archive", filter="data")
-            bundle = root / "archive" / "CopyPasteBin-linux-1.1"
+            bundle = root / "archive" / "CopyPasteBin-linux-1.2"
+            isolated_runtime = root / "run"
+            isolated_runtime.mkdir(mode=0o700)
             environment = os.environ.copy()
-            environment.update({"HOME": str(home), "XDG_SESSION_TYPE": "wayland"})
-            environment.pop("DBUS_SESSION_BUS_ADDRESS", None)
+            environment.update({
+                "HOME": str(home),
+                "XDG_RUNTIME_DIR": str(isolated_runtime),
+                "DBUS_SESSION_BUS_ADDRESS": f"unix:path={isolated_runtime / 'bus'}",
+                "XDG_SESSION_TYPE": "wayland",
+            })
+            environment.pop("DBUS_STARTER_ADDRESS", None)
+            environment.pop("DBUS_STARTER_BUS_TYPE", None)
+            self.assertFalse((isolated_runtime / "bus").exists())
 
             for _ in range(2):
                 subprocess.run(
@@ -95,10 +116,11 @@ class InstallationMigrationTests(unittest.TestCase):
             self.assertFalse(local_extension.exists())
 
             system_root = root / "system"
-            subprocess.run(
-                ["dpkg-deb", "--extract", str(self.deb), str(system_root)],
-                check=True, capture_output=True,
-            )
+            for package in self.debs:
+                subprocess.run(
+                    ["dpkg-deb", "--extract", str(package), str(system_root)],
+                    check=True, capture_output=True,
+                )
             system_extension = system_root / "usr/share/gnome-shell/extensions" / UUID
             self.assertTrue((system_extension / "image-redactor.js").is_file())
             self.assertFalse(local_extension.exists())
@@ -107,10 +129,11 @@ class InstallationMigrationTests(unittest.TestCase):
             self.assertEqual("synthetic=true\n", (config / "synthetic.toml").read_text())
             self.assertEqual("synthetic\n", (state / "synthetic.state").read_text())
 
-            subprocess.run(
-                ["dpkg-deb", "--extract", str(self.deb), str(system_root)],
-                check=True, capture_output=True,
-            )
+            for package in self.debs:
+                subprocess.run(
+                    ["dpkg-deb", "--extract", str(package), str(system_root)],
+                    check=True, capture_output=True,
+                )
             self.assertTrue((system_extension / "extension.js").is_file())
 
 

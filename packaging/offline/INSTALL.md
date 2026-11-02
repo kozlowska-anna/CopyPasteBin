@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # Offline installation
 
 **English** | [Polski](INSTALL.pl.md) | [Overview](README.md)
@@ -40,6 +43,9 @@ From the current extracted package, run:
 
 Use the current script, not an older version. This removes installed code while
 preserving configuration and history in the private directories listed above.
+The installer and uninstaller rebuild only the current user's standard hicolor
+icon cache after adding or removing the CopyPasteBin icon. This prevents a
+removed local icon from hiding a later system-installed icon.
 
 ## Troubleshooting
 
@@ -56,5 +62,6 @@ manually attaching it to an issue. Nothing is sent automatically.
 
 ## Usage and safety
 
-Super+Shift+V starts Safe Paste on demand; it neither pastes automatically nor
-intercepts Ctrl+V. Read the [protection limitations](SECURITY.md).
+To review text manually, choose **Edit / anonymize clipboard** from the
+CopyPasteBin menu. The program does not intercept Ctrl+V. Read the
+[protection limitations](SECURITY.md).

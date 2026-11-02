@@ -1,0 +1,13 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+#!/bin/sh
+set -eu
+
+test -x /usr/bin/cpb
+test ! -e /usr/share/gnome-shell/extensions/copypastebin@kozlowska-anna.github.io
+test ! -e /usr/share/applications/copypastebin.desktop
+python3 -c 'import copypastebin'
+cpb bridge capabilities \
+    | grep -E '^\{"document_version":1,"product_version":"1\.2","protocol_version":2\}$' \
+    >/dev/null

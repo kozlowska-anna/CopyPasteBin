@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import io
 import json
 import tempfile
@@ -62,6 +65,20 @@ class UiCliTests(unittest.TestCase):
         self.assertEqual("", stderr)
         self.assertEqual(1, len(json.loads(stdout)["entries"]))
         self.assertNotIn(canary, stdout)
+
+    def test_history_saving_choice_is_independent_and_persistent(self):
+        code, stdout, stderr = self.run_cli("history-saving")
+        self.assertEqual((0, ""), (code, stderr))
+        self.assertTrue(json.loads(stdout)["enabled"])
+
+        code, stdout, stderr = self.run_cli(
+            "history-saving-set", extra=("off",)
+        )
+        self.assertEqual((0, ""), (code, stderr))
+        self.assertEqual({"version": 1, "enabled": False}, json.loads(stdout))
+        code, stdout, stderr = self.run_cli("history-saving")
+        self.assertEqual((0, ""), (code, stderr))
+        self.assertFalse(json.loads(stdout)["enabled"])
 
     def test_redact_returns_only_suggestion_and_does_not_record(self):
         code, stdout, stderr = self.run_cli(

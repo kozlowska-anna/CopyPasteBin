@@ -1,0 +1,8 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Tests: backend-only
+Depends: copypastebin-backend
+
+Tests: smoke
+Depends: @

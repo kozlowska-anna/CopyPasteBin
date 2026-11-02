@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
@@ -15,6 +18,7 @@ readonly REQUIRED_SHELL_MAJOR="50"
 readonly SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
 readonly PAYLOAD_DIR="$SCRIPT_DIR/payload"
 readonly CHECKSUM_FILE="$SCRIPT_DIR/SHA256SUMS"
+readonly ICON_CACHE_HELPER="$SCRIPT_DIR/refresh-user-icon-cache.sh"
 readonly APP_DIR="$HOME/.local/share/copypastebin"
 readonly VENV_DIR="$APP_DIR/venv"
 readonly EXTENSIONS_DIR="$HOME/.local/share/gnome-shell/extensions"
@@ -110,6 +114,8 @@ done
 [[ ! -L "$LEGACY_EXTENSION_DIR" ]] || fail "$LEGACY_EXTENSION_DIR jest dowiązaniem symbolicznym"
 [[ ! -L "$LAUNCHER_PATH" ]] || fail "$LAUNCHER_PATH jest dowiązaniem symbolicznym"
 [[ ! -L "$ICON_PATH" ]] || fail "$ICON_PATH jest dowiązaniem symbolicznym"
+[[ -x "$ICON_CACHE_HELPER" && ! -L "$ICON_CACHE_HELPER" ]] || \
+    fail "pakiet nie zawiera bezpiecznego pomocnika cache ikon"
 for application_id in "${WINDOW_APPLICATION_IDS[@]}"; do
     window_launcher="$APPLICATIONS_DIR/$application_id.desktop"
     [[ ! -L "$window_launcher" ]] || fail "$window_launcher jest dowiązaniem symbolicznym"
@@ -117,7 +123,6 @@ done
 
 required_files=("$CHECKSUM_FILE" "$PAYLOAD_DIR/copypastebin.desktop" \
     "$PAYLOAD_DIR/copypastebin.svg" "$PAYLOAD_DIR/$UUID/metadata.json" \
-    "$PAYLOAD_DIR/$UUID/schemas/gschemas.compiled" \
     "$PAYLOAD_DIR/persist-extension-enablement.js")
 for application_id in "${WINDOW_APPLICATION_IDS[@]}"; do
     required_files+=("$PAYLOAD_DIR/$application_id.desktop")
@@ -247,6 +252,7 @@ fi
 
 INSTALL_COMMITTED=true
 trap - EXIT INT TERM
+"$ICON_CACHE_HELPER" || true
 
 if $ENABLE_AFTER_INSTALL; then
     if /usr/bin/gjs "$PAYLOAD_DIR/persist-extension-enablement.js" \

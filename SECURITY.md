@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # CopyPasteBin V1 Security Model
 
 [Polski](docs/security.pl.md) | **English**
@@ -7,7 +10,8 @@
 Original text, personal and financial data, secrets, redacted output, and the
 HMAC key must not enter persistent history, logs, errors, `repr`, argv, the
 environment, or temporary files. The explicit exception is a bounded list of
-recent text entries held only in the extension's session memory. Terminal
+policy-approved recent text entries held only in the extension's session
+memory while history saving is enabled. Terminal
 preview neutralizes ANSI, C0/C1, and bidirectional control characters.
 
 The current desktop path is the event-driven GNOME Shell 50 extension. The old
@@ -28,6 +32,7 @@ must remain inactive.
 - history uses HMAC-SHA-256 rather than a plain content hash;
 - filter settings store only closed category names and the selected automatic
   clearing delay;
+- the separate history setting stores only a version and an enabled boolean;
 - the contents of an explicitly created custom rule are an exception because
   they must be stored locally; the interface therefore warns against entering
   a real secret;
@@ -55,9 +60,10 @@ length, incomplete frame, excess data, invalid UTF-8, NUL, and empty text, then
 checks the pause state again.
 
 The stdout response is limited to 2 KiB and uses closed JSON containing only
-the version, risk level, and categories with counts. It contains no text,
-redaction, match positions, or operation ID. The extension validates the full
-response before displaying a banner.
+the version, risk level, categories with counts, and a boolean history-policy
+decision. It contains no text, redaction, match positions, reason for
+rejection, or operation ID. The extension validates the full response before
+displaying a banner or retaining an entry.
 
 A successful zero-length text MIME transfer is not sent to the bridge and does
 not create history. It displays only a blue empty-clipboard notice. A failed
@@ -77,11 +83,26 @@ and incorrect permissions. The HMAC key is random and local.
 The destination of ordinary copying remains `unknown`. A focus change is not
 proof of a paste and does not supplement history.
 
-The extension additionally retains up to 15 recent text entries, with limits
-of 256 KiB per entry and 2 MiB in total. An entry is created only after the
-bridge response has been validated, so a pause, locked screen, empty or invalid
-transfer, and analysis failure do not add content. The text is not sent to
-Python again and does not enter the database or a state file.
+The extension additionally retains up to 15 eligible recent text entries, with
+limits of 256 KiB per entry and 2 MiB in total. The bridge runs detectors once,
+uses the complete unfiltered detections for the independent history policy,
+and applies warning filters separately. Recognized secret categories and all
+`high` or `critical` detections are excluded even when their warning category
+is disabled. A history-only heuristic also excludes standalone 12–128
+character strings with high entropy, high character diversity, and at least
+three character classes (all four below 16 characters). It rejects whitespace,
+URLs, email-shaped values, and path prefixes before this heuristic. This may
+omit harmless identifiers and does not claim to detect every password. It does
+not create an additional warning.
+
+An entry is created only when history saving is enabled and after the bridge
+response has been validated. Disabling history saving immediately clears the
+list, closes its window, and prevents a delayed callback from adding an entry.
+Re-enabling starts with an empty list. `history-settings.json` persists only
+`version` and `enabled` in the private state directory; it never stores entry
+content. Pause is independent: it stops new analysis and therefore new entries
+without changing the history setting. The text is not sent to Python again and
+does not enter the database or a state file.
 
 A separate GTK window receives a temporary binary snapshot through stdin. It
 returns only a closed action and a content-free entry identifier through
@@ -349,8 +370,9 @@ alternative mode of the current product.
 ## Publication
 
 The extension has a stable public UUID and English base messages with a Polish
-translation. Version 1.1 is distributed through GitHub Release as a Debian
-package and a user-local tar.gz archive, with external SHA-256 checksums.
+translation. Version 1.2 is distributed through an Ubuntu PPA and GitHub
+Release as three matching Debian packages, with a user-local tar.gz archive as
+an alternative. GitHub Release assets have external SHA-256 checksums.
 Publication on GNOME Extensions and separate confined packaging of the core
 require later review and remain outside the supported scope. The project is
 licensed under `GPL-3.0-or-later`, and the BSD-3-Clause notice for BIP-39 data

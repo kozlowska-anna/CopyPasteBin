@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import GLib from 'gi://GLib';
 import GLibUnix from 'gi://GLibUnix?version=2.0';
 import Gdk from 'gi://Gdk?version=4.0';
@@ -8,11 +11,22 @@ import {languageFromArgs, translate} from './i18n.js';
 
 const LANGUAGE = languageFromArgs(ARGV);
 const t = (message, values = {}) => translate(LANGUAGE, message, values);
-const VERSION = '1.1';
-// Official URL from website/index.html's canonical configuration.
-const WEBSITE_URL = 'https://kozlowska-anna.github.io/CopyPasteBin/';
-const LATEST_RELEASE_URL = 'https://github.com/kozlowska-anna/CopyPasteBin/releases/latest';
+const VERSION = '1.2';
+const WEBSITE_URL = LANGUAGE === 'pl'
+    ? 'https://kozlowska-anna.github.io/CopyPasteBin/'
+    : 'https://kozlowska-anna.github.io/CopyPasteBin/en/';
+const UPDATE_URL = LANGUAGE === 'pl'
+    ? 'https://kozlowska-anna.github.io/CopyPasteBin/#pobierz'
+    : 'https://kozlowska-anna.github.io/CopyPasteBin/en/#download';
 const ISSUES_URL = 'https://github.com/kozlowska-anna/CopyPasteBin/issues';
+
+/*
+ * A personal note from the creator:
+ *
+ * Special thanks to ChatGPT for helping create CopyPasteBin… and later questioning whether it actually exists.
+ *
+ * — Anna Kozłowska
+ */
 
 function informationLabel(label, options = {}) {
     return new Gtk.Label({
@@ -142,15 +156,15 @@ class AboutApplication extends Gtk.Application {
             uri: WEBSITE_URL,
         }));
         links.append(new Gtk.LinkButton({
-            label: t('Download the latest version'),
-            uri: LATEST_RELEASE_URL,
+            label: t('Check for updates'),
+            uri: UPDATE_URL,
         }));
         links.append(new Gtk.LinkButton({
             label: t('Report an issue'),
             uri: ISSUES_URL,
         }));
         layout.append(informationLabel(
-            t('Updates are not checked automatically. Open the latest release to download a new version.'),
+            t('Updates are not checked automatically. Open the download section to check for a new version.'),
             {marginTop: 8}
         ));
         layout.append(links);

@@ -1,30 +1,27 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 #!/usr/bin/env bash
 set -Eeuo pipefail
 umask 022
 
 readonly ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd -P)"
-readonly PACKAGE="copypastebin"
-readonly VERSION="1.1-1"
-readonly UUID="copypastebin@kozlowska-anna.github.io"
-readonly SOURCE_DATE_EPOCH="1792454400"
+readonly VERSION="$(dpkg-parsechangelog -l "$ROOT/debian/changelog" -S Version)"
+readonly SOURCE_DATE_EPOCH="$(dpkg-parsechangelog -l "$ROOT/debian/changelog" -S Timestamp)"
 readonly DIST_DIR="${CPB_DEB_DIST_DIR:-$ROOT/dist}"
 readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/copypastebin-deb.XXXXXX")"
-readonly STAGE_DIR="$WORK_DIR/root"
-readonly EXTENSION_DIR="$STAGE_DIR/usr/share/gnome-shell/extensions/$UUID"
-readonly PYTHON_PACKAGE_DIR="$STAGE_DIR/usr/lib/python3/dist-packages/copypastebin"
-readonly APPLICATIONS_DIR="$STAGE_DIR/usr/share/applications"
-readonly METAINFO_DIR="$STAGE_DIR/usr/share/metainfo"
-readonly ENABLE_HELPER_DIR="$STAGE_DIR/usr/share/copypastebin"
-readonly DOC_DIR="$STAGE_DIR/usr/share/doc/$PACKAGE"
-readonly WINDOW_APPLICATION_IDS=(
-    "io.github.copypastebin.Editor"
-    "io.github.copypastebin.ImageRedactor"
-    "io.github.copypastebin.FilterEditor"
-    "io.github.copypastebin.RulesEditor"
-    "io.github.copypastebin.RecentClipboard"
-    "io.github.copypastebin.About"
+readonly SOURCE_DIR="$WORK_DIR/source"
+readonly PACKAGES=(
+    "copypastebin-backend"
+    "gnome-shell-extension-copypastebin"
+    "copypastebin"
 )
 export SOURCE_DATE_EPOCH
+
+[[ "$DIST_DIR" = /* && "$DIST_DIR" != "/" ]] || {
+    printf 'Artifact directory must be an absolute, narrow path.\n' >&2
+    exit 2
+}
 
 cleanup() {
     chmod -R u+w -- "$WORK_DIR" 2>/dev/null || true
@@ -32,72 +29,50 @@ cleanup() {
 }
 trap cleanup EXIT
 
-for executable in dpkg-deb glib-compile-schemas; do
+for executable in dpkg-buildpackage dpkg-deb dpkg-parsechangelog dh; do
     command -v "$executable" >/dev/null 2>&1 || {
-        printf 'Brak wymaganego narzędzia budowy: %s\n' "$executable" >&2
+        printf 'Missing Debian package build tool: %s\n' "$executable" >&2
         exit 1
     }
 done
 
-mkdir -p -- \
-    "$STAGE_DIR/DEBIAN" \
-    "$STAGE_DIR/usr/bin" \
-    "$PYTHON_PACKAGE_DIR" \
-    "$EXTENSION_DIR" \
-    "$APPLICATIONS_DIR" \
-    "$METAINFO_DIR" \
-    "$ENABLE_HELPER_DIR" \
-    "$STAGE_DIR/usr/share/icons/hicolor/scalable/apps" \
-    "$DOC_DIR" \
-    "$DIST_DIR"
-
-install -m 0644 -- "$ROOT/packaging/deb/control" "$STAGE_DIR/DEBIAN/control"
-install -m 0755 -- "$ROOT/packaging/deb/cpb" "$STAGE_DIR/usr/bin/cpb"
-cp -a -- "$ROOT/src/copypastebin/." "$PYTHON_PACKAGE_DIR/"
-find "$PYTHON_PACKAGE_DIR" -type d -name __pycache__ -prune -exec rm -rf -- {} +
-find "$PYTHON_PACKAGE_DIR" -type f -name '*.py[co]' -delete
-
-cp -a -- "$ROOT/gnome-extension/$UUID/." "$EXTENSION_DIR/"
-glib-compile-schemas "$EXTENSION_DIR/schemas"
-
-install -m 0644 -- "$ROOT/packaging/deb/copypastebin.desktop" \
-    "$APPLICATIONS_DIR/copypastebin.desktop"
-install -m 0644 -- "$ROOT/packaging/deb/enable-extension.js" \
-    "$ENABLE_HELPER_DIR/enable-extension.js"
-for application_id in "${WINDOW_APPLICATION_IDS[@]}"; do
-    install -m 0644 -- "$ROOT/packaging/copypastebin-window.desktop" \
-        "$APPLICATIONS_DIR/$application_id.desktop"
+mkdir -p -- "$SOURCE_DIR" "$DIST_DIR"
+for source_path in debian packaging gnome-extension src LICENSE NOTICE; do
+    cp -a -- "$ROOT/$source_path" "$SOURCE_DIR/"
 done
-install -m 0644 -- "$ROOT/packaging/copypastebin-app.svg" \
-    "$STAGE_DIR/usr/share/icons/hicolor/scalable/apps/copypastebin.svg"
-install -m 0644 -- "$ROOT/packaging/deb/io.github.kozlowska_anna.CopyPasteBin.metainfo.xml" \
-    "$METAINFO_DIR/io.github.kozlowska_anna.CopyPasteBin.metainfo.xml"
-install -m 0644 -- "$ROOT/packaging/deb/README.Debian" "$DOC_DIR/README.Debian"
-install -m 0644 -- "$ROOT/packaging/deb/copyright" "$DOC_DIR/copyright"
-install -m 0644 -- "$ROOT/LICENSE" "$DOC_DIR/LICENSE"
-install -m 0644 -- "$ROOT/NOTICE" "$DOC_DIR/NOTICE"
 
-find "$STAGE_DIR" -type d -exec chmod 0755 -- {} +
-find "$STAGE_DIR" -type f -exec chmod 0644 -- {} +
-chmod 0755 -- "$STAGE_DIR/usr/bin/cpb"
-find "$STAGE_DIR" -exec touch -h -d "@$SOURCE_DATE_EPOCH" -- {} +
+(
+    cd -- "$SOURCE_DIR"
+    dpkg-buildpackage --build=binary --no-sign >/dev/null
+)
 
-readonly OUTPUT="$DIST_DIR/${PACKAGE}_${VERSION}_all.deb"
-readonly CANDIDATE="$WORK_DIR/${PACKAGE}_${VERSION}_all.deb"
-dpkg-deb --build --root-owner-group "$STAGE_DIR" "$CANDIDATE" >/dev/null
-
-if [[ -e "$OUTPUT" ]]; then
-    [[ -f "$OUTPUT" && ! -L "$OUTPUT" ]] || {
-        printf 'Odmowa zastąpienia nieprawidłowego artefaktu: %s\n' "$OUTPUT" >&2
+for package in "${PACKAGES[@]}"; do
+    candidate="$WORK_DIR/${package}_${VERSION}_all.deb"
+    output="$DIST_DIR/${package}_${VERSION}_all.deb"
+    [[ -f "$candidate" && ! -L "$candidate" ]] || {
+        printf 'Expected binary package was not built: %s\n' "$candidate" >&2
         exit 1
     }
-    cmp -s -- "$CANDIDATE" "$OUTPUT" || {
-        printf 'Artefakt %s istnieje i różni się od nowej budowy. Zmień wersję.\n' \
-            "$OUTPUT" >&2
+    [[ "$(dpkg-deb --field "$candidate" Package)" == "$package" ]] || {
+        printf 'Built package has an unexpected name: %s\n' "$candidate" >&2
         exit 1
     }
-else
-    install -m 0444 -- "$CANDIDATE" "$OUTPUT"
-fi
-
-printf '%s\n' "$OUTPUT"
+    [[ "$(dpkg-deb --field "$candidate" Version)" == "$VERSION" ]] || {
+        printf 'Built package has an unexpected version: %s\n' "$candidate" >&2
+        exit 1
+    }
+    if [[ -e "$output" ]]; then
+        [[ -f "$output" && ! -L "$output" ]] || {
+            printf 'Refusing to replace invalid artifact: %s\n' "$output" >&2
+            exit 1
+        }
+        cmp -s -- "$candidate" "$output" || {
+            printf 'Artifact %s exists and differs from the new build. Bump the version.\n' \
+                "$output" >&2
+            exit 1
+        }
+    else
+        install -m 0444 -- "$candidate" "$output"
+    fi
+    printf '%s\n' "$output"
+done

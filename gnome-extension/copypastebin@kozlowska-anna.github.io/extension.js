@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
@@ -8,10 +11,15 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Dialog from 'resource:///org/gnome/shell/ui/dialog.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
-import {resolveBackendPath} from './backend-path.js';
+import {BackendProbe} from './backend-probe.js';
+import {BACKEND_PROTOCOL_VERSION, resolveBackendPath} from './backend-path.js';
+import {BridgeWorker} from './bridge-worker.js';
+import {detectExtensionChannelState} from './extension-channel.js';
 import {translate} from './i18n.js';
 
 const ACTIVE = 'CopyPasteBin pause: ACTIVE\n';
@@ -20,10 +28,9 @@ const TIMED = /^CopyPasteBin pause: PAUSED_TIMED remaining_seconds=([0-9]+)\n$/;
 const MAX_STATUS_BYTES = 128;
 const MAX_FILTERS_BYTES = 2048;
 const MAX_AUTO_CLEAR_BYTES = 128;
+const MAX_HISTORY_SETTING_BYTES = 128;
 const MAX_LANGUAGE_BYTES = 128;
 const MAX_BRIDGE_RESULT_BYTES = 2048;
-const MAX_DETECTIONS_BYTES = 64 * 1024;
-const MAX_DETECTIONS = 1000;
 const MAX_INPUT_BYTES = 10 * 1024 * 1024;
 const MAX_RECENT_CLIPBOARD_ENTRIES = 15;
 const MAX_RECENT_CLIPBOARD_ITEM_BYTES = 256 * 1024;
@@ -39,7 +46,6 @@ const TEXT_MIMES = ['text/plain;charset=utf-8', 'text/plain'];
 const APPLICATION_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const RISKS = new Set(['none', 'low', 'medium', 'high', 'critical']);
 const EDITOR_APPLICATION_ID = 'io.github.copypastebin.Editor';
-const SAFE_PASTE_KEY = 'safe-paste';
 const CATEGORY_LABELS = new Map([
     ['EMAIL', 'email address'],
     ['PHONE', 'phone number'],
@@ -81,6 +87,31 @@ function clearRecentClipboardState(state) {
     state.totalBytes = 0;
 }
 
+const BackendStatusIndicator = GObject.registerClass(
+class BackendStatusIndicator extends PanelMenu.Button {
+    constructor(pausedIconPath, language, status, details) {
+        super(0.0, 'CopyPasteBin');
+        this.add_child(new St.Icon({
+            gicon: new Gio.FileIcon({
+                file: Gio.File.new_for_path(pausedIconPath),
+            }),
+            style_class: 'system-status-icon',
+        }));
+        this.menu.addMenuItem(new PopupMenu.PopupMenuItem(
+            translate(language, status),
+            {reactive: false}
+        ));
+        for (const detail of details === null
+            ? []
+            : (Array.isArray(details) ? details : [details])) {
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem(
+                translate(language, detail.message, detail.values),
+                {reactive: false}
+            ));
+        }
+    }
+});
+
 const CopyPasteBinIndicator = GObject.registerClass(
 class CopyPasteBinIndicator extends PanelMenu.Button {
     constructor(uuid, entryPoint, editorPath, imageRedactorPath, filterEditorPath,
@@ -113,12 +144,13 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._clipboardFlashTimeoutId = 0;
         this._mode = 'unknown';
         this._ownerChangeSequence = 0;
+        this._analysisSequence = 0;
         this._eventSequence = 0;
         this._filterSequence = 0;
         this._autoClearSettingSequence = 0;
+        this._historySettingSequence = 0;
         this._languageSequence = 0;
         this._recentClipboardSequence = 0;
-        this._safePasteSequence = 0;
         this._transferCancellable = null;
         this._editorProcess = null;
         this._imageRedactorProcess = null;
@@ -126,7 +158,6 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._rulesProcess = null;
         this._recentClipboardProcess = null;
         this._aboutProcess = null;
-        this._safePasteProcess = null;
         this._ignoreNextOwnerChange = false;
         this._ignoreOwnerTimeoutId = 0;
         this._clipboard = St.Clipboard.get_default();
@@ -134,12 +165,15 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._selectionSignalId = 0;
         this._sessionModeSignalId = 0;
         this._bannerTimeoutId = 0;
-        this._quitResetTimeoutId = 0;
-        this._quitArmed = false;
+        this._quitDialog = null;
         this._autoClearSeconds = 0;
+        this._historyEnabled = false;
+        this._historySettingPending = null;
+        this._historySettingRetry = null;
         this._autoClearTimeoutId = 0;
         this._lastClipboardDigest = null;
         this._pendingClipboardDigest = null;
+        this._bridgeWorker = new BridgeWorker(this._entryPoint);
 
         this._panelIcon = new St.Icon({
             gicon: this._pausedIcon,
@@ -148,10 +182,28 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this.add_child(this._panelIcon);
         this._buildBanner();
 
-        this._recentClipboardItem = new PopupMenu.PopupMenuItem('');
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._recentClipboardItem = new PopupMenu.PopupMenuItem(
+            this._t('Clipboard history — loading…')
+        );
+        this._recentClipboardItem.setSensitive(false);
         this._recentClipboardItem.connect('activate', () => this._openRecentClipboard());
+        this._historyAccent = new St.Label({
+            text: '●',
+            style_class: 'cpb-state-accent cpb-state-inactive',
+        });
+        this._recentClipboardItem.insert_child_at_index(this._historyAccent, 0);
         this.menu.addMenuItem(this._recentClipboardItem);
-        this._updateRecentClipboardLabel();
+        this._historySavingItem = new PopupMenu.PopupMenuItem(
+            this._t('History saving — loading…')
+        );
+        this._historySavingItem.connect('activate', () => {
+            this._setHistorySaving(
+                this._historySettingRetry ?? !this._historyEnabled
+            );
+        });
+        this.menu.addMenuItem(this._historySavingItem);
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this._filterStates = new Map();
         this._filtersItem = new PopupMenu.PopupMenuItem(
             this._t('Detection filters — loading…')
@@ -170,6 +222,11 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._statusItem = new PopupMenu.PopupMenuItem(this._t('Status: checking…'), {
             reactive: false,
         });
+        this._statusAccent = new St.Label({
+            text: '●',
+            style_class: 'cpb-state-accent cpb-state-inactive',
+        });
+        this._statusItem.insert_child_at_index(this._statusAccent, 0);
         this.menu.addMenuItem(this._statusItem);
         this._addAction(this._t('Pause for 30 minutes'), '30m');
         this._addAction(this._t('Pause for 1 hour'), '1h');
@@ -188,20 +245,20 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._sessionModeSignalId = Main.sessionMode.connect('updated', () => {
             if (Main.sessionMode.isLocked || Main.sessionMode.isGreeter) {
                 this._ownerChangeSequence++;
+                this._analysisSequence++;
                 this._eventSequence++;
                 this._transferCancellable?.cancel();
                 this._transferCancellable = null;
+                this._bridgeWorker.stop();
                 this._cancelAutoClear();
                 this._resetClipboardIdentity();
                 this._hideBanner(true);
-                this._safePasteSequence++;
-                this._safePasteProcess?.force_exit();
-                this._safePasteProcess = null;
             }
         });
         this._menuSignalId = this.menu.connect('open-state-changed', (_menu, open) => {
             if (open) {
                 this._updateRecentClipboardLabel();
+                this._refreshHistorySaving();
                 this._refreshFilters();
                 this._refreshAutoClear();
                 this._refreshLanguage();
@@ -209,6 +266,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             }
         });
         this._refresh(false);
+        this._refreshHistorySaving();
         this._refreshAutoClear();
         this._refreshLanguage();
     }
@@ -404,43 +462,53 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
 
     _addQuitAction() {
         this._quitItem = new PopupMenu.PopupMenuItem(this._t('Quit CopyPasteBin'));
-        this._quitItem.connect('activate', () => {
-            if (!this._quitArmed) {
-                this._quitArmed = true;
-                this._quitItem.label.text = this._t('Click again: Quit CopyPasteBin');
-                this._showBanner(
-                    'warning',
-                    this._t('CopyPasteBin: confirm quit'),
-                    this._t('Open the menu again and select “Quit” to stop protection.')
-                );
-                this._quitResetTimeoutId = GLib.timeout_add_seconds(
-                    GLib.PRIORITY_DEFAULT,
-                    8,
-                    () => {
-                        this._quitResetTimeoutId = 0;
-                        this._resetQuitConfirmation();
-                        return GLib.SOURCE_REMOVE;
-                    }
-                );
-                return;
-            }
-            this._clearQuitResetTimeout();
-            try {
-                Gio.Subprocess.new(
-                    [GNOME_EXTENSIONS, 'disable', this._uuid],
-                    Gio.SubprocessFlags.STDOUT_SILENCE |
-                        Gio.SubprocessFlags.STDERR_SILENCE
-                );
-            } catch (_error) {
-                this._resetQuitConfirmation();
-                this._showBanner(
-                    'error',
-                    this._t('CopyPasteBin: error'),
-                    this._t('CopyPasteBin could not be stopped.')
-                );
-            }
-        });
+        this._quitItem.connect('activate', () => this._openQuitDialog());
         this.menu.addMenuItem(this._quitItem);
+    }
+
+    _openQuitDialog() {
+        if (this._quitDialog === null) {
+            this._quitDialog = new ModalDialog.ModalDialog({
+                destroyOnClose: false,
+            });
+            this._quitDialog.contentLayout.add_child(new Dialog.MessageDialogContent({
+                title: this._t('Quit CopyPasteBin?'),
+                description: this._t(
+                    'CopyPasteBin will stop detecting data in the clipboard and showing warnings.'
+                ),
+            }));
+            this._quitDialog.setButtons([
+                {
+                    label: this._t('Cancel'),
+                    action: () => this._quitDialog?.close(),
+                    key: Clutter.KEY_Escape,
+                    default: true,
+                    focused: true,
+                },
+                {
+                    label: this._t('Quit'),
+                    action: () => this._quitCopyPasteBin(),
+                },
+            ]);
+        }
+        this._quitDialog.open();
+    }
+
+    _quitCopyPasteBin() {
+        this._quitDialog?.close();
+        try {
+            Gio.Subprocess.new(
+                [GNOME_EXTENSIONS, 'disable', this._uuid],
+                Gio.SubprocessFlags.STDOUT_SILENCE |
+                    Gio.SubprocessFlags.STDERR_SILENCE
+            );
+        } catch (_error) {
+            this._showBanner(
+                'error',
+                this._t('CopyPasteBin: error'),
+                this._t('CopyPasteBin could not be stopped.')
+            );
+        }
     }
 
     _addAboutAction() {
@@ -496,19 +564,6 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                     this._aboutProcess = null;
             }
         });
-    }
-
-    _resetQuitConfirmation() {
-        this._quitArmed = false;
-        if (this._quitItem !== undefined)
-            this._quitItem.label.text = this._t('Quit CopyPasteBin');
-    }
-
-    _clearQuitResetTimeout() {
-        if (this._quitResetTimeoutId !== 0) {
-            GLib.source_remove(this._quitResetTimeoutId);
-            this._quitResetTimeoutId = 0;
-        }
     }
 
     _buildBanner() {
@@ -613,7 +668,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         );
         this._showBanner(
             result.risk,
-            this._t(`CPBin: ${result.risk} risk`),
+            this._t(`CPB: ${result.risk} risk`),
             this._t('Detected: {labels}.', {labels: labels.join(', ')}),
             true
         );
@@ -688,6 +743,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
 
     _run(action, automaticCheck) {
         if (action !== 'status') {
+            this._bridgeWorker.stop();
             this._cancelAutoClear();
             this._mode = 'transition';
             this._resumeItem.visible = false;
@@ -729,6 +785,9 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             this._clearIgnoreOwnerTimeout();
             return;
         }
+        const analysisSequence = ++this._analysisSequence;
+        this._bridgeWorker.cancelActive();
+        this._pendingClipboardDigest = null;
         if (Main.sessionMode.isLocked || Main.sessionMode.isGreeter)
             return;
         if (this._mode === 'transition' || this._mode === 'timed' ||
@@ -743,7 +802,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             this._applyStatus(stdout, false);
             if (stdout !== ACTIVE)
                 return;
-            this._transferText(ownerSequence, sourceApplication);
+            this._transferText(ownerSequence, analysisSequence, sourceApplication);
         });
     }
 
@@ -765,7 +824,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         return 'unknown';
     }
 
-    _transferText(ownerSequence, sourceApplication) {
+    _transferText(ownerSequence, analysisSequence, sourceApplication) {
         const mimetypes = this._selection.get_mimetypes(
             Meta.SelectionType.SELECTION_CLIPBOARD
         );
@@ -802,7 +861,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                         digest === this._pendingClipboardDigest)
                         return;
                     this._cancelAutoClear();
-                    const sequence = ++this._eventSequence;
+                    const eventSequence = ++this._eventSequence;
                     eventAccepted = true;
                     this._pendingClipboardDigest = digest;
                     this._flashClipboardChange();
@@ -813,12 +872,16 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                     }
                     if (bytes.length > MAX_INPUT_BYTES)
                         throw new Error('closed transfer failure');
-                    this._sendToBridge(sequence, sourceApplication, bytes, digest);
+                    this._sendToBridge(
+                        analysisSequence, eventSequence,
+                        sourceApplication, bytes, digest
+                    );
                 } catch (_error) {
                     if (!cancellable.is_cancelled()) {
                         this._cancelAutoClear();
-                        if (!eventAccepted)
-                            this._eventSequence++;
+                        if (!eventAccepted &&
+                            analysisSequence === this._analysisSequence)
+                            this._analysisSequence++;
                         this._resetClipboardIdentity();
                         this._showError();
                     }
@@ -866,7 +929,9 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._pendingClipboardDigest = null;
     }
 
-    _sendToBridge(sequence, sourceApplication, content, digest) {
+    _sendToBridge(
+        analysisSequence, eventSequence, sourceApplication, content, digest
+    ) {
         const frame = new Uint8Array(4 + sourceApplication.length + content.length);
         const length = sourceApplication.length;
         frame[0] = (length >>> 24) & 0xff;
@@ -877,48 +942,42 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             frame[4 + index] = sourceApplication.charCodeAt(index);
         frame.set(content, 4 + length);
 
-        let process;
         try {
-            process = Gio.Subprocess.new(
-                [this._entryPoint, 'bridge', 'observe'],
-                Gio.SubprocessFlags.STDIN_PIPE |
-                    Gio.SubprocessFlags.STDOUT_PIPE |
-                    Gio.SubprocessFlags.STDERR_SILENCE
-            );
+            this._bridgeWorker.request(frame, result => {
+                if (analysisSequence !== this._analysisSequence)
+                    return;
+                try {
+                    if (result.status !== 'ok')
+                        throw new Error('closed bridge failure');
+                    const bytes = result.bytes;
+                    if (bytes.length === 0 || bytes.length > MAX_BRIDGE_RESULT_BYTES)
+                        throw new Error('closed bridge failure');
+                    const rendered = new TextDecoder('utf-8', {fatal: true}).decode(bytes);
+                    const bridgeResult = this._parseBridgeResult(rendered);
+                    this._markClipboardProcessed(digest);
+                    if (bridgeResult.historyEligible)
+                        this._rememberRecentClipboard(content);
+                    if (bridgeResult.risk !== 'none') {
+                        this._showRiskBanner(bridgeResult);
+                        this._scheduleAutoClear(eventSequence);
+                    }
+                } catch (_error) {
+                    this._clearPendingClipboardDigest(digest);
+                    this._showError();
+                }
+            });
         } catch (_error) {
             this._clearPendingClipboardDigest(digest);
             this._showError();
-            return;
         }
-        process.communicate_async(new GLib.Bytes(frame), null, (source, result) => {
-            if (sequence !== this._eventSequence)
-                return;
-            try {
-                const [, stdout] = source.communicate_finish(result);
-                if (!source.get_successful())
-                    throw new Error('closed bridge failure');
-                const bytes = stdout.get_data();
-                if (bytes.length === 0 || bytes.length > MAX_BRIDGE_RESULT_BYTES)
-                    throw new Error('closed bridge failure');
-                const rendered = new TextDecoder('utf-8', {fatal: true}).decode(bytes);
-                const bridgeResult = this._parseBridgeResult(rendered);
-                this._markClipboardProcessed(digest);
-                this._rememberRecentClipboard(content);
-                if (bridgeResult.risk !== 'none') {
-                    this._showRiskBanner(bridgeResult);
-                    this._scheduleAutoClear(sequence);
-                }
-            } catch (_error) {
-                this._clearPendingClipboardDigest(digest);
-                this._showError();
-            }
-        });
     }
 
     _parseBridgeResult(rendered) {
         const payload = JSON.parse(rendered);
         if (payload === null || typeof payload !== 'object' ||
-            payload.version !== 1 || !RISKS.has(payload.risk) ||
+            Object.keys(payload).length !== 4 || payload.version !== 1 ||
+            typeof payload.history_eligible !== 'boolean' ||
+            !RISKS.has(payload.risk) ||
             !Array.isArray(payload.categories) ||
             payload.categories.length > CATEGORY_LABELS.size)
             throw new Error('closed bridge result failure');
@@ -936,7 +995,103 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             throw new Error('closed bridge result failure');
         if (payload.risk !== 'none' && categories.length === 0)
             throw new Error('closed bridge result failure');
-        return {risk: payload.risk, categories};
+        return {
+            risk: payload.risk,
+            categories,
+            historyEligible: payload.history_eligible,
+        };
+    }
+
+    _refreshHistorySaving() {
+        if (this._historySettingPending !== null ||
+            this._historySettingRetry !== null)
+            return;
+        this._runHistorySettingCommand(['history-saving']);
+    }
+
+    _setHistorySaving(enabled) {
+        if (typeof enabled !== 'boolean')
+            return;
+        this._historySettingRetry = null;
+        this._historySettingPending = enabled;
+        this._historySavingItem.reactive = false;
+        this._applyHistorySaving(enabled);
+        this._runHistorySettingCommand([
+            'history-saving-set', enabled ? 'on' : 'off',
+        ], enabled);
+    }
+
+    _runHistorySettingCommand(arguments_, requested = null) {
+        const sequence = ++this._historySettingSequence;
+        let process;
+        try {
+            process = Gio.Subprocess.new(
+                [this._entryPoint, 'ui', ...arguments_],
+                Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE
+            );
+        } catch (_error) {
+            this._showHistorySettingError(requested);
+            return;
+        }
+        process.communicate_utf8_async(null, null, (source, result) => {
+            if (sequence !== this._historySettingSequence)
+                return;
+            try {
+                const [, stdout] = source.communicate_utf8_finish(result);
+                if (!source.get_successful() ||
+                    new TextEncoder().encode(stdout).length > MAX_HISTORY_SETTING_BYTES)
+                    throw new Error('closed history setting failure');
+                const payload = JSON.parse(stdout);
+                if (payload === null || typeof payload !== 'object' ||
+                    Object.keys(payload).length !== 2 || payload.version !== 1 ||
+                    typeof payload.enabled !== 'boolean')
+                    throw new Error('closed history setting failure');
+                this._historySettingPending = null;
+                this._historySettingRetry = null;
+                this._historySavingItem.reactive = true;
+                this._applyHistorySaving(payload.enabled);
+            } catch (_error) {
+                this._showHistorySettingError(requested);
+            }
+        });
+    }
+
+    _applyHistorySaving(enabled) {
+        if (!enabled || enabled !== this._historyEnabled) {
+            clearRecentClipboardState(this._recentClipboardState);
+            this._recentClipboardSequence++;
+            this._recentClipboardProcess?.force_exit();
+            this._recentClipboardProcess = null;
+        }
+        this._historyEnabled = enabled;
+        this._historySavingItem.label.text = this._t(
+            enabled ? 'Disable history saving' : 'Enable history saving'
+        );
+        this._updateRecentClipboardLabel();
+    }
+
+    _showHistorySettingError(requested) {
+        this._historySettingPending = null;
+        this._historySettingRetry = requested;
+        this._historySavingItem.reactive = true;
+        if (requested === true)
+            this._applyHistorySaving(false);
+        this._historySavingItem.label.text = this._t('History saving — unavailable');
+        this._recentClipboardItem.reactive = false;
+        this._recentClipboardItem.can_focus = false;
+        this._recentClipboardItem.label.text = this._t('Clipboard history — unavailable');
+        this._setStateAccent(this._historyAccent, 'error');
+        this._showBanner(
+            'error',
+            this._t('CopyPasteBin: settings unavailable'),
+            this._t('History saving could not be read or saved.')
+        );
+    }
+
+    _setStateAccent(accent, state) {
+        for (const name of ['active', 'inactive', 'error'])
+            accent.remove_style_class_name(`cpb-state-${name}`);
+        accent.add_style_class_name(`cpb-state-${state}`);
     }
 
     _refreshFilters() {
@@ -1242,7 +1397,8 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
     }
 
     _rememberRecentClipboard(content) {
-        if (!(content instanceof Uint8Array) || content.length === 0 ||
+        if (!this._historyEnabled || !(content instanceof Uint8Array) ||
+            content.length === 0 ||
             content.length > MAX_RECENT_CLIPBOARD_ITEM_BYTES)
             return;
         let text;
@@ -1273,12 +1429,15 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
     }
 
     _updateRecentClipboardLabel() {
-        this._recentClipboardItem.label.text = this._t(
-            'Clipboard history — {count}/{limit}', {
+        this._recentClipboardItem.setSensitive(this._historyEnabled);
+        this._recentClipboardItem.label.text = this._historyEnabled
+            ? this._t('Clipboard history — {count}/{limit}', {
                 count: this._recentClipboardState.entries.length,
                 limit: MAX_RECENT_CLIPBOARD_ENTRIES,
-            }
-        );
+            })
+            : this._t('Clipboard history — Disabled');
+        this._setStateAccent(this._historyAccent,
+            this._historyEnabled ? 'active' : 'inactive');
     }
 
     _recentClipboardInput() {
@@ -1318,6 +1477,8 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
     }
 
     _openRecentClipboard() {
+        if (!this._historyEnabled)
+            return;
         if (this._recentClipboardProcess !== null) {
             try {
                 this._recentClipboardProcess.send_signal(10);
@@ -1356,6 +1517,8 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
     }
 
     _launchRecentClipboard() {
+        if (!this._historyEnabled)
+            return;
         const sequence = ++this._recentClipboardSequence;
         let input;
         let process;
@@ -1435,17 +1598,20 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
     }
 
     _restoreRecentClipboard(entry) {
-        if (!this._recentClipboardState.entries.includes(entry) ||
+        if (!this._historyEnabled ||
+            !this._recentClipboardState.entries.includes(entry) ||
             Main.sessionMode.isLocked || Main.sessionMode.isGreeter)
             return;
         this._runPause('status', stdout => {
             this._applyStatus(stdout, false);
-            if (stdout !== ACTIVE ||
+            if (stdout !== ACTIVE || !this._historyEnabled ||
                 !this._recentClipboardState.entries.includes(entry) ||
                 Main.sessionMode.isLocked || Main.sessionMode.isGreeter)
                 return;
             this._cancelAutoClear();
             this._eventSequence++;
+            this._analysisSequence++;
+            this._bridgeWorker.cancelActive();
             this._armIgnoredOwnerChange();
             this._rememberOwnClipboardText(entry.text);
             this._clipboard.set_text(St.ClipboardType.CLIPBOARD, entry.text);
@@ -1523,160 +1689,13 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         });
     }
 
-    safePaste() {
-        this._cancelAutoClear();
-        if (Main.sessionMode.isLocked || Main.sessionMode.isGreeter)
-            return;
-        if (this._editorProcess !== null) {
-            this._showBanner(
-                'info',
-                'CopyPasteBin',
-                this._t('The clipboard editor is already open.')
-            );
-            return;
-        }
-        const sequence = ++this._safePasteSequence;
-        this._safePasteProcess?.force_exit();
-        this._safePasteProcess = null;
-        this._runPause('status', stdout => {
-            this._applyStatus(stdout, false);
-            if (sequence !== this._safePasteSequence)
-                return;
-            if (stdout !== ACTIVE) {
-                this._showBanner(
-                    'warning',
-                    this._t('CopyPasteBin: pause active'),
-                    this._t('Resume protection before using Safe Paste.')
-                );
-                return;
-            }
-            this._clipboard.get_text(St.ClipboardType.CLIPBOARD, (_clipboard, text) => {
-                if (sequence !== this._safePasteSequence ||
-                    Main.sessionMode.isLocked || Main.sessionMode.isGreeter)
-                    return;
-                try {
-                    if (typeof text !== 'string' || text.includes('\0'))
-                        throw new Error('closed safe paste failure');
-                    if (text.length === 0) {
-                        this._showEmptyClipboard();
-                        return;
-                    }
-                    const input = new TextEncoder().encode(text);
-                    if (input.length > MAX_INPUT_BYTES)
-                        throw new Error('closed safe paste failure');
-                    this._analyzeSafePaste(sequence, input, Array.from(text).length);
-                } catch (_error) {
-                    this._showBanner(
-                        'error',
-                        this._t('CopyPasteBin: Safe Paste failed'),
-                        this._t('The clipboard could not be checked safely.')
-                    );
-                }
-            });
-        });
-    }
-
-    _analyzeSafePaste(sequence, input, textLength) {
-        let process;
-        try {
-            process = Gio.Subprocess.new(
-                [this._entryPoint, 'ui', 'detections'],
-                Gio.SubprocessFlags.STDIN_PIPE |
-                    Gio.SubprocessFlags.STDOUT_PIPE |
-                    Gio.SubprocessFlags.STDERR_SILENCE
-            );
-            this._safePasteProcess = process;
-        } catch (_error) {
-            this._showSafePasteError();
-            return;
-        }
-        process.communicate_async(new GLib.Bytes(input), null, (source, result) => {
-            if (this._safePasteProcess === source)
-                this._safePasteProcess = null;
-            if (sequence !== this._safePasteSequence)
-                return;
-            try {
-                const [, stdout] = source.communicate_finish(result);
-                const bytes = stdout.get_data();
-                if (!source.get_successful() || bytes.length === 0 ||
-                    bytes.length > MAX_DETECTIONS_BYTES)
-                    throw new Error('closed safe paste failure');
-                const rendered = new TextDecoder('utf-8', {fatal: true}).decode(bytes);
-                const risk = this._safePasteRisk(rendered, textLength);
-                this._finishSafePaste(sequence, input, risk);
-            } catch (_error) {
-                this._showSafePasteError();
-            }
-        });
-    }
-
-    _safePasteRisk(rendered, textLength) {
-        const payload = JSON.parse(rendered);
-        if (payload === null || typeof payload !== 'object' ||
-            Object.keys(payload).sort().join(',') !== 'detections,version' ||
-            payload.version !== 1 || !Array.isArray(payload.detections) ||
-            payload.detections.length > MAX_DETECTIONS)
-            throw new Error('closed safe paste failure');
-        const priorities = new Map([
-            ['none', 0], ['low', 1], ['medium', 2], ['high', 3], ['critical', 4],
-        ]);
-        let highest = 'none';
-        for (const item of payload.detections) {
-            if (item === null || typeof item !== 'object' ||
-                Object.keys(item).sort().join(',') !== 'category,end,risk,start' ||
-                !Number.isSafeInteger(item.start) || !Number.isSafeInteger(item.end) ||
-                item.start < 0 || item.end <= item.start || item.end > textLength ||
-                typeof item.category !== 'string' || !CATEGORY_LABELS.has(item.category) ||
-                !priorities.has(item.risk))
-                throw new Error('closed safe paste failure');
-            if (priorities.get(item.risk) > priorities.get(highest))
-                highest = item.risk;
-        }
-        return highest;
-    }
-
-    _finishSafePaste(sequence, input, risk) {
-        this._runPause('status', stdout => {
-            this._applyStatus(stdout, false);
-            if (sequence !== this._safePasteSequence || stdout !== ACTIVE ||
-                Main.sessionMode.isLocked || Main.sessionMode.isGreeter)
-                return;
-            if (risk === 'none') {
-                this._showBanner(
-                    'success',
-                    this._t('CopyPasteBin: Safe Paste'),
-                    this._t('No known sensitive pattern was detected. The clipboard was not changed.')
-                );
-                return;
-            }
-            this._showBanner(
-                risk,
-                this._t(`CPBin: ${risk} risk`),
-                risk === 'high' || risk === 'critical'
-                    ? this._t('High-risk data was detected. Review the redacted proposal before replacing the clipboard.')
-                    : this._t('Sensitive data was detected. Review the redacted proposal before replacing the clipboard.')
-            );
-            this._launchEditor(input, true);
-        });
-    }
-
-    _showSafePasteError() {
-        this._showBanner(
-            'error',
-            this._t('CopyPasteBin: Safe Paste failed'),
-            this._t('The clipboard could not be checked safely.')
-        );
-    }
-
-    _launchEditor(input, suggestRedaction = false) {
+    _launchEditor(input) {
         let process;
         try {
             const arguments_ = [
                 '/usr/bin/gjs', '-m', this._editorPath,
                 `--language=${this._language}`,
             ];
-            if (suggestRedaction)
-                arguments_.push('--suggest-redaction');
             process = Gio.Subprocess.new(
                 arguments_,
                 Gio.SubprocessFlags.STDIN_PIPE |
@@ -1754,6 +1773,8 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                 return;
             }
             this._eventSequence++;
+            this._analysisSequence++;
+            this._bridgeWorker.cancelActive();
             this._armIgnoredOwnerChange();
             this._rememberOwnClipboardText(edited);
             this._clipboard.set_text(St.ClipboardType.CLIPBOARD, edited);
@@ -1800,6 +1821,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             this._resumeItem.visible = false;
             this._setProtectionIcon(true);
             this._statusItem.label.text = this._t('Status: active');
+            this._setStateAccent(this._statusAccent, 'active');
             if (automaticCheck && previousMode === 'timed')
                 this._showBanner(
                     'success',
@@ -1809,10 +1831,12 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             return;
         }
         if (stdout === INDEFINITE) {
+            this._bridgeWorker.stop();
             this._mode = 'indefinite';
             this._resumeItem.visible = true;
             this._setProtectionIcon(false);
             this._statusItem.label.text = this._t('Status: paused until resumed');
+            this._setStateAccent(this._statusAccent, 'inactive');
             return;
         }
         const match = TIMED.exec(stdout);
@@ -1826,10 +1850,12 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             return;
         }
         this._mode = 'timed';
+        this._bridgeWorker.stop();
         this._resumeItem.visible = true;
         this._setProtectionIcon(false);
         const minutes = Math.max(1, Math.ceil(remaining / 60));
         this._statusItem.label.text = this._t('Status: paused — {minutes} min', {minutes});
+        this._setStateAccent(this._statusAccent, 'inactive');
         const delay = Math.max(1, Math.min(remaining, 60));
         this._timeoutId = GLib.timeout_add_seconds(
             GLib.PRIORITY_DEFAULT,
@@ -1849,6 +1875,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._resumeItem.visible = false;
         this._setProtectionIcon(false);
         this._statusItem.label.text = this._t('Status: error — protection unconfirmed');
+        this._setStateAccent(this._statusAccent, 'error');
         if (showBanner)
             this._showBanner(
                 'error',
@@ -1903,15 +1930,18 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
 
     destroy() {
         this._ownerChangeSequence++;
+        this._analysisSequence++;
         this._eventSequence++;
         this._filterSequence++;
         this._autoClearSettingSequence++;
+        this._historySettingSequence++;
         this._languageSequence++;
         this._recentClipboardSequence++;
         this._transferCancellable?.cancel();
         this._transferCancellable = null;
         this._editorProcess?.force_exit();
         this._editorProcess = null;
+        this._bridgeWorker.destroy();
         const imageRedactorProcess = this._imageRedactorProcess;
         this._imageRedactorProcess = null;
         imageRedactorProcess?.force_exit();
@@ -1923,10 +1953,9 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._recentClipboardProcess = null;
         this._aboutProcess?.force_exit();
         this._aboutProcess = null;
-        this._safePasteSequence++;
-        this._safePasteProcess?.force_exit();
-        this._safePasteProcess = null;
-        this._clearQuitResetTimeout();
+        this._quitDialog?.close();
+        this._quitDialog?.destroy();
+        this._quitDialog = null;
         this._clearBannerTimeout();
         this._banner.remove_all_transitions();
         Main.layoutManager.removeChrome(this._banner);
@@ -1954,9 +1983,14 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
 
 export default class CopyPasteBinExtension extends Extension {
     enable() {
+        this._lifecycleGeneration = (this._lifecycleGeneration ?? 0) + 1;
+        const generation = this._lifecycleGeneration;
         this._recentClipboardState = {entries: [], totalBytes: 0, nextId: 1};
+        this._backendProbe = null;
+        this._backendCompatible = false;
+        this._indicator = null;
         this._paths = {
-            entryPoint: resolveBackendPath(),
+            entryPoint: null,
             editorPath: GLib.build_filenamev([this.path, 'editor.js']),
             imageRedactorPath: GLib.build_filenamev([this.path, 'image-redactor.js']),
             filterEditorPath: GLib.build_filenamev([this.path, 'filter-editor.js']),
@@ -1967,15 +2001,107 @@ export default class CopyPasteBinExtension extends Extension {
             pausedIconPath: GLib.build_filenamev([this.path, 'icon-paused.svg']),
             copyingIconPath: GLib.build_filenamev([this.path, 'icon-copying.svg']),
         };
-        this._createIndicator({choice: 'system', effective: systemLanguage()});
-        this._settings = this.getSettings();
-        Main.wm.addKeybinding(
-            SAFE_PASTE_KEY,
-            this._settings,
-            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
-            Shell.ActionMode.NORMAL,
-            () => this._indicator?.safePaste()
+        const channel = detectExtensionChannelState();
+        if (channel.status !== 'clear') {
+            this._showBackendStatus(
+                channel.status === 'conflict' ? 'channel-conflict' : 'channel-error'
+            );
+            return;
+        }
+        this._paths.entryPoint = resolveBackendPath();
+        if (this._paths.entryPoint === null) {
+            this._showBackendStatus('missing');
+            return;
+        }
+        this._showBackendStatus('checking');
+        const probe = new BackendProbe(
+            this._paths.entryPoint,
+            result => this._finishBackendProbe(generation, result)
         );
+        this._backendProbe = probe;
+        probe.start();
+    }
+
+    _finishBackendProbe(generation, result) {
+        if (generation !== this._lifecycleGeneration || this._paths === null)
+            return;
+        this._backendProbe = null;
+        if (result.status !== 'compatible') {
+            this._showBackendStatus(result.status, result);
+            return;
+        }
+        this._backendCompatible = true;
+        this._indicator?.destroy();
+        this._indicator = null;
+        this._createIndicator({choice: 'system', effective: systemLanguage()});
+    }
+
+    _showBackendStatus(status, result = null) {
+        const language = systemLanguage();
+        const states = {
+            checking: {
+                label: 'Backend: checking compatibility…',
+                details: null,
+            },
+            missing: {
+                label: 'Backend: not installed',
+                details: {
+                    message: 'Clipboard protection is inactive. Install a supported CopyPasteBin backend.',
+                    values: {},
+                },
+            },
+            incompatible: {
+                label: 'Backend: incompatible protocol',
+                details: {
+                    message: 'Required protocol: {required}; backend protocol: {found} (product {product}).',
+                    values: {
+                        required: BACKEND_PROTOCOL_VERSION,
+                        found: result?.protocolVersion ?? '?',
+                        product: result?.productVersion ?? '?',
+                    },
+                },
+            },
+            error: {
+                label: 'Backend: compatibility check failed',
+                details: {
+                    message: 'Clipboard protection is inactive.',
+                    values: {},
+                },
+            },
+            'channel-conflict': {
+                label: 'Extension channel conflict',
+                details: [
+                    {
+                        message: 'Option 1: remove the system extension package; keep copypastebin-backend.',
+                        values: {},
+                    },
+                    {
+                        message: 'Option 2: remove the user-local extension.',
+                        values: {},
+                    },
+                    {
+                        message: 'Then log out and log back in.',
+                        values: {},
+                    },
+                ],
+            },
+            'channel-error': {
+                label: 'Extension channel check failed',
+                details: {
+                    message: 'Clipboard protection is inactive. No extension channel was changed.',
+                    values: {},
+                },
+            },
+        };
+        const selected = states[status] ?? states.error;
+        this._indicator?.destroy();
+        this._indicator = new BackendStatusIndicator(
+            this._paths.pausedIconPath,
+            language,
+            selected.label,
+            selected.details
+        );
+        Main.panel.addToStatusArea(this.uuid, this._indicator);
     }
 
     _createIndicator(languageStatus) {
@@ -2000,7 +2126,10 @@ export default class CopyPasteBinExtension extends Extension {
     }
 
     _replaceIndicator(languageStatus) {
+        const generation = this._lifecycleGeneration;
         GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            if (generation !== this._lifecycleGeneration || !this._backendCompatible)
+                return GLib.SOURCE_REMOVE;
             this._indicator?.destroy();
             this._indicator = null;
             if (this._paths !== null)
@@ -2010,8 +2139,10 @@ export default class CopyPasteBinExtension extends Extension {
     }
 
     disable() {
-        Main.wm.removeKeybinding(SAFE_PASTE_KEY);
-        this._settings = null;
+        this._lifecycleGeneration = (this._lifecycleGeneration ?? 0) + 1;
+        this._backendProbe?.destroy();
+        this._backendProbe = null;
+        this._backendCompatible = false;
         this._paths = null;
         this._indicator?.destroy();
         this._indicator = null;

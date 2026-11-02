@@ -1,0 +1,35 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+.TH CPB 1 "1 November 2026" "CopyPasteBin 1.2" "User Commands"
+.SH NAME
+cpb \- local CopyPasteBin backend for GNOME
+.SH SYNOPSIS
+.B cpb
+.RI [ options ]
+.RI [ command ]
+.SH DESCRIPTION
+.B cpb
+is the local command-line backend used by the CopyPasteBin GNOME Shell
+extension and its editing windows. The normal user interface is the
+CopyPasteBin indicator in GNOME Shell.
+.PP
+Analysis is performed on the local computer. The command does not contact a
+network service. User configuration and metadata history are stored separately
+for each account.
+.SH OPTIONS
+.TP
+.BR \-h , " " \-\-help
+Display the available command-line options and exit.
+.SH FILES
+.TP
+.I ~/.config/copypastebin
+Per-user configuration, custom rules and exclusions.
+.TP
+.I ~/.local/state/copypastebin
+Per-user metadata history and local state. Clipboard content is not stored in
+the persistent history.
+.SH SEE ALSO
+.BR gnome-extensions (1)
+.SH AUTHOR
+Anna Koz\[u0142]owska

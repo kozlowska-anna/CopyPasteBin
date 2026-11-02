@@ -1,4 +1,7 @@
-COPYPASTEBIN 1.1 - INSTALACJA OFFLINE
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+COPYPASTEBIN 1.2 - INSTALACJA OFFLINE
 
 Autorka: Anna Kozłowska
 Rozwój wspierany przy użyciu ChatGPT i Codex od OpenAI.
@@ -42,9 +45,8 @@ INSTALACJA
    wykluczeń, ścieżki katalogu domowego ani listy innych rozszerzeń.
 7. Po zapisaniu raportu uruchom CopyPasteBin z menu aplikacji.
 
-Jawne „Bezpieczne wklejenie” używa skrótu Super+Shift+V. Sprawdza schowek i
-może przygotować propozycję redakcji, ale nie wkleja automatycznie i nie
-przechwytuje zwykłego Ctrl+V.
+Aby ręcznie przejrzeć tekst, użyj pozycji „Edytuj / anonimizuj schowek” w menu
+CopyPasteBin. Program nie przechwytuje zwykłego Ctrl+V.
 
 Instalator zapisuje program w ~/.local/share. Nie zmienia prywatnych plików
 w ~/.config/copypastebin ani ~/.local/state/copypastebin.

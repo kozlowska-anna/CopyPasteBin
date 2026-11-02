@@ -1,7 +1,9 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 [Desktop Entry]
 Type=Application
-Name=Enable CopyPasteBin
-Name[pl]=Włącz CopyPasteBin
+Name=CopyPasteBin
 GenericName=Clipboard privacy assistant
 GenericName[pl]=Asystent prywatności schowka
 Comment=Enable local clipboard protection for this user

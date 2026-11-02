@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 from __future__ import annotations
 
 import json
@@ -12,6 +15,7 @@ from .detection import (
 )
 from .filters import ALL_CATEGORIES, AUTO_CLEAR_CHOICES, FilterStatus
 from .history import HistoryStore, VIEW_LIMIT
+from .history_settings import HistorySettingsStatus
 from .models import AnalysisResult, Category, RiskLevel
 
 
@@ -97,6 +101,16 @@ def auto_clear_json(status: FilterStatus) -> str:
         raise UiError()
     return json.dumps(
         {"version": 1, "seconds": status.auto_clear_seconds},
+        ensure_ascii=True,
+        separators=(",", ":"),
+    ) + "\n"
+
+
+def history_settings_json(status: HistorySettingsStatus) -> str:
+    if type(status) is not HistorySettingsStatus:
+        raise UiError()
+    return json.dumps(
+        {"version": 1, "enabled": status.enabled},
         ensure_ascii=True,
         separators=(",", ":"),
     ) + "\n"

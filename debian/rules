@@ -1,0 +1,60 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+#!/usr/bin/make -f
+
+BACKEND_ROOT = debian/copypastebin-backend
+EXTENSION_ROOT = debian/gnome-shell-extension-copypastebin
+COMPLETE_ROOT = debian/copypastebin
+UUID = copypastebin@kozlowska-anna.github.io
+EXTENSION_DIR = $(EXTENSION_ROOT)/usr/share/gnome-shell/extensions/$(UUID)
+PYTHON_PACKAGE_DIR = $(BACKEND_ROOT)/usr/lib/python3/dist-packages/copypastebin
+APPLICATIONS_DIR = $(EXTENSION_ROOT)/usr/share/applications
+ICON_CACHE_HELPER_DIR = $(EXTENSION_ROOT)/usr/libexec/copypastebin
+
+%:
+	dh $@ --buildsystem=none
+
+override_dh_auto_install:
+	install -d \
+		$(BACKEND_ROOT)/usr/bin \
+		$(PYTHON_PACKAGE_DIR) \
+		$(EXTENSION_DIR) \
+		$(APPLICATIONS_DIR) \
+		$(ICON_CACHE_HELPER_DIR) \
+		$(EXTENSION_ROOT)/usr/share/copypastebin \
+		$(EXTENSION_ROOT)/usr/share/icons/hicolor/scalable/apps \
+		$(EXTENSION_ROOT)/usr/share/metainfo
+	install -m 0755 packaging/deb/cpb $(BACKEND_ROOT)/usr/bin/cpb
+	cp -a src/copypastebin/. $(PYTHON_PACKAGE_DIR)/
+	grep -Fqx '__version__ = "1.2"' $(PYTHON_PACKAGE_DIR)/__init__.py
+	find $(PYTHON_PACKAGE_DIR) -type d -name __pycache__ -prune -exec rm -rf -- {} +
+	find $(PYTHON_PACKAGE_DIR) -type f -name '*.py[co]' -delete
+	cp -a gnome-extension/$(UUID)/. $(EXTENSION_DIR)/
+	grep -Fqx "const VERSION = '1.2';" $(EXTENSION_DIR)/about.js
+	grep -Fqx '  "version": 7' $(EXTENSION_DIR)/metadata.json
+	install -m 0644 packaging/deb/copypastebin.desktop \
+		$(APPLICATIONS_DIR)/copypastebin.desktop
+	install -m 0644 debian/enable-extension.js \
+		$(EXTENSION_ROOT)/usr/share/copypastebin/enable-extension.js
+	install -m 0755 debian/refresh-user-icon-cache \
+		$(ICON_CACHE_HELPER_DIR)/refresh-user-icon-cache
+	for application_id in \
+		io.github.copypastebin.Editor \
+		io.github.copypastebin.ImageRedactor \
+		io.github.copypastebin.FilterEditor \
+		io.github.copypastebin.RulesEditor \
+		io.github.copypastebin.RecentClipboard \
+		io.github.copypastebin.About; do \
+		install -m 0644 packaging/copypastebin-window.desktop \
+			$(APPLICATIONS_DIR)/$$application_id.desktop; \
+	done
+	install -m 0644 packaging/copypastebin-app.svg \
+		$(EXTENSION_ROOT)/usr/share/icons/hicolor/scalable/apps/copypastebin.svg
+	install -m 0644 packaging/deb/io.github.kozlowska_anna.CopyPasteBin.metainfo.xml \
+		$(EXTENSION_ROOT)/usr/share/metainfo/io.github.kozlowska_anna.CopyPasteBin.metainfo.xml
+
+override_dh_fixperms:
+	dh_fixperms
+	find $(BACKEND_ROOT) $(EXTENSION_ROOT) $(COMPLETE_ROOT) \
+		-exec touch -h -d "@$(SOURCE_DATE_EPOCH)" -- {} +

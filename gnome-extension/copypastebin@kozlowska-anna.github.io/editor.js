@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import Gio from 'gi://Gio';
 import GioUnix from 'gi://GioUnix?version=2.0';
 import Gdk from 'gi://Gdk?version=4.0';
@@ -9,8 +12,7 @@ import System from 'system';
 import {backendCommand} from './backend-path.js';
 import {languageFromArgs, translate} from './i18n.js';
 
-const SUGGEST_REDACTION = ARGV.includes('--suggest-redaction');
-if (ARGV.some(argument => argument !== '--suggest-redaction' &&
+if (ARGV.some(argument =>
     argument !== '--language=pl' && argument !== '--language=en'))
     System.exit(1);
 const LANGUAGE = languageFromArgs(ARGV.filter(argument =>
@@ -361,10 +363,7 @@ class EditorApplication extends Gtk.Application {
         window.present();
         view.grab_focus();
         GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
-            if (SUGGEST_REDACTION)
-                this._suggestRedaction();
-            else
-                this._inspectDetections(true);
+            this._inspectDetections(true);
             return GLib.SOURCE_REMOVE;
         });
     }

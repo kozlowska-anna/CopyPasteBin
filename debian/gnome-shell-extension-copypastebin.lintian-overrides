@@ -1,0 +1,11 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+# The desktop launchers call executables supplied by strong runtime dependencies.
+gnome-shell-extension-copypastebin: desktop-command-not-in-package usr/bin/gjs [usr/share/applications/copypastebin.desktop]
+gnome-shell-extension-copypastebin: desktop-command-not-in-package usr/bin/gnome-extensions [usr/share/applications/io.github.copypastebin.About.desktop]
+gnome-shell-extension-copypastebin: desktop-command-not-in-package usr/bin/gnome-extensions [usr/share/applications/io.github.copypastebin.Editor.desktop]
+gnome-shell-extension-copypastebin: desktop-command-not-in-package usr/bin/gnome-extensions [usr/share/applications/io.github.copypastebin.FilterEditor.desktop]
+gnome-shell-extension-copypastebin: desktop-command-not-in-package usr/bin/gnome-extensions [usr/share/applications/io.github.copypastebin.ImageRedactor.desktop]
+gnome-shell-extension-copypastebin: desktop-command-not-in-package usr/bin/gnome-extensions [usr/share/applications/io.github.copypastebin.RecentClipboard.desktop]
+gnome-shell-extension-copypastebin: desktop-command-not-in-package usr/bin/gnome-extensions [usr/share/applications/io.github.copypastebin.RulesEditor.desktop]

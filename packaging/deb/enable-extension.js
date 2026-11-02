@@ -1,10 +1,28 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Gtk from 'gi://Gtk?version=4.0';
 import System from 'system';
 
 const UUID = 'copypastebin@kozlowska-anna.github.io';
+const ICON_CACHE_HELPER = '/usr/libexec/copypastebin/refresh-user-icon-cache';
 const polish = (GLib.getenv('LANG') ?? '').toLowerCase().startsWith('pl');
+
+function refreshUserIconCache() {
+    if (!GLib.file_test(ICON_CACHE_HELPER, GLib.FileTest.IS_EXECUTABLE))
+        return;
+    try {
+        const process = Gio.Subprocess.new(
+            [ICON_CACHE_HELPER],
+            Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE
+        );
+        process.wait_check(null);
+    } catch (_error) {
+        // Icon cache refresh is a non-critical migration repair.
+    }
+}
 
 function hasUserExtension() {
     const home = GLib.get_home_dir();
@@ -58,6 +76,7 @@ application.connect('activate', () => {
     const conflict = hasUserExtension();
     let successful = false;
     if (!conflict) {
+        refreshUserIconCache();
         try {
             const process = Gio.Subprocess.new(
                 ['/usr/bin/gnome-extensions', 'enable', UUID],

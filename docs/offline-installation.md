@@ -1,22 +1,25 @@
-# Instalacja CopyPasteBin 1.1
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+# Instalacja CopyPasteBin 1.2
 
-CopyPasteBin 1.1 ma dwa instalatory z tego samego zestawu źródeł:
+CopyPasteBin 1.2 ma dwie metody instalacji z tego samego zestawu źródeł:
 
-- [pakiet Debiana `copypastebin_1.1-1_all.deb`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb) — instalacja systemowa zarządzana przez APT;
-- [archiwum `CopyPasteBin-linux-1.1.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz) — instalacja lokalna dla jednego użytkownika.
+- trzy pakiety Debiana w dokładnie tej samej wersji z [wydania v1.2](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2): `copypastebin-backend_1.2-2_all.deb`, `gnome-shell-extension-copypastebin_1.2-2_all.deb` i `copypastebin_1.2-2_all.deb` — instalacja systemowa zarządzana przez APT;
+- [archiwum `CopyPasteBin-linux-1.2.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz) — instalacja lokalna dla jednego użytkownika.
 
-Pobierz również [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) i sprawdź wybrany plik przed jego otwarciem. Nie instaluj obu wariantów jednocześnie.
+Pobierz również [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/SHA256SUMS) i sprawdź wybrane pliki przed ich otwarciem. Nie instaluj obu wariantów jednocześnie.
 
 Obsługiwany zakres to GNOME Shell 50, Wayland oraz Python 3.11 lub nowszy.
 KDE Plasma, Cinnamon i Xfce nie mają potwierdzonej integracji. Projekt nie ma
-repozytorium APT, więc lokalny DEB nie otrzymuje automatycznych aktualizacji.
+Pakiety nie dodają repozytorium APT ani klucza podpisującego. Lokalnie pobrane
+pliki DEB nie otrzymują automatycznych aktualizacji, chyba że użytkownik osobno
+skonfiguruje opublikowane repozytorium.
 
 ## Wspólna zawartość
 
 - wheel lokalnego rdzenia Python bez zależności sieciowych;
 - komplet plików rozszerzenia `copypastebin@kozlowska-anna.github.io`;
-- skompilowany lokalnie schemat GSettings dla pojedynczego skrótu
-  `Super+Shift+V`;
 - launcher, skalowalną ikonę aplikacji i ukryte mapowania tej ikony do sześciu
   okien GTK; małe ikony stanu panelu pozostają osobnymi zasobami rozszerzenia;
 - uruchamiany wyłącznie na polecenie edytor obrazów dla lokalnych plików PNG i
@@ -76,7 +79,8 @@ Deinstalacja używa `./uninstall.sh` z bieżącego pakietu. Nie należy uruchami
 deinstalatora ze starego rozpakowanego katalogu, ponieważ starsza wersja może
 nie znać publicznego UUID. Bieżący skrypt usuwa kod i launcher dla publicznego
 UUID oraz pozostałość starego UUID, ale świadomie pozostawia lokalne ustawienia
-i historię.
+i historię. Po dodaniu albo usunięciu własnej ikony instalator i deinstalator
+przebudowują wyłącznie standardowy cache ikon `hicolor` bieżącego użytkownika.
 
 ## Gdy CopyPasteBin nie uruchomi się automatycznie
 
@@ -99,19 +103,24 @@ aplikacji.
 Przed instalacją sprawdź sumę oraz metadane pobranego pliku:
 
 ```text
-sha256sum copypastebin_1.1-1_all.deb
-dpkg-deb --info copypastebin_1.1-1_all.deb
+sha256sum --check --ignore-missing SHA256SUMS
+dpkg-deb --info copypastebin-backend_1.2-2_all.deb
+dpkg-deb --info gnome-shell-extension-copypastebin_1.2-2_all.deb
+dpkg-deb --info copypastebin_1.2-2_all.deb
 ```
 
 Instalacja systemowa wymaga zatwierdzenia uprawnień administratora:
 
 ```text
-sudo apt install ./copypastebin_1.1-1_all.deb
+sudo apt install \
+  ./copypastebin-backend_1.2-2_all.deb \
+  ./gnome-shell-extension-copypastebin_1.2-2_all.deb \
+  ./copypastebin_1.2-2_all.deb
 ```
 
 Pakiet nie uruchamia CopyPasteBin jako root, nie ma skryptów maintainer i nie
 włącza rozszerzenia podczas instalacji. Po instalacji wyloguj się, zaloguj do
-GNOME Wayland i uruchom pozycję „Włącz CopyPasteBin”. Aktualizacja używa tej
+GNOME Wayland i uruchom pozycję „CopyPasteBin”. Aktualizacja używa tej
 samej komendy z nowym plikiem DEB. Centrum oprogramowania Ubuntu nie
 zaktualizowało istniejącego lokalnego pakietu podczas testu, dlatego
 udokumentowaną metodą aktualizacji jest APT.
@@ -119,7 +128,10 @@ udokumentowaną metodą aktualizacji jest APT.
 Odinstalowanie kodu pakietu:
 
 ```text
-sudo apt remove copypastebin
+sudo apt remove \
+  copypastebin \
+  gnome-shell-extension-copypastebin \
+  copypastebin-backend
 ```
 
 Prywatne katalogi `~/.config/copypastebin` i
@@ -134,7 +146,10 @@ Przy przejściu z tar.gz do DEB najpierw uruchom `./uninstall.sh` z aktualnego
 archiwum, a dopiero potem zainstaluj DEB. Skrypt zachowa ustawienia i historię,
 ale usunie lokalny backend, launchery oraz rozszerzenie o tym samym UUID, które
 miałoby pierwszeństwo przed wersją systemową. Helper DEB odmawia aktywacji,
-jeśli taki konflikt nadal istnieje; nie usuwa go automatycznie.
+jeśli taki konflikt nadal istnieje; nie usuwa go automatycznie. Podczas jawnej
+aktywacji helper odświeża cache ikon bieżącego użytkownika, aby stary wpis po
+wcześniejszym `tar.gz` nie przesłaniał poprawnej ikony systemowej. Operacja nie
+odczytuje ustawień, historii ani treści schowka i nie jest warunkiem aktywacji.
 
 Przy przejściu z DEB do tar.gz najpierw usuń pakiet poleceniem `apt remove`, a
 następnie użyj `./install.sh` z archiwum. Nie instaluj obu wariantów

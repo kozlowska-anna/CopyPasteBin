@@ -1,10 +1,13 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # <img src="website/assets/images/logo-web.svg" alt="CopyPasteBin icon" width="44" height="44"> CopyPasteBin
 
 **English** | [Polski](README.pl.md)
 
 **[Open the CopyPasteBin website](https://kozlowska-anna.github.io/CopyPasteBin/en/)**
 
-[Download version 1.1](#install-version-11) · [Documentation](#documentation) · [Security model](SECURITY.md)
+[Download version 1.2](#install-version-12) · [Documentation](#documentation) · [Security model](SECURITY.md)
 
 ## More control before you paste
 
@@ -20,8 +23,8 @@ decision always stays with you.
   paste it or change the clipboard automatically by default.
 - **Keep data on your device.** Detection and redaction run without sending
   clipboard contents to cloud services.
-- **Prepare safer text.** Safe Paste and the editor help remove or redact
-  selected values before you share them.
+- **Prepare safer text.** The editor helps remove or redact selected values
+  before you share them.
 
 ### In everyday work
 
@@ -50,14 +53,14 @@ information and does not block pasting.
   clipboard only after reviewing the result.
 - **Image redaction:** open a local PNG or JPEG on demand, cover selected areas,
   and save a new PNG without modifying the original file.
-- **Safe Paste:** press `Super+Shift+V` to inspect clipboard text without
-  automatically pasting it into the active application.
 - **Exact exclusions:** suppress a known low- or medium-risk match without
   disabling its entire category. High- and critical-risk matches cannot be
   permanently excluded.
 - **Local history model:** persistent history contains limited metadata and an
   HMAC, not clipboard text. Up to 15 recent text entries can be retained in
-  session memory.
+  session memory; recognized secrets and high-risk text are kept out of that
+  list even when their warning filter is disabled. History saving can be
+  disabled independently without stopping analysis or the editor.
 - **Configurable protection:** enable or disable detection categories, add
   literal custom rules, pause monitoring, or opt in to clearing an unchanged
   warning-triggering clipboard entry after 1, 5, or 15 minutes.
@@ -137,7 +140,7 @@ HMAC but no clipboard text.
 
 ## Compatibility
 
-Version 1.1 supports the following environment:
+Version 1.2 supports the following environment:
 
 | Component | Requirement |
 | --- | --- |
@@ -148,15 +151,18 @@ Version 1.1 supports the following environment:
 | Additional components | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
 
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in
-version 1.1. The installer stops safely when GNOME Shell is unavailable.
+version 1.2. The installer stops safely when GNOME Shell is unavailable.
 
-## Install version 1.1
+## Install version 1.2
 
 Choose one installation method:
 
-- [⬇ Download the Debian package](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb) for a system installation managed by APT.
-- [⬇ Download the tar.gz archive](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz) for a user-local installation without `sudo`.
-- [Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) and verify the selected file before opening it:
+- Download the three exactly matching Debian packages—`copypastebin-backend`,
+  `gnome-shell-extension-copypastebin`, and `copypastebin`—from the
+  [v1.2 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2)
+  for a system installation managed by APT.
+- [⬇ Download the tar.gz archive](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz) for a user-local installation without `sudo`.
+- [Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/SHA256SUMS) and verify the selected files before opening them:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
@@ -243,10 +249,21 @@ not require real clipboard contents or private user data.
 ```sh
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 PYTHONPATH=src python3 benchmarks/detection_quality.py
+PYTHONPATH=src python3 benchmarks/detection_performance.py
+PYTHONPATH=src python3 benchmarks/detection_performance.py --minimal-bridge
+PYTHONPATH=src python3 benchmarks/persistent_bridge_performance.py
 ```
 
 The synthetic detection benchmark passed 26/26. Automated checks do not
-replace a test in a running GNOME Shell session.
+replace a test in a running GNOME Shell session. The performance benchmark
+separates rule-engine time from process startup, filter writes, and backend
+GNOME bridge event handling; its results depend on the machine and current
+system load. The `--minimal-bridge` option measures an experimental, inactive
+bridge entry point without switching the GNOME extension to it.
+The persistent-process benchmark exercises the production bridge worker with
+synthetic state in a temporary directory. The GNOME client starts that worker
+lazily, keeps at most one request active, and stops it on pause, lock,
+extension shutdown, error, or 30 seconds of inactivity.
 
 ## License and authorship
 

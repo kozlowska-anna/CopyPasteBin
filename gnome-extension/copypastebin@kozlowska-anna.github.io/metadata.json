@@ -1,8 +1,10 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 {
   "uuid": "copypastebin@kozlowska-anna.github.io",
   "name": "CopyPasteBin",
   "description": "Local clipboard protection by Anna Kozłowska, developed with support from ChatGPT and Codex",
   "shell-version": ["50"],
-  "settings-schema": "org.gnome.shell.extensions.copypastebin",
-  "version": 6
+  "version": 7
 }

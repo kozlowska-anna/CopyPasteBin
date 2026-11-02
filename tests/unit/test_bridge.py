@@ -1,11 +1,24 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import io
 import tempfile
 import unittest
 from pathlib import Path
 
-from copypastebin.bridge import BridgeError, bridge_result_json, observe_framed_event
+from copypastebin import __version__
+from copypastebin.bridge import (
+    BACKEND_PROTOCOL_VERSION,
+    MAX_CAPABILITIES_RESULT_BYTES,
+    BridgeError,
+    BridgeObservation,
+    bridge_result_json,
+    capabilities_json,
+    observe_framed_event,
+)
 from copypastebin.filters import FilterStore
 from copypastebin.history import HistoryStore
+from copypastebin.history_settings import HistorySettingsStore
 from copypastebin.models import Category
 from copypastebin.pause import PauseStore
 
@@ -32,6 +45,20 @@ class BridgeTests(unittest.TestCase):
             pause=self.pause,
         )
 
+    def test_capabilities_are_exact_bounded_and_content_free(self):
+        rendered = capabilities_json()
+        self.assertEqual(
+            '{"document_version":1,"product_version":'
+            f'"{__version__}","protocol_version":'
+            f'{BACKEND_PROTOCOL_VERSION}}}\n',
+            rendered,
+        )
+        self.assertLessEqual(
+            len(rendered.encode("ascii")),
+            MAX_CAPABILITIES_RESULT_BYTES,
+        )
+        self.assertNotIn(str(self.state), rendered)
+
     def test_event_records_metadata_without_content(self):
         canary = b"person@example.com"
         self.observe(frame("org.mozilla.firefox", canary))
@@ -42,31 +69,51 @@ class BridgeTests(unittest.TestCase):
         self.assertNotIn(canary, self.history.database_path.read_bytes())
 
     def test_warning_and_high_return_safe_metadata_but_safe_text_does_not(self):
-        self.assertIsNone(self.observe(frame("app.one", b"ordinary sentence")))
+        safe = self.observe(frame("app.one", b"ordinary sentence"))
+        self.assertIsNone(safe.notification)
+        self.assertTrue(safe.history_eligible)
         warning = self.observe(frame("app.two", b"1234 PLN"))
-        self.assertEqual("low", warning.risk.value)
+        self.assertEqual("low", warning.notification.risk.value)
         high = self.observe(frame("app.three", b"password=synthetic-only"))
-        self.assertEqual("high", high.risk.value)
+        self.assertEqual("high", high.notification.risk.value)
+        self.assertFalse(high.history_eligible)
         self.assertNotIn("1234", repr(warning))
 
     def test_disabled_filter_suppresses_banner_category_and_redaction_metadata(self):
         FilterStore(self.state).set_enabled(Category.MONEY_AMOUNT_PLN_USD, False)
-        self.assertIsNone(self.observe(frame("app.two", b"1234 PLN")))
+        self.assertIsNone(
+            self.observe(frame("app.two", b"1234 PLN")).notification
+        )
         entry = self.history.recent()[0]
         self.assertEqual("none", entry.highest_risk)
         self.assertEqual((), entry.category_counts)
 
     def test_bridge_result_json_is_bounded_and_content_free(self):
-        safe = bridge_result_json(None)
+        safe = bridge_result_json(BridgeObservation(None, True))
         warning = bridge_result_json(self.observe(frame("app.two", b"1234 PLN")))
         self.assertEqual(
-            '{"version":1,"risk":"none","categories":[]}\n',
+            '{"version":1,"risk":"none","categories":[],'
+            '"history_eligible":true}\n',
             safe,
         )
         self.assertIn('"risk":"low"', warning)
         self.assertIn('"MONEY_AMOUNT_PLN_USD"', warning)
         self.assertNotIn("1234", warning)
         self.assertLessEqual(len(warning.encode("ascii")), 2048)
+
+    def test_disabled_warning_filter_does_not_enable_secret_history(self):
+        FilterStore(self.state).set_enabled(Category.SECRET_ASSIGNMENT, False)
+        result = self.observe(
+            frame("app.synthetic", b"password: synthetic-value")
+        )
+        self.assertIsNone(result.notification)
+        self.assertFalse(result.history_eligible)
+
+    def test_disabled_text_history_does_not_disable_analysis_or_warning(self):
+        HistorySettingsStore(self.state).set_enabled(False)
+        result = self.observe(frame("app.synthetic", b"1234 PLN"))
+        self.assertEqual("low", result.notification.risk.value)
+        self.assertFalse(HistorySettingsStore(self.state).status().enabled)
 
     def test_pause_rejects_event_before_history_or_result(self):
         self.pause.pause_indefinitely()

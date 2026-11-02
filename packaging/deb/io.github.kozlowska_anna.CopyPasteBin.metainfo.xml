@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>io.github.kozlowska_anna.CopyPasteBin</id>
@@ -26,6 +29,7 @@
     <binary>cpb</binary>
   </provides>
   <releases>
+    <release version="1.2" date="2026-11-01"/>
     <release version="1.1" date="2026-10-20"/>
     <release version="1.0.0" date="2026-10-18"/>
   </releases>

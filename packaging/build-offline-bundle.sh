@@ -1,10 +1,30 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 #!/usr/bin/env bash
 set -Eeuo pipefail
 umask 022
 
 readonly ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)"
-readonly VERSION="1.1"
-readonly SOURCE_DATE_EPOCH="1792454400"
+readonly CHANNEL="${CPB_BUNDLE_CHANNEL:-release}"
+case "$CHANNEL" in
+    release)
+        VERSION="1.2"
+        PYTHON_PROJECT_VERSION="1.2"
+        EXTENSION_VERSION="7"
+        ;;
+    development)
+        VERSION="1.3-dev"
+        PYTHON_PROJECT_VERSION="1.3.dev0"
+        EXTENSION_VERSION="8"
+        ;;
+    *)
+        printf 'Nieobsługiwany kanał budowy: %s\n' "$CHANNEL" >&2
+        exit 2
+        ;;
+esac
+readonly VERSION PYTHON_PROJECT_VERSION EXTENSION_VERSION
+readonly SOURCE_DATE_EPOCH="1793491200"
 readonly UUID="copypastebin@kozlowska-anna.github.io"
 readonly WINDOW_APPLICATION_IDS=(
     "io.github.copypastebin.Editor"
@@ -15,12 +35,17 @@ readonly WINDOW_APPLICATION_IDS=(
     "io.github.copypastebin.About"
 )
 readonly BUNDLE_NAME="CopyPasteBin-linux-$VERSION"
-readonly DIST_DIR="$ROOT/dist"
+readonly DIST_DIR="${CPB_BUNDLE_DIST_DIR:-$ROOT/dist}"
 readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/copypastebin-bundle.XXXXXX")"
 readonly BUILD_SOURCE_DIR="$WORK_DIR/source"
 readonly STAGE_DIR="$WORK_DIR/$BUNDLE_NAME"
 readonly PAYLOAD_DIR="$STAGE_DIR/payload"
 readonly PYTHON_BIN="${PYTHON_BIN:-python3}"
+
+[[ "$DIST_DIR" = /* && "$DIST_DIR" != "/" ]] || {
+    printf 'Katalog artefaktów musi być bezwzględną, zawężoną ścieżką.\n' >&2
+    exit 2
+}
 
 cleanup() {
     chmod -R u+w -- "$WORK_DIR" 2>/dev/null || true
@@ -39,6 +64,28 @@ export SOURCE_DATE_EPOCH
 cp -- "$ROOT/pyproject.toml" "$ROOT/LICENSE" "$ROOT/NOTICE" \
     "$BUILD_SOURCE_DIR/"
 cp -a -- "$ROOT/src/." "$BUILD_SOURCE_DIR/src/"
+if [[ "$CHANNEL" == "development" ]]; then
+    "$PYTHON_BIN" - \
+        "$BUILD_SOURCE_DIR/pyproject.toml" \
+        "$BUILD_SOURCE_DIR/src/copypastebin/__init__.py" \
+        "$PYTHON_PROJECT_VERSION" <<'PY'
+from pathlib import Path
+import sys
+
+pyproject = Path(sys.argv[1])
+package_init = Path(sys.argv[2])
+version = sys.argv[3]
+
+for path, old, new in (
+    (pyproject, 'version = "1.2"', f'version = "{version}"'),
+    (package_init, '__version__ = "1.2"', f'__version__ = "{version}"'),
+):
+    source = path.read_text(encoding="utf-8")
+    if source.count(old) != 1:
+        raise SystemExit(f"unexpected version marker in {path}")
+    path.write_text(source.replace(old, new, 1), encoding="utf-8")
+PY
+fi
 find "$BUILD_SOURCE_DIR" -type d -exec chmod 0755 -- {} +
 find "$BUILD_SOURCE_DIR" -type f -exec chmod 0644 -- {} +
 
@@ -46,7 +93,39 @@ find "$BUILD_SOURCE_DIR" -type f -exec chmod 0644 -- {} +
     --wheel-dir "$PAYLOAD_DIR" "$BUILD_SOURCE_DIR" >/dev/null
 
 cp -a -- "$ROOT/gnome-extension/$UUID" "$PAYLOAD_DIR/"
-glib-compile-schemas "$PAYLOAD_DIR/$UUID/schemas"
+if [[ "$CHANNEL" == "development" ]]; then
+    "$PYTHON_BIN" - \
+        "$PAYLOAD_DIR/$UUID/about.js" \
+        "$PAYLOAD_DIR/$UUID/metadata.json" \
+        "$VERSION" "$EXTENSION_VERSION" <<'PY'
+from pathlib import Path
+import json
+import sys
+
+about_path = Path(sys.argv[1])
+metadata_path = Path(sys.argv[2])
+display_version = sys.argv[3]
+extension_version = int(sys.argv[4])
+
+about = about_path.read_text(encoding="utf-8")
+old = "const VERSION = '1.2';"
+if about.count(old) != 1:
+    raise SystemExit("unexpected About version marker")
+about_path.write_text(
+    about.replace(old, f"const VERSION = '{display_version}';", 1),
+    encoding="utf-8",
+)
+
+metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+if metadata.get("version") != 7:
+    raise SystemExit("unexpected extension version marker")
+metadata["version"] = extension_version
+metadata_path.write_text(
+    json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+    encoding="utf-8",
+)
+PY
+fi
 cp -- "$ROOT/packaging/copypastebin.desktop" "$PAYLOAD_DIR/copypastebin.desktop"
 cp -- "$ROOT/packaging/persist-extension-enablement.js" \
     "$PAYLOAD_DIR/persist-extension-enablement.js"
@@ -57,6 +136,8 @@ done
 cp -- "$ROOT/packaging/copypastebin-app.svg" "$PAYLOAD_DIR/copypastebin.svg"
 cp -- "$ROOT/packaging/offline/install.sh" "$STAGE_DIR/install.sh"
 cp -- "$ROOT/packaging/offline/uninstall.sh" "$STAGE_DIR/uninstall.sh"
+cp -- "$ROOT/packaging/offline/refresh-user-icon-cache.sh" \
+    "$STAGE_DIR/refresh-user-icon-cache.sh"
 cp -- "$ROOT/packaging/offline/diagnose-first-activation.sh" \
     "$STAGE_DIR/diagnose-first-activation.sh"
 for document in README.md README.pl.md INSTALL.md INSTALL.pl.md; do
@@ -70,10 +151,12 @@ sed 's|(image-redaction.md)|(IMAGE-REDACTION.md)|g' "$ROOT/docs/image-redaction.
 cp -- "$ROOT/LICENSE" "$STAGE_DIR/LICENSE"
 cp -- "$ROOT/NOTICE" "$STAGE_DIR/NOTICE"
 chmod 0755 -- "$STAGE_DIR/install.sh" "$STAGE_DIR/uninstall.sh" \
+    "$STAGE_DIR/refresh-user-icon-cache.sh" \
     "$STAGE_DIR/diagnose-first-activation.sh"
 find "$STAGE_DIR" -type d -exec chmod 0755 -- {} +
 find "$STAGE_DIR" -type f -exec chmod 0444 -- {} +
 chmod 0555 -- "$STAGE_DIR/install.sh" "$STAGE_DIR/uninstall.sh" \
+    "$STAGE_DIR/refresh-user-icon-cache.sh" \
     "$STAGE_DIR/diagnose-first-activation.sh"
 
 (

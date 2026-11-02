@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
@@ -11,6 +14,8 @@ readonly WINDOW_APPLICATION_IDS=(
     "io.github.copypastebin.RecentClipboard"
     "io.github.copypastebin.About"
 )
+readonly SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+readonly ICON_CACHE_HELPER="$SCRIPT_DIR/refresh-user-icon-cache.sh"
 readonly APP_DIR="$HOME/.local/share/copypastebin"
 readonly EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/$UUID"
 readonly LEGACY_EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/$LEGACY_UUID"
@@ -40,6 +45,9 @@ rm -f -- "$LAUNCHER_PATH" "$ICON_PATH"
 for application_id in "${WINDOW_APPLICATION_IDS[@]}"; do
     rm -f -- "$HOME/.local/share/applications/$application_id.desktop"
 done
+if [[ -x "$ICON_CACHE_HELPER" && ! -L "$ICON_CACHE_HELPER" ]]; then
+    "$ICON_CACHE_HELPER" || true
+fi
 
 printf '%s\n' \
     'CopyPasteBin został odinstalowany.' \

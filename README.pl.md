@@ -1,10 +1,13 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 # <img src="website/assets/images/logo-web.svg" alt="Ikona CopyPasteBin" width="44" height="44"> CopyPasteBin
 
 [English](README.md) | **Polski**
 
 **[Otwórz stronę CopyPasteBin](https://kozlowska-anna.github.io/CopyPasteBin/)**
 
-[Pobierz wersję 1.1](#instalacja-wersji-11) · [Dokumentacja](#dokumentacja) · [Model bezpieczeństwa](docs/security.pl.md)
+[Pobierz wersję 1.2](#instalacja-wersji-12) · [Dokumentacja](#dokumentacja) · [Model bezpieczeństwa](docs/security.pl.md)
 
 ## Więcej kontroli zanim wkleisz
 
@@ -20,8 +23,8 @@ zawsze należy do Ciebie.
   i domyślnie nie zmienia schowka automatycznie.
 - **Twoje dane zostają na komputerze.** Wykrywanie i anonimizacja działają bez
   wysyłania treści do chmury.
-- **Łatwiej poprawiasz tekst.** Bezpieczne wklejenie i edytor pomagają usunąć
-  albo zanonimizować wybrane wartości przed użyciem.
+- **Łatwiej poprawiasz tekst.** Edytor pomaga usunąć albo zanonimizować
+  wybrane wartości przed użyciem.
 
 ### W codziennej pracy
 
@@ -52,14 +55,14 @@ wszystkich danych wrażliwych i nie blokuje wklejania.
   zastąpić schowek dopiero po sprawdzeniu wyniku.
 - **Anonimizacja obrazów:** na żądanie otwórz lokalny plik PNG lub JPEG,
   zakryj wybrane obszary i zapisz nowy PNG bez modyfikowania oryginału.
-- **Bezpieczne wklejenie:** skrót `Super+Shift+V` sprawdza tekst bez
-  automatycznego wklejania go do aktywnej aplikacji.
 - **Dokładne wykluczenia:** znane trafienie niskiego lub średniego ryzyka można
   wyciszyć bez wyłączania całej kategorii. Trafień wysokiego i krytycznego
   ryzyka nie można trwale wykluczać.
 - **Lokalny model historii:** trwała historia zawiera ograniczone metadane i
   HMAC, a nie treść schowka. Do 15 ostatnich tekstów może być przechowywanych
-  w pamięci bieżącej sesji.
+  w pamięci bieżącej sesji; rozpoznane sekrety i tekst wysokiego ryzyka nie
+  trafiają na tę listę nawet po wyłączeniu odpowiadającego im filtra ostrzeżeń.
+  Zapisywanie historii można wyłączyć bez zatrzymywania analizy i edytora.
 - **Konfigurowalna ochrona:** można zmieniać kategorie detekcji, dodawać własne
   reguły dosłowne, wstrzymać monitorowanie albo świadomie włączyć czyszczenie
   niezmienionego ostrzegającego schowka po 1, 5 lub 15 minutach.
@@ -138,7 +141,7 @@ lecz nie treść schowka.
 
 ## Zgodność
 
-Wersja 1.1 obsługuje następujące środowisko:
+Wersja 1.2 obsługuje następujące środowisko:
 
 | Element | Wymaganie |
 | --- | --- |
@@ -149,16 +152,19 @@ Wersja 1.1 obsługuje następujące środowisko:
 | Dodatkowe komponenty | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
 
 Integracje z pulpitami Cinnamon, KDE Plasma i Xfce nie są obsługiwane w wersji
-1.1. Instalator bezpiecznie zatrzymuje się, jeśli GNOME Shell nie jest
+1.2. Instalator bezpiecznie zatrzymuje się, jeśli GNOME Shell nie jest
 dostępny.
 
-## Instalacja wersji 1.1
+## Instalacja wersji 1.2
 
 Wybierz jeden sposób instalacji:
 
-- [⬇ Pobierz pakiet Debiana](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb) do instalacji systemowej zarządzanej przez APT.
-- [⬇ Pobierz archiwum tar.gz](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz) do instalacji lokalnej bez `sudo`.
-- [Pobierz `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS) i sprawdź wybrany plik przed jego otwarciem:
+- Pobierz trzy pakiety Debiana w dokładnie tej samej wersji:
+  `copypastebin-backend`, `gnome-shell-extension-copypastebin` i
+  `copypastebin` z [wydania v1.2](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2),
+  aby wykonać instalację systemową zarządzaną przez APT.
+- [⬇ Pobierz archiwum tar.gz](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz) do instalacji lokalnej bez `sudo`.
+- [Pobierz `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/SHA256SUMS) i sprawdź wybrane pliki przed ich otwarciem:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
@@ -246,10 +252,22 @@ Nie wymagają prawdziwej treści schowka ani prywatnych danych użytkownika.
 ```sh
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 PYTHONPATH=src python3 benchmarks/detection_quality.py
+PYTHONPATH=src python3 benchmarks/detection_performance.py
+PYTHONPATH=src python3 benchmarks/detection_performance.py --minimal-bridge
+PYTHONPATH=src python3 benchmarks/persistent_bridge_performance.py
 ```
 
 Syntetyczny benchmark detekcji zakończył się wynikiem 26/26. Kontrole
-automatyczne nie zastępują testu w działającej sesji GNOME Shell.
+automatyczne nie zastępują testu w działającej sesji GNOME Shell. Benchmark
+wydajności oddziela czas samego silnika reguł od kosztu uruchomienia procesu,
+zapisu filtra i backendowej obsługi zdarzenia przez most GNOME; jego wyniki
+zależą od komputera i aktualnego obciążenia systemu. Opcja
+`--minimal-bridge` mierzy eksperymentalny, nieaktywny punkt wejścia mostu bez
+przełączania na niego rozszerzenia GNOME. Benchmark procesu rezydentnego
+sprawdza produkcyjny worker ze stanem syntetycznym w katalogu tymczasowym.
+Klient GNOME uruchamia worker leniwie, utrzymuje najwyżej jedno aktywne żądanie
+i kończy proces przy pauzie, blokadzie, wyłączeniu rozszerzenia, błędzie albo
+po 30 sekundach bezczynności.
 
 ## Licencja i autorstwo
 

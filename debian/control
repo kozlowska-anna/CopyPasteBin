@@ -1,0 +1,59 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Source: copypastebin
+Section: utils
+Priority: optional
+Maintainer: Anna Kozłowska <copypastebin@op.pl>
+Build-Depends:
+ debhelper-compat (= 13),
+Standards-Version: 4.7.3
+Rules-Requires-Root: no
+Homepage: https://github.com/kozlowska-anna/CopyPasteBin
+
+Package: copypastebin-backend
+Architecture: all
+Depends:
+ ${misc:Depends},
+ python3 (>= 3.11),
+Breaks: copypastebin (<< 1.2~)
+Replaces: copypastebin (<< 1.2~)
+Description: local analysis backend for CopyPasteBin
+ CopyPasteBin's short-lived command-line backend detects selected kinds of
+ sensitive text and prepares local redaction suggestions. It does not install
+ or enable a GNOME extension, start a service, or send data to a cloud service.
+
+Package: gnome-shell-extension-copypastebin
+Section: gnome
+Architecture: all
+Depends:
+ ${misc:Depends},
+ copypastebin-backend (= ${binary:Version}),
+ gir1.2-gdkpixbuf-2.0,
+ gir1.2-glib-2.0,
+ gir1.2-gtk-4.0,
+ gjs,
+ gnome-shell (>= 50~),
+ gnome-shell (<< 51~),
+Breaks: copypastebin (<< 1.2~)
+Replaces: copypastebin (<< 1.2~)
+Description: GNOME Shell interface for CopyPasteBin
+ CopyPasteBin detects selected kinds of sensitive clipboard text and secrets,
+ warns when sensitive content is detected, and helps the user redact text
+ before sharing.
+ .
+ It also provides manual redaction of selected areas in local photos and
+ screenshots. Analysis and editing stay on the device; no data is sent to a
+ cloud service. This release supports GNOME Shell 50 on Wayland and requires
+ explicit per-user activation after installation.
+
+Package: copypastebin
+Architecture: all
+Depends:
+ ${misc:Depends},
+ copypastebin-backend (= ${binary:Version}),
+ gnome-shell-extension-copypastebin (= ${binary:Version}),
+Description: complete CopyPasteBin installation for GNOME
+ This small package installs the matching CopyPasteBin backend and GNOME Shell
+ extension. Keeping the existing package name makes upgrades from the 1.1
+ monolithic package install the complete split product.

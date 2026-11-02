@@ -1,16 +1,30 @@
-CopyPasteBin 1.1 Debian package
-===============================
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+CopyPasteBin split Debian packages
+==================================
 
-This package installs CopyPasteBin as a system GNOME Shell extension. It does
-not enable the extension during package installation because package manager
-actions run as root and must not modify an arbitrary user's GNOME settings.
+The `copypastebin` package is a small complete-installation package. It depends
+on the exactly matching `copypastebin-backend` and
+`gnome-shell-extension-copypastebin` packages. The backend can be installed on
+its own for use with a separately distributed extension.
+
+The extension package does not enable the extension during installation
+because package manager actions run as root and must not modify an arbitrary
+user's GNOME settings.
 
 After installation, log out and back in to GNOME Wayland. Open the application
-menu and choose "Enable CopyPasteBin" (Polish: "Włącz CopyPasteBin"). This
+menu and choose "CopyPasteBin". This
 explicit action enables only the CopyPasteBin extension for the currently
 logged-in user. It does not enable the extension for other accounts. The
 launcher refuses activation while a user-local extension with the same UUID
 exists, preventing GNOME from silently selecting older code.
+
+During that explicit per-user activation, the launcher also asks GTK to
+rebuild only the current user's hicolor icon cache. This repairs a stale icon
+entry that an older offline uninstaller could leave after removing its local
+CopyPasteBin icon. The repair does not read CopyPasteBin settings, history or
+clipboard data, and failure to refresh the cache does not block activation.
 
 The package contains AppStream metadata, the GPL-3.0-or-later project license,
 the developer name, homepage and product icon. A graphical installer may still
@@ -23,12 +37,18 @@ If CopyPasteBin was previously installed from the offline archive, run that
 archive's current uninstall.sh before installing this package. The offline
 uninstaller preserves ~/.config/copypastebin and ~/.local/state/copypastebin.
 A user-local extension with the same UUID takes precedence over this system
-extension. CopyPasteBin 1.1 uses `/usr/bin/cpb` first when both backends are
-available, but an older user-local copy of the extension does not contain that
-resolver and could keep using the old user-local backend. The DEB launcher
+extension. The system extension uses `/usr/bin/cpb` first when both backends
+are available, but an older user-local copy of the extension could keep using
+the old user-local backend. The DEB launcher
 therefore requires removal of the old offline program code before activation;
 it does not remove that code or private data automatically.
 
-Removing this package removes only package-owned program files. User settings
-and metadata history under ~/.config/copypastebin and
-~/.local/state/copypastebin are not package-owned and remain in place.
+Removing any of the split packages removes only package-owned program files.
+User settings and metadata history under ~/.config/copypastebin and
+~/.local/state/copypastebin are not package-owned and remain in place. Removing
+only the extension package leaves the backend installed.
+
+To remove the complete split installation explicitly, remove
+`copypastebin`, `gnome-shell-extension-copypastebin`, and
+`copypastebin-backend`. Removing only the small `copypastebin` metapackage
+does not by itself prove that the two dependency packages were removed.

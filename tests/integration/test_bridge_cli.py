@@ -1,10 +1,15 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 import io
+import json
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from copypastebin import cli
+from copypastebin import bridge_cli, cli
+from copypastebin import __version__
 from copypastebin.config import save_customizations
 from copypastebin.detection import CustomLiteralExclusion
 from copypastebin.history import HistoryStore
@@ -50,6 +55,39 @@ class BridgeCliTests(unittest.TestCase):
         )
         return code, stdout.getvalue(), stderr.getvalue()
 
+    def test_capabilities_are_stateless_and_do_not_read_input(self):
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        input_stream = _Input(b"synthetic-private-canary")
+        with patch("copypastebin.cli.HistoryStore") as history_type:
+            code = cli.main(
+                [
+                    "--state-dir",
+                    str(self.state),
+                    "--config",
+                    str(self.config),
+                    "bridge",
+                    "capabilities",
+                ],
+                stdin=input_stream,
+                stdout=stdout,
+                stderr=stderr,
+            )
+        self.assertEqual(0, code)
+        self.assertEqual("", stderr.getvalue())
+        self.assertEqual(
+            {
+                "document_version": 1,
+                "product_version": __version__,
+                "protocol_version": 2,
+            },
+            json.loads(stdout.getvalue()),
+        )
+        self.assertNotIn("synthetic-private-canary", stdout.getvalue())
+        self.assertFalse(self.state.exists())
+        self.assertFalse(self.config.exists())
+        history_type.assert_not_called()
+
     def test_observe_returns_only_bounded_safe_metadata_and_records_no_content(self):
         canary = "ordinary private canary"
         code, stdout, stderr = self.run_cli(
@@ -58,7 +96,8 @@ class BridgeCliTests(unittest.TestCase):
         self.assertEqual(0, code)
         self.assertEqual("", stderr)
         self.assertEqual(
-            '{"version":1,"risk":"none","categories":[]}\n',
+            '{"version":1,"risk":"none","categories":[],'
+            '"history_eligible":true}\n',
             stdout,
         )
         entry = HistoryStore(self.state).recent()[0]
@@ -81,7 +120,8 @@ class BridgeCliTests(unittest.TestCase):
         )
         self.assertEqual((0, ""), (code, stderr))
         self.assertEqual(
-            '{"version":1,"risk":"none","categories":[]}\n',
+            '{"version":1,"risk":"none","categories":[],'
+            '"history_eligible":true}\n',
             stdout,
         )
 
@@ -105,7 +145,8 @@ class BridgeCliTests(unittest.TestCase):
         code, stdout, stderr = self.run_cli(frame("app.one", "5.6 Sol"))
         self.assertEqual((0, ""), (code, stderr))
         self.assertEqual(
-            '{"version":1,"risk":"none","categories":[]}\n',
+            '{"version":1,"risk":"none","categories":[],'
+            '"history_eligible":true}\n',
             stdout,
         )
 
@@ -128,6 +169,78 @@ class BridgeCliTests(unittest.TestCase):
                     "Operacja nie powiodła się bez ujawniania danych wejściowych.\n",
                     stderr,
                 )
+
+class MinimalBridgeCliTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.state = Path(self.temporary.name) / "state"
+        self.config = Path(self.temporary.name) / "missing.toml"
+
+    def tearDown(self):
+        self.temporary.cleanup()
+
+    def run_cli(self, payload, *, arguments=None):
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        selected_arguments = (
+            [
+                "--state-dir",
+                str(self.state),
+                "--config",
+                str(self.config),
+                "bridge",
+                "observe",
+            ]
+            if arguments is None
+            else arguments
+        )
+        code = bridge_cli.main(
+            selected_arguments,
+            stdin=_Input(payload),
+            stdout=stdout,
+            stderr=stderr,
+        )
+        return code, stdout.getvalue(), stderr.getvalue()
+
+    def test_capabilities_match_full_cli_without_state_access(self):
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with patch("copypastebin.bridge_cli.HistoryStore") as history_type:
+            code = bridge_cli.main(
+                ["bridge", "capabilities"],
+                stdin=_Input(b"synthetic-private-canary"),
+                stdout=stdout,
+                stderr=stderr,
+            )
+        self.assertEqual((0, ""), (code, stderr.getvalue()))
+        self.assertEqual(__version__, json.loads(stdout.getvalue())["product_version"])
+        self.assertFalse(self.state.exists())
+        history_type.assert_not_called()
+
+    def test_observe_matches_bounded_bridge_result_and_records_no_content(self):
+        canary = "person@example.invalid"
+        code, stdout, stderr = self.run_cli(frame("app.one", canary))
+        self.assertEqual((0, ""), (code, stderr))
+        self.assertIn('"risk":"medium"', stdout)
+        self.assertNotIn(canary, stdout)
+        self.assertNotIn(
+            canary.encode(), HistoryStore(self.state).database_path.read_bytes()
+        )
+
+    def test_pause_bad_frame_and_usage_fail_without_echoing_input(self):
+        PauseStore(self.state).pause_indefinitely()
+        code, stdout, stderr = self.run_cli(
+            frame("app.one", "private-canary")
+        )
+        self.assertEqual((1, ""), (code, stdout))
+        self.assertNotIn("private-canary", stderr)
+
+        code, stdout, stderr = self.run_cli(
+            b"private-canary",
+            arguments=["--unknown-private-canary"],
+        )
+        self.assertEqual((2, ""), (code, stdout))
+        self.assertNotIn("private-canary", stderr)
 
 
 if __name__ == "__main__":

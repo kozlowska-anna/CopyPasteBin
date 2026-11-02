@@ -1,14 +1,21 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 from __future__ import annotations
 
 import json
+import re
+from dataclasses import dataclass
 from typing import BinaryIO
 
-from .application import inspect_and_record
+from . import __version__
 from .application_id import MAX_APPLICATION_ID_LENGTH, normalize_application_id
-from .clipboard import MAX_INPUT_BYTES
 from .config import load_customizations
+from .detection import RULESET_VERSION, analysis_from_detections, detect_text
 from .filters import FilterStore
 from .history import HistoryStore
+from .history_policy import history_text_is_eligible
+from .input_sources import MAX_INPUT_BYTES
 from .models import RiskLevel
 from .notifications import SafeNotification
 from .pause import PauseStore
@@ -16,6 +23,10 @@ from .pause import PauseStore
 
 FRAME_HEADER_BYTES = 4
 MAX_BRIDGE_RESULT_BYTES = 2048
+CAPABILITIES_DOCUMENT_VERSION = 1
+BACKEND_PROTOCOL_VERSION = 2
+MAX_CAPABILITIES_RESULT_BYTES = 512
+_PRODUCT_VERSION = re.compile(r"[0-9A-Za-z][0-9A-Za-z.+_-]{0,63}\Z")
 
 
 class BridgeError(Exception):
@@ -26,13 +37,39 @@ class BridgeError(Exception):
         return "BridgeError(redacted=True)"
 
 
+@dataclass(frozen=True, slots=True, repr=False)
+class BridgeObservation:
+    notification: SafeNotification | None
+    history_eligible: bool
+
+    def __repr__(self) -> str:
+        return (
+            "BridgeObservation(notification="
+            f"{self.notification!r}, history_eligible={self.history_eligible!r})"
+        )
+
+
+def capabilities_json() -> str:
+    if not _PRODUCT_VERSION.fullmatch(__version__):
+        raise BridgeError()
+    payload = {
+        "document_version": CAPABILITIES_DOCUMENT_VERSION,
+        "product_version": __version__,
+        "protocol_version": BACKEND_PROTOCOL_VERSION,
+    }
+    rendered = json.dumps(payload, ensure_ascii=True, separators=(",", ":")) + "\n"
+    if len(rendered.encode("ascii")) > MAX_CAPABILITIES_RESULT_BYTES:
+        raise BridgeError()
+    return rendered
+
+
 def observe_framed_event(
     stream: BinaryIO,
     *,
     history: HistoryStore,
     pause: PauseStore,
     config_path=None,
-) -> SafeNotification | None:
+) -> BridgeObservation:
     if pause.status().paused:
         raise BridgeError()
     header = _read_exact(stream, FRAME_HEADER_BYTES)
@@ -54,33 +91,52 @@ def observe_framed_event(
     if not text or "\x00" in text:
         raise BridgeError()
     custom_rules, custom_exclusions = load_customizations(config_path)
-    result = inspect_and_record(
+    detections = detect_text(text, custom_rules)
+    history_eligible = history_text_is_eligible(text, detections)
+    analysis = analysis_from_detections(
         text,
-        source_kind="clipboard_event",
+        detections,
+        FilterStore(history.state_dir).status().disabled,
+        custom_exclusions,
+    )
+    history.record(
+        text,
+        "clipboard_event",
+        "other",
+        analysis,
+        "warned",
+        ruleset_version=RULESET_VERSION + (
+            "+custom" if custom_rules or custom_exclusions else ""
+        ),
         source_application=application,
         destination_application="unknown",
-        purpose="other",
-        history=history,
-        custom_rules=custom_rules,
-        custom_exclusions=custom_exclusions,
-        disabled_categories=FilterStore(history.state_dir).status().disabled,
     )
-    if result.analysis.highest_risk is not RiskLevel.NONE:
-        return SafeNotification(
-            result.analysis.highest_risk,
-            result.analysis.category_counts,
+    notification = None
+    if analysis.highest_risk is not RiskLevel.NONE:
+        notification = SafeNotification(
+            analysis.highest_risk,
+            analysis.category_counts,
         )
-    return None
+    return BridgeObservation(notification, history_eligible)
 
 
-def bridge_result_json(notification: SafeNotification | None) -> str:
+def bridge_result_json(observation: BridgeObservation) -> str:
+    if type(observation) is not BridgeObservation:
+        raise BridgeError()
+    notification = observation.notification
     if notification is None:
-        payload = {"version": 1, "risk": "none", "categories": []}
+        payload = {
+            "version": 1,
+            "risk": "none",
+            "categories": [],
+            "history_eligible": observation.history_eligible,
+        }
     elif type(notification) is SafeNotification:
         payload = {
             "version": 1,
             "risk": notification.risk.value,
             "categories": [list(item) for item in notification.category_counts],
+            "history_eligible": observation.history_eligible,
         }
     else:
         raise BridgeError()

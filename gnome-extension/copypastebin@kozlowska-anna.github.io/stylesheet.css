@@ -1,3 +1,6 @@
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
+Failed to create stream fd: Operation not permitted
 .cpb-banner-action {
     color: #ffffff;
     background-color: rgba(255, 255, 255, 0.14);
@@ -15,4 +18,22 @@
 
 .cpb-banner-action:active {
     background-color: rgba(255, 255, 255, 0.42);
+}
+
+.cpb-state-accent {
+    min-width: 12px;
+    padding-right: 8px;
+    font-size: 0.9em;
+}
+
+.cpb-state-active {
+    color: #26a269;
+}
+
+.cpb-state-inactive {
+    color: #77767b;
+}
+
+.cpb-state-error {
+    color: #c01c28;
 }
