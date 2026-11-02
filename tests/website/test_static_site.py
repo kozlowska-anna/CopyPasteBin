@@ -1,621 +1,5 @@
-from __future__ import annotations
-
-import json
-import re
-import unittest
-import xml.etree.ElementTree as ET
-from html.parser import HTMLParser
-from pathlib import Path
-from urllib.parse import urlparse
-
-
-ROOT = Path(__file__).resolve().parents[2]
-SITE = ROOT / "website"
-PAGES = (SITE / "index.html", SITE / "en" / "index.html")
-EXPECTED_CANONICALS = {
-    "pl": "https://kozlowska-anna.github.io/CopyPasteBin/",
-    "en": "https://kozlowska-anna.github.io/CopyPasteBin/en/",
-}
-EXPECTED_METADATA = {
-    "pl": {
-        "title": "CopyPasteBin | Mened≈ºer schowka dla GNOME",
-        "h1": "Sprawd≈∫, zanim wkleisz.",
-        "description": (
-            "CopyPasteBin to mened≈ºer schowka dla GNOME, kt√≥ry wykrywa dane "
-            "wra≈ºliwe, ostrzega przed wklejeniem i umo≈ºliwia lokalnƒÖ anonimizacjƒô "
-            "tekstu i obraz√≥w."
-        ),
-    },
-    "en": {
-        "title": "CopyPasteBin | Clipboard Manager for GNOME",
-        "h1": "Check Before You Paste.",
-        "description": (
-            "CopyPasteBin is a clipboard manager for GNOME with sensitive-data "
-            "detection, paste warnings, text and image redaction, and a built-in paste editor."
-        ),
-    },
-}
-EXPECTED_COMPATIBILITY = {
-    "pl": (
-        "Wymagane ≈õrodowisko.",
-        "Przyk≈Çad zgodnej dystrybucji:",
-        "Ubuntu 26.04 LTS (GNOME 50, Wayland)",
-        "Obecnie nieobs≈Çugiwane ≈õrodowiska: KDE Plasma, Cinnamon, Xfce oraz sesje X11.",
-        "Zgodno≈õƒá zale≈ºy od ≈õrodowiska graficznego i jego wersji, a nie wy≈ÇƒÖcznie od nazwy dystrybucji.",
-    ),
-    "en": (
-        "Required environment.",
-        "Example of a compatible Linux distribution:",
-        "Ubuntu 26.04 LTS (GNOME 50, Wayland)",
-        "Currently unsupported: KDE Plasma, Cinnamon, Xfce, and X11 sessions.",
-        "Compatibility depends on the desktop environment and its version, not just the Linux distribution.",
-    ),
-}
-
-
-class PageParser(HTMLParser):
-    def __init__(self) -> None:
-        super().__init__(convert_charrefs=True)
-        self.html_lang = ""
-        self.ids: list[str] = []
-        self.h1_count = 0
-        self.h1_text = ""
-        self.in_h1 = False
-        self.title = ""
-        self.in_title = False
-        self.links: list[dict[str, str]] = []
-        self.metas: list[dict[str, str]] = []
-        self.resources: list[str] = []
-        self.buttons: list[dict[str, str]] = []
-        self.images: list[dict[str, str]] = []
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        data = {key: value or "" for key, value in attrs}
-        if tag == "html":
-            self.html_lang = data.get("lang", "")
-        if "id" in data:
-            self.ids.append(data["id"])
-        if tag == "h1":
-            self.h1_count += 1
-            self.in_h1 = True
-        if tag == "title":
-            self.in_title = True
-        if tag in {"a", "link"}:
-            self.links.append(data)
-        if tag == "meta":
-            self.metas.append(data)
-        if tag == "button":
-            self.buttons.append(data)
-        if tag == "img":
-            self.images.append(data)
-        if tag in {"img", "script"} and data.get("src"):
-            self.resources.append(data["src"])
-        if tag == "link" and data.get("rel") in {"stylesheet", "icon"} and data.get("href"):
-            self.resources.append(data["href"])
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag == "title":
-            self.in_title = False
-        if tag == "h1":
-            self.in_h1 = False
-
-    def handle_data(self, data: str) -> None:
-        if self.in_title:
-            self.title += data
-        if self.in_h1:
-            self.h1_text += data
-
-
-def parse_page(path: Path) -> PageParser:
-    parser = PageParser()
-    parser.feed(path.read_text(encoding="utf-8"))
-    parser.close()
-    return parser
-
-
-def meta_content(parser: PageParser, *, name: str | None = None, prop: str | None = None) -> str:
-    for meta in parser.metas:
-        if name and meta.get("name") == name:
-            return meta.get("content", "")
-        if prop and meta.get("property") == prop:
-            return meta.get("content", "")
-    return ""
-
-
-class StaticSiteTests(unittest.TestCase):
-    def test_required_public_files_exist(self) -> None:
-        for relative in ("index.html", "en/index.html", "robots.txt", "sitemap.xml", ".nojekyll"):
-            self.assertTrue((SITE / relative).is_file(), relative)
-
-    def test_pages_have_valid_structure_and_unique_ids(self) -> None:
-        for page in PAGES:
-            with self.subTest(page=page.relative_to(SITE)):
-                parser = parse_page(page)
-                self.assertIn(parser.html_lang, EXPECTED_CANONICALS)
-                self.assertEqual(parser.h1_count, 1)
-                self.assertTrue(10 <= len(parser.title.strip()) <= 65)
-                self.assertEqual(len(parser.ids), len(set(parser.ids)))
-                self.assertTrue(any(link.get("href") == "#main" for link in parser.links))
-                self.assertTrue(all(button.get("type") == "button" for button in parser.buttons))
-
-    def test_seo_metadata_is_complete_and_language_specific(self) -> None:
-        titles: set[str] = set()
-        descriptions: set[str] = set()
-        for page in PAGES:
-            parser = parse_page(page)
-            lang = parser.html_lang
-            canonical = next(
-                link.get("href", "")
-                for link in parser.links
-                if link.get("rel") == "canonical"
-            ) if any(link.get("rel") == "canonical" for link in parser.links) else ""
-            alternatives = {
-                link.get("hreflang"): link.get("href")
-                for link in parser.links
-                if link.get("rel") == "alternate"
-            }
-            description = meta_content(parser, name="description")
-            expected = EXPECTED_METADATA[lang]
-            self.assertEqual(canonical, EXPECTED_CANONICALS[lang])
-            self.assertEqual(alternatives.get("pl"), EXPECTED_CANONICALS["pl"])
-            self.assertEqual(alternatives.get("en"), EXPECTED_CANONICALS["en"])
-            self.assertEqual(alternatives.get("x-default"), EXPECTED_CANONICALS["pl"])
-            self.assertEqual(parser.title.strip(), expected["title"])
-            self.assertEqual(parser.h1_text.strip(), expected["h1"])
-            self.assertEqual(description, expected["description"])
-            self.assertTrue(80 <= len(description) <= 180)
-            self.assertEqual(meta_content(parser, prop="og:url"), canonical)
-            self.assertEqual(meta_content(parser, prop="og:site_name"), "CopyPasteBin")
-            self.assertEqual(meta_content(parser, prop="og:title"), expected["title"])
-            self.assertEqual(meta_content(parser, prop="og:description"), expected["description"])
-            self.assertTrue(meta_content(parser, prop="og:image").startswith("https://"))
-            self.assertTrue(meta_content(parser, prop="og:image").endswith("share-card-1.1.png"))
-            self.assertEqual(meta_content(parser, name="twitter:image"), meta_content(parser, prop="og:image"))
-            titles.add(parser.title.strip())
-            descriptions.add(description)
-        self.assertEqual(len(titles), len(PAGES))
-        self.assertEqual(len(descriptions), len(PAGES))
-
-    def test_software_application_structured_data_is_factual_and_bilingual(self) -> None:
-        for page in PAGES:
-            parser = parse_page(page)
-            source = page.read_text(encoding="utf-8")
-            match = re.search(
-                r'<script type="application/ld\+json">\s*(.*?)\s*</script>',
-                source,
-                flags=re.DOTALL,
-            )
-            self.assertIsNotNone(match, page)
-            data = json.loads(match.group(1))
-            lang = parser.html_lang
-            self.assertEqual(data["@context"], "https://schema.org")
-            self.assertEqual(data["@type"], "SoftwareApplication")
-            self.assertEqual(data["name"], "CopyPasteBin")
-            self.assertEqual(data["softwareVersion"], "1.1")
-            self.assertEqual(data["applicationCategory"], "SecurityApplication")
-            self.assertEqual(data["mainEntityOfPage"], EXPECTED_CANONICALS[lang])
-            self.assertEqual(data["description"], EXPECTED_METADATA[lang]["description"])
-            self.assertEqual(data["offers"]["price"], 0)
-            self.assertTrue(data["isAccessibleForFree"])
-            self.assertEqual(len(data["downloadUrl"]), 2)
-            self.assertGreaterEqual(len(data["featureList"]), 4)
-            self.assertNotIn("aggregateRating", data)
-            self.assertNotIn("review", data)
-
-    def test_all_local_links_and_resources_resolve(self) -> None:
-        for page in PAGES:
-            parser = parse_page(page)
-            candidates = [link.get("href", "") for link in parser.links] + parser.resources
-            for raw in candidates:
-                with self.subTest(page=page.relative_to(SITE), target=raw):
-                    if not raw or raw.startswith(("#", "https://", "mailto:", "tel:")):
-                        continue
-                    target = (page.parent / raw.split("#", 1)[0].split("?", 1)[0]).resolve()
-                    self.assertTrue(target.is_relative_to(SITE.resolve()))
-                    self.assertTrue(target.exists(), target)
-
-    def test_repository_documents_linked_from_site_exist(self) -> None:
-        prefix = "https://github.com/kozlowska-anna/CopyPasteBin/blob/main/"
-        for page in PAGES:
-            for link in parse_page(page).links:
-                href = link.get("href", "")
-                if not href.startswith(prefix):
-                    continue
-                target = ROOT / href.removeprefix(prefix)
-                with self.subTest(page=page.relative_to(SITE), target=target.relative_to(ROOT)):
-                    self.assertTrue(target.is_file(), target)
-
-    def test_internal_fragments_resolve(self) -> None:
-        for page in PAGES:
-            parser = parse_page(page)
-            ids = set(parser.ids)
-            for link in parser.links:
-                href = link.get("href", "")
-                if href.startswith("#"):
-                    self.assertIn(href[1:], ids, (page, href))
-
-    def test_images_are_accessible_and_dimensioned(self) -> None:
-        for page in PAGES:
-            for image in parse_page(page).images:
-                with self.subTest(page=page.relative_to(SITE), src=image.get("src")):
-                    self.assertIn("alt", image)
-                    if not image.get("src"):
-                        continue
-                    self.assertTrue(image.get("width"))
-                    self.assertTrue(image.get("height"))
-
-    def test_runtime_resources_are_local(self) -> None:
-        for page in PAGES:
-            parser = parse_page(page)
-            for resource in parser.resources:
-                self.assertFalse(urlparse(resource).scheme, (page, resource))
-
-    def test_language_switch_is_bidirectional(self) -> None:
-        polish = parse_page(SITE / "index.html")
-        english = parse_page(SITE / "en" / "index.html")
-        self.assertTrue(any(link.get("hreflang") == "en" and link.get("href") == "en/" for link in polish.links))
-        self.assertTrue(any(link.get("hreflang") == "pl" and link.get("href") == "../" for link in english.links))
-
-    def test_distribution_examples_are_bilingual(self) -> None:
-        for page in PAGES:
-            parser = parse_page(page)
-            source = page.read_text(encoding="utf-8")
-            for expected_text in EXPECTED_COMPATIBILITY[parser.html_lang]:
-                with self.subTest(page=page.relative_to(SITE), text=expected_text):
-                    self.assertIn(expected_text, source)
-
-    def test_version_1_1_release_is_described_consistently(self) -> None:
-        expected_by_language = {
-            "pl": (
-                "Wydanie ¬∑ 1.1",
-                "Anonimizacja obraz√≥w",
-                "Dwa instalatory z tego samego kodu",
-                "Pakiet DEB",
-                "Archiwum tar.gz",
-                "copypastebin_1.1-1_all.deb",
-                "CopyPasteBin-linux-1.1.tar.gz",
-                "releases/download/v1.1/copypastebin_1.1-1_all.deb",
-                "releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz",
-                "releases/download/v1.1/SHA256SUMS",
-                "sha256sum --check --ignore-missing SHA256SUMS",
-                "Watch ‚Üí Custom ‚Üí Releases",
-                "Oba warianty instalacji sprawdzono w docelowym ≈õrodowisku GNOME/Wayland",
-                "Aktualizacja pakietu DEB wymaga obecnie pobrania nowej wersji i zainstalowania jej przez APT",
-            ),
-            "en": (
-                "Release ¬∑ 1.1",
-                "Image redaction",
-                "Two installers from the same source",
-                "DEB package",
-                "tar.gz archive",
-                "copypastebin_1.1-1_all.deb",
-                "CopyPasteBin-linux-1.1.tar.gz",
-                "releases/download/v1.1/copypastebin_1.1-1_all.deb",
-                "releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz",
-                "releases/download/v1.1/SHA256SUMS",
-                "sha256sum --check --ignore-missing SHA256SUMS",
-                "Watch ‚Üí Custom ‚Üí Releases",
-                "Both installation variants were checked in the target GNOME/Wayland environment",
-                "Updating the DEB package currently requires downloading the new version and installing it through APT",
-            ),
-        }
-        for page in PAGES:
-            parser = parse_page(page)
-            source = page.read_text(encoding="utf-8")
-            for expected_text in expected_by_language[parser.html_lang]:
-                with self.subTest(page=page.relative_to(SITE), text=expected_text):
-                    self.assertIn(expected_text, source)
-            self.assertNotIn("Kandydat do wydania", source)
-            self.assertNotIn("Release candidate", source)
-            self.assertNotIn("pozostaje nieopublikowana", source)
-            self.assertNotIn("remains unpublished", source)
-            self.assertNotIn("Pobierz stabilne 1.0.0", source)
-            self.assertNotIn("Download stable 1.0.0", source)
-            self.assertNotIn("26/26", source)
-
-    def test_public_roadmap_separates_commitments_from_exploration(self) -> None:
-        expected_by_language = {
-            "pl": (
-                'id="roadmapa"',
-                "Co dalej z CopyPasteBin.",
-                "Planowane",
-                "Wygodniejsze przygotowanie tre≈õci",
-                "Wiƒôcej sposob√≥w ochrony",
-                "Badamy",
-                "Wersja 1.1 pozwala rƒôcznie zakrywaƒá fragmenty obraz√≥w",
-                "/ROADMAP.pl.md",
-            ),
-            "en": (
-                'id="roadmap"',
-                "What‚Äôs next for CopyPasteBin.",
-                "Planned",
-                "Easier content preparation",
-                "More ways to protect content",
-                "Exploring",
-                "Version 1.1 lets you manually cover parts of images",
-                "/ROADMAP.md",
-            ),
-        }
-        for page in PAGES:
-            parser = parse_page(page)
-            source = page.read_text(encoding="utf-8")
-            for expected_text in expected_by_language[parser.html_lang]:
-                with self.subTest(page=page.relative_to(SITE), text=expected_text):
-                    self.assertIn(expected_text, source)
-            self.assertNotIn("wyra≈ºenia regularne", source)
-            self.assertNotIn("regular expressions", source)
-            self.assertNotIn("Domkniƒôcie wersji 1.1", source)
-            self.assertNotIn("Finalize version 1.1", source)
-
-    def test_product_positioning_and_privacy_summary_are_bilingual(self) -> None:
-        expected_by_language = {
-            "pl": (
-                "Privacy-focused Clipboard Manager",
-                "Mened≈ºer, ale nie klasyczne archiwum schowka.",
-                "ochrona przed niefortunnym klikniƒôciem",
-                "Lokalnie, bez konta i chmury.",
-            ),
-            "en": (
-                "Privacy-focused Clipboard Manager",
-                "not a traditional clipboard archive",
-                "built-in paste editor",
-                "Local, with no account or cloud.",
-            ),
-        }
-        for page in PAGES:
-            parser = parse_page(page)
-            source = page.read_text(encoding="utf-8")
-            self.assertIn('class="product-positioning"', source)
-            for expected_text in expected_by_language[parser.html_lang]:
-                with self.subTest(page=page.relative_to(SITE), text=expected_text):
-                    self.assertIn(expected_text, source)
-
-    def test_use_cases_present_four_concrete_bilingual_situations(self) -> None:
-        expected_by_language = {
-            "pl": (
-                'id="zastosowania"',
-                'href="#zastosowania">Zastosowania</a>',
-                "Kiedy mo≈ºe siƒô przydaƒá CopyPasteBin?",
-                "Gdy piszesz wiadomo≈õƒá",
-                "Gdy pracujesz z kodem lub terminalem",
-                "Gdy korzystasz z narzƒôdzia AI",
-                "sprawd≈∫ kopiowany fragment dokumentu",
-                "Gdy udostƒôpniasz obraz",
-            ),
-            "en": (
-                'id="use-cases"',
-                'href="#use-cases">Use cases</a>',
-                "When might CopyPasteBin help?",
-                "When writing a message",
-                "When working with code or a terminal",
-                "When using an AI tool",
-                "review copied text from a document",
-                "When sharing an image",
-            ),
-        }
-        for page in PAGES:
-            parser = parse_page(page)
-            source = page.read_text(encoding="utf-8")
-            for expected_text in expected_by_language[parser.html_lang]:
-                with self.subTest(page=page.relative_to(SITE), text=expected_text):
-                    self.assertIn(expected_text, source)
-            section_id = "zastosowania" if parser.html_lang == "pl" else "use-cases"
-            section = re.search(
-                rf'<section[^>]+id="{section_id}"[^>]*>(?P<body>.*?)</section>',
-                source,
-                re.DOTALL,
-            )
-            self.assertIsNotNone(section)
-            body = section.group("body")
-            self.assertIn('class="use-case-list"', body)
-            self.assertEqual(body.count("<li>"), 4)
-            self.assertNotIn("trust-strip", body)
-            self.assertNotIn("trust-item", body)
-
-    def test_clipboard_editor_is_presented_as_a_general_text_tool(self) -> None:
-        expected_by_language = {
-            "pl": ("Podrƒôczny edytor tre≈õci", "wprowad≈∫ rƒôczne poprawki", "dopiero po Twojej akceptacji"),
-            "en": ("Handy text editor", "make manual changes", "only after your confirmation"),
-        }
-        for page in PAGES:
-            parser = parse_page(page)
-            source = page.read_text(encoding="utf-8")
-            for expected_text in expected_by_language[parser.html_lang]:
-                with self.subTest(page=page.relative_to(SITE), text=expected_text):
-                    self.assertIn(expected_text, source)
-
-    def test_features_lead_with_the_owner_priorities(self) -> None:
-        expected_by_language = {
-            "pl": (
-                "Podrƒôczny edytor tre≈õci",
-                "Anonimizacja obraz√≥w",
-                "Regu≈Çy i dok≈Çadne wykluczenia",
-                "Historia ostatnich 15 kopiowa≈Ñ",
-                "Cztery poziomy ryzyka",
-            ),
-            "en": (
-                "Handy text editor",
-                "Image redaction",
-                "Rules and exact exceptions",
-                "15-item clipboard history",
-                "Four risk levels",
-            ),
-        }
-        for page in PAGES:
-            parser = parse_page(page)
-            source = page.read_text(encoding="utf-8")
-            section_id = "mozliwosci" if parser.html_lang == "pl" else "features"
-            section = re.search(
-                rf'<section[^>]+id="{section_id}"[^>]*>(?P<body>.*?)</section>',
-                source,
-                re.DOTALL,
-            )
-            self.assertIsNotNone(section)
-            body = section.group("body")
-            positions = [body.index(text) for text in expected_by_language[parser.html_lang]]
-            self.assertEqual(positions, sorted(positions), page)
-
-    def test_gallery_contains_full_uncropped_screenshot_set(self) -> None:
-        expected_by_language = {
-            "pl": {
-                "01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png",
-                "02-copypastebin-1-1-ostrzezenie-przed-wklejeniem-danych-wrazliwych-PL.png",
-                "03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png",
-                "04-copypastebin-1-1-selektywna-anonimizacja-narzedzia-edycji-PL.png",
-                "05-copypastebin-1-1-reguly-wlasne-dokladne-wykluczenia-PL.png",
-                "06-copypastebin-1-1-lokalny-edytor-anonimizacji-obrazow-PL.png",
-                "07-copypastebin-1-1-tymczasowa-historia-schowka-PL.png",
-            },
-            "en": {
-                "01-copypastebin-1-1-clipboard-manager-menu-gnome-EN.png",
-                "02-copypastebin-1-1-sensitive-data-paste-warning-EN.png",
-                "03-copypastebin-1-1-clipboard-editor-risk-highlighting-EN.png",
-                "04-copypastebin-1-1-selective-anonymization-editing-tools-EN.png",
-                "05-copypastebin-1-1-custom-rules-exact-exceptions-EN.png",
-                "06-copypastebin-1-1-local-image-redaction-editor-EN.png",
-                "07-copypastebin-1-1-session-only-clipboard-history-EN.png",
-            },
-        }
-        for page in PAGES:
-            parser = parse_page(page)
-            sources = {
-                Path(image.get("src", "")).name
-                for image in parser.images
-            }
-            self.assertTrue(expected_by_language[parser.html_lang].issubset(sources), page)
-
-        css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8")
-        gallery_rule = re.search(r"\.gallery-button img\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
-        self.assertIsNotNone(gallery_rule)
-        body = gallery_rule.group("body")
-        self.assertIn("width: auto", body)
-        self.assertIn("height: auto", body)
-        self.assertIn("object-fit: contain", body)
-        self.assertNotIn("aspect-ratio", body)
-        self.assertNotIn("object-fit: cover", body)
-
-    def test_page_uses_plain_white_section_backgrounds(self) -> None:
-        css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8").lower()
-        self.assertNotIn("gradient(", css)
-        for selector in ("body", ".site-header", ".hero", ".section-soft", ".section-dark", ".cta"):
-            with self.subTest(selector=selector):
-                rule = re.search(rf"{re.escape(selector)}\s*\{{(?P<body>[^}}]*)\}}", css, re.DOTALL)
-                self.assertIsNotNone(rule)
-                self.assertRegex(rule.group("body"), r"background:\s*(?:#fff|var\(--paper\));")
-
-    def test_site_palette_uses_one_cyan_accent_without_green(self) -> None:
-        css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8").lower()
-        for token in (
-            "--ink: #14243a",
-            "--cyan: #0f789f",
-            "--cyan-dark: #075d7d",
-            "--line: #d6e2f0",
-        ):
-            self.assertIn(token, css)
-        self.assertNotIn("--green", css)
-        self.assertNotIn("--blue", css)
-        self.assertNotIn("--violet", css)
-        self.assertNotIn("#178143", css)
-        self.assertNotIn("#0f6833", css)
-        primary = re.search(r"\.button-primary\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
-        self.assertIsNotNone(primary)
-        self.assertIn("background: var(--cyan)", primary.group("body"))
-
-    def test_hero_arranges_all_four_product_risk_banners(self) -> None:
-        expected = {
-            "risk-low": "#245f9e",
-            "risk-medium": "#8a5a00",
-            "risk-high": "#a61b29",
-            "risk-critical": "#67101b",
-        }
-        css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8").lower()
-        for page in PAGES:
-            source = page.read_text(encoding="utf-8")
-            self.assertNotIn("HMAC", source)
-            self.assertGreaterEqual(source.lower().count("open source"), 2, page)
-            self.assertEqual(source.count('class="project-credit"'), 2, page)
-            self.assertIn("ChatGPT", source)
-            self.assertIn("Codex", source)
-            self.assertIn("OpenAI", source)
-            self.assertLess(source.index("ChatGPT"), source.index("GPL-3.0-or-later", source.index("ChatGPT")), page)
-            self.assertIn('href="#jak-dziala"' if page == SITE / "index.html" else 'href="#how-it-works"', source)
-            for class_name in expected:
-                self.assertEqual(source.count(f"risk-banner {class_name}"), 1, (page, class_name))
-            self.assertNotIn("home path", source.lower())
-            self.assertNotIn("≈õcie≈ºka domowa", source.lower())
-            self.assertNotIn("seed phrase", source.lower())
-            self.assertNotIn("fraza seed", source.lower())
-            self.assertNotIn("GitHub Pages documentation", source)
-            self.assertNotIn("Bez udawania, ≈ºe ryzyko znika", source)
-            self.assertNotIn("Without pretending risk disappears", source)
-            self.assertNotIn('name="keywords"', source.lower())
-            self.assertIn("styles.css?v=20261026-3", source)
-            self.assertIn("site.js?v=20261019-6", source)
-        stack_rule = re.search(r"\.risk-stack\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
-        banner_rule = re.search(r"\.risk-banner\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
-        self.assertIsNotNone(stack_rule)
-        self.assertIsNotNone(banner_rule)
-        self.assertIn("position: relative", stack_rule.group("body"))
-        self.assertIn("position: absolute", banner_rule.group("body"))
-        brand_rule = re.search(r"\.brand img\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
-        self.assertIsNotNone(brand_rule)
-        self.assertIn("width: 3.25rem", brand_rule.group("body"))
-        self.assertIn("height: 3.25rem", brand_rule.group("body"))
-        card_rule = re.search(
-            r"\.system-card,\s*\.download-card\s*\{(?P<body>[^}]*)\}",
-            css,
-            re.DOTALL,
-        )
-        self.assertIsNotNone(card_rule)
-        self.assertIn("min-width: 0", card_rule.group("body"))
-        for class_name, color in expected.items():
-            rule = re.search(rf"\.{class_name}\s*\{{(?P<body>[^}}]*)\}}", css, re.DOTALL)
-            self.assertIsNotNone(rule)
-            self.assertIn(f"background: {color}", rule.group("body"))
-
-    def test_visible_brand_uses_web_svg_with_dark_navy_contour(self) -> None:
-        css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8").lower()
-        app_logo = SITE / "assets" / "images" / "logo.svg"
-        web_logo = SITE / "assets" / "images" / "logo-web.svg"
-        share_card = SITE / "assets" / "images" / "share-card-1.1.png"
-        self.assertTrue(app_logo.is_file())
-        self.assertTrue(web_logo.is_file())
-        self.assertTrue(share_card.is_file())
-        self.assertGreater(share_card.stat().st_size, 10_000)
-        ET.parse(app_logo)
-        ET.parse(web_logo)
-        web_logo_source = web_logo.read_text(encoding="utf-8").lower()
-        self.assertGreaterEqual(web_logo_source.count('stroke="#071d35"'), 2)
-        for color in ("#50c8ff", "#ffd12e", "#ff5a69", "#c92f52"):
-            self.assertIn(color, web_logo_source)
-        for page in PAGES:
-            source = page.read_text(encoding="utf-8")
-            self.assertNotIn('logo.png"', source)
-            self.assertEqual(source.count("logo-web.svg"), 3, page)
-        self.assertGreaterEqual(css.count("drop-shadow(0 0 1px #061827)"), 2)
-
-    def test_sitemap_and_robots_match_public_urls(self) -> None:
-        sitemap = ET.parse(SITE / "sitemap.xml")
-        namespace = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-        locations = {node.text for node in sitemap.findall("s:url/s:loc", namespace)}
-        self.assertEqual(locations, set(EXPECTED_CANONICALS.values()))
-        robots = (SITE / "robots.txt").read_text(encoding="utf-8")
-        self.assertIn("Allow: /", robots)
-        self.assertIn("https://kozlowska-anna.github.io/CopyPasteBin/sitemap.xml", robots)
-
-    def test_publish_tree_contains_no_symlinks_or_obvious_private_paths(self) -> None:
-        files = [path for path in SITE.rglob("*") if path.is_file()]
-        self.assertTrue(files)
-        self.assertFalse(any(path.is_symlink() for path in SITE.rglob("*")))
-        text = "\n".join(
-            path.read_text(encoding="utf-8", errors="ignore")
-            for path in files
-            if path.suffix in {".html", ".css", ".js", ".txt", ".xml"}
-        )
-        self.assertNotRegex(text, re.compile(r"/home/(?!example(?:/|\b))[^\s<]+"))
-        self.assertNotIn("BEGIN PRIVATE KEY", text)
-        self.assertNotIn("github_pat_", text)
-
-
-if __name__ == "__main__":
-    unittest.main()
+®•y€hr∑öµÎ-≠Ê¶}”©z∂≠äâÁ¢⁄^Æh≠µÁEj)^v⁄≠Ê≠zÀky©ütÍ^≠´b¢yË∂ó´ö+my—ZäWù∂á+y´^≤⁄ﬁjg›:ó´jÿ®ûz-•ÍÊä€^uô…Ω¥Å}}ô’—’…ï}|Å•µ¡Ω…–ÅÖππΩ—Ö—•ΩπÃ()•µ¡Ω…–Å©ÕΩ∏)•µ¡Ω…–Å…î)•µ¡Ω…–Å’π•——ïÕ–)•µ¡Ω…–Å·µ∞πï—…ïîπ±ïµïπ—Q…ïîÅÖÃÅP)ô…Ω¥Å°—µ∞π¡Ö…Õï»Å•µ¡Ω…–Å!Q51AÖ…Õï»)ô…Ω¥Å¡Ö—°±•àÅ•µ¡Ω…–ÅAÖ—†)ô…Ω¥Å’…±±•àπ¡Ö…ÕîÅ•µ¡Ω…–Å’…±¡Ö…Õî(()I==PÄÙÅAÖ—†°}}ô•±ï}|§π…ïÕΩ±Ÿî†§π¡Ö…ïπ—Õl…t)M%QÄÙÅI==PÄºÄâ›ïâÕ•—îà)ALÄÙÄ°M%QÄºÄâ•πëï‡π°—µ∞à∞ÅM%QÄºÄâï∏àÄºÄâ•πëï‡π°—µ∞à§)aAQ}9=9%1LÄÙÅÏ(ÄÄÄÄâ¡∞àËÄâ°——¡ÃËºΩ≠ΩÈ±Ω›Õ≠ÑµÖππÑπù•—°’àπ•ºΩΩ¡ÂAÖÕ—ï	•∏ºà∞(ÄÄÄÄâï∏àËÄâ°——¡ÃËºΩ≠ΩÈ±Ω›Õ≠ÑµÖππÑπù•—°’àπ•ºΩΩ¡ÂAÖÕ—ï	•∏Ωï∏ºà∞)Ù)aAQ}5QQÄÙÅÏ(ÄÄÄÄâ¡∞àËÅÏ(ÄÄÄÄÄÄÄÄâ—•—±îàËÄâΩ¡ÂAÖÕ—ï	•∏ÅÅ5ïπïìÒï»ÅÕç°Ω›≠ÑÅë±ÑÅ9=5à∞(ÄÄÄÄÄÄÄÄâ†ƒàËÄâM¡…Ö›ìË∞ÅÈÖπ•¥Å›≠±ï•ÕË∏à∞(ÄÄÄÄÄÄÄÄâëïÕç…•¡—•Ω∏àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄâΩ¡ÂAÖÕ—ï	•∏Å—ºÅµïπïìÒï»ÅÕç°Ω›≠ÑÅë±ÑÅ9=5∞Å≠”Õ…‰Å›Â≠…Â›ÑÅëÖπîÄà(ÄÄÄÄÄÄÄÄÄÄÄÄâ›…áÒ±•›î∞ÅΩÕ—…ÈïùÑÅ¡…ÈïêÅ›≠±ï©ïπ•ï¥Å§Å’µøÒ±•›•ÑÅ±Ω≠Ö±ªÅÖπΩπ•µ•ÈÖç´dÄà(ÄÄÄÄÄÄÄÄÄÄÄÄâ—ï≠Õ—‘Å§ÅΩâ…ÖÎÕ‹∏à(ÄÄÄÄÄÄÄÄ§∞(ÄÄÄÅÙ∞(ÄÄÄÄâï∏àËÅÏ(ÄÄÄÄÄÄÄÄâ—•—±îàËÄâΩ¡ÂAÖÕ—ï	•∏ÅÅ±•¡âΩÖ…êÅ5ÖπÖùï»ÅôΩ»Å9=5à∞(ÄÄÄÄÄÄÄÄâ†ƒàËÄâ°ïç¨Å	ïôΩ…îÅeΩ‘ÅAÖÕ—î∏à∞(ÄÄÄÄÄÄÄÄâëïÕç…•¡—•Ω∏àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄâΩ¡ÂAÖÕ—ï	•∏Å•ÃÅÑÅç±•¡âΩÖ…êÅµÖπÖùï»ÅôΩ»Å9=5Å›•—†ÅÕïπÕ•—•ŸîµëÖ—ÑÄà(ÄÄÄÄÄÄÄÄÄÄÄÄâëï—ïç—•Ω∏∞Å¡ÖÕ—îÅ›Ö…π•πùÃ∞Å—ï·–ÅÖπêÅ•µÖùîÅ…ïëÖç—•Ω∏∞ÅÖπêÅÑÅâ’•±–µ•∏Å¡ÖÕ—îÅïë•—Ω»∏à(ÄÄÄÄÄÄÄÄ§∞(ÄÄÄÅÙ∞)Ù)aAQ}=5AQ%	%1%QdÄÙÅÏ(ÄÄÄÄâ¡∞àËÄ†(ÄÄÄÄÄÄÄÄâ]ÂµÖùÖπîÉm…ΩëΩ›•Õ≠º∏à∞(ÄÄÄÄÄÄÄÄâA…ÈÂØ	ÖêÅÈùΩëπï®ÅëÂÕ—…Ââ’ç©§Ëà∞(ÄÄÄÄÄÄÄÄâUâ’π—‘Ä»ÿ∏¿–Å1QLÄ°9=5Ä‘¿∞Å]ÖÂ±Öπê§à∞(ÄÄÄÄÄÄÄÄâ=âïçπ•îÅπ•ïΩâœ	’ù•›ÖπîÉm…ΩëΩ›•Õ≠ÑËÅ-ÅA±ÖÕµÑ∞Å•ππÖµΩ∏∞ÅaôçîÅΩ…ÖËÅÕïÕ©îÅ`ƒƒ∏à∞(ÄÄÄÄÄÄÄÄâiùΩëπøoÅÈÖ±óÒ‰ÅΩêÉm…ΩëΩ›•Õ≠ÑÅù…Öô•çÈπïùºÅ§Å©ïùºÅ›ï…Õ©§∞ÅÑÅπ•îÅ›ÁçÈπ•îÅΩêÅπÖÈ›‰ÅëÂÕ—…Ââ’ç©§∏à∞(ÄÄÄÄ§∞(ÄÄÄÄâï∏àËÄ†(ÄÄÄÄÄÄÄÄâIï≈’•…ïêÅïπŸ•…Ωπµïπ–∏à∞(ÄÄÄÄÄÄÄÄâ·Öµ¡±îÅΩòÅÑÅçΩµ¡Ö—•â±îÅ1•π’‡Åë•Õ—…•â’—•Ω∏Ëà∞(ÄÄÄÄÄÄÄÄâUâ’π—‘Ä»ÿ∏¿–Å1QLÄ°9=5Ä‘¿∞Å]ÖÂ±Öπê§à∞(ÄÄÄÄÄÄÄÄâ’……ïπ—±‰Å’πÕ’¡¡Ω…—ïêËÅ-ÅA±ÖÕµÑ∞Å•ππÖµΩ∏∞Åaôçî∞ÅÖπêÅ`ƒƒÅÕïÕÕ•ΩπÃ∏à∞(ÄÄÄÄÄÄÄÄâΩµ¡Ö—•â•±•—‰Åëï¡ïπëÃÅΩ∏Å—°îÅëïÕ≠—Ω¿ÅïπŸ•…Ωπµïπ–ÅÖπêÅ•—ÃÅŸï…Õ•Ω∏∞ÅπΩ–Å©’Õ–Å—°îÅ1•π’‡Åë•Õ—…•â’—•Ω∏∏à∞(ÄÄÄÄ§∞)Ù(()ç±ÖÕÃÅAÖùïAÖ…Õï»°!Q51AÖ…Õï»§Ë(ÄÄÄÅëïòÅ}}•π•—}|°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅÕ’¡ï»†§π}}•π•—}|°çΩπŸï…—}ç°Ö……ïôÃıQ…’î§(ÄÄÄÄÄÄÄÅÕï±òπ°—µ±}±ÖπúÄÙÄàà(ÄÄÄÄÄÄÄÅÕï±òπ•ëÃËÅ±•Õ—mÕ—…tÄÙÅmt(ÄÄÄÄÄÄÄÅÕï±òπ†≈}çΩ’π–ÄÙÄ¿(ÄÄÄÄÄÄÄÅÕï±òπ†≈}—ï·–ÄÙÄàà(ÄÄÄÄÄÄÄÅÕï±òπ•π}†ƒÄÙÅÖ±Õî(ÄÄÄÄÄÄÄÅÕï±òπ—•—±îÄÙÄàà(ÄÄÄÄÄÄÄÅÕï±òπ•π}—•—±îÄÙÅÖ±Õî(ÄÄÄÄÄÄÄÅÕï±òπ±•π≠ÃËÅ±•Õ—më•ç—mÕ—»∞ÅÕ—…utÄÙÅmt(ÄÄÄÄÄÄÄÅÕï±òπµï—ÖÃËÅ±•Õ—më•ç—mÕ—»∞ÅÕ—…utÄÙÅmt(ÄÄÄÄÄÄÄÅÕï±òπ…ïÕΩ’…çïÃËÅ±•Õ—mÕ—…tÄÙÅmt(ÄÄÄÄÄÄÄÅÕï±òπâ’——ΩπÃËÅ±•Õ—më•ç—mÕ—»∞ÅÕ—…utÄÙÅmt(ÄÄÄÄÄÄÄÅÕï±òπ•µÖùïÃËÅ±•Õ—më•ç—mÕ—»∞ÅÕ—…utÄÙÅmt((ÄÄÄÅëïòÅ°Öπë±ï}Õ—Ö…——Öú°Õï±ò∞Å—ÖúËÅÕ—»∞ÅÖ——…ÃËÅ±•Õ—m—’¡±ïmÕ—»∞ÅÕ—»ÅÅ9Ωπïut§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅëÖ—ÑÄÙÅÌ≠ï‰ËÅŸÖ±’îÅΩ»ÄààÅôΩ»Å≠ï‰∞ÅŸÖ±’îÅ•∏ÅÖ——…ÕÙ(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄâ°—µ∞àË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ°—µ±}±ÖπúÄÙÅëÖ—Ñπùï–†â±Öπúà∞Äàà§(ÄÄÄÄÄÄÄÅ•òÄâ•êàÅ•∏ÅëÖ—ÑË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ•ëÃπÖ¡¡ïπê°ëÖ—Ölâ•êât§(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄâ†ƒàË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ†≈}çΩ’π–Ä¨ÙÄƒ(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ•π}†ƒÄÙÅQ…’î(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄâ—•—±îàË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ•π}—•—±îÄÙÅQ…’î(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÅ•∏ÅÏâÑà∞Äâ±•π¨âÙË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ±•π≠ÃπÖ¡¡ïπê°ëÖ—Ñ§(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄâµï—ÑàË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπµï—ÖÃπÖ¡¡ïπê°ëÖ—Ñ§(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄââ’——Ω∏àË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπâ’——ΩπÃπÖ¡¡ïπê°ëÖ—Ñ§(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄâ•µúàË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ•µÖùïÃπÖ¡¡ïπê°ëÖ—Ñ§(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÅ•∏ÅÏâ•µúà∞ÄâÕç…•¡–âÙÅÖπêÅëÖ—Ñπùï–†âÕ…åà§Ë(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ…ïÕΩ’…çïÃπÖ¡¡ïπê°ëÖ—ÖlâÕ…åât§(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄâ±•π¨àÅÖπêÅëÖ—Ñπùï–†â…ï∞à§Å•∏ÅÏâÕ—Â±ïÕ°ïï–à∞Äâ•çΩ∏âÙÅÖπêÅëÖ—Ñπùï–†â°…ïòà§Ë(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ…ïÕΩ’…çïÃπÖ¡¡ïπê°ëÖ—Ölâ°…ïòât§((ÄÄÄÅëïòÅ°Öπë±ï}ïπë—Öú°Õï±ò∞Å—ÖúËÅÕ—»§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄâ—•—±îàË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ•π}—•—±îÄÙÅÖ±Õî(ÄÄÄÄÄÄÄÅ•òÅ—ÖúÄÙÙÄâ†ƒàË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ•π}†ƒÄÙÅÖ±Õî((ÄÄÄÅëïòÅ°Öπë±ï}ëÖ—Ñ°Õï±ò∞ÅëÖ—ÑËÅÕ—»§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅ•òÅÕï±òπ•π}—•—±îË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ—•—±îÄ¨ÙÅëÖ—Ñ(ÄÄÄÄÄÄÄÅ•òÅÕï±òπ•π}†ƒË(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπ†≈}—ï·–Ä¨ÙÅëÖ—Ñ(()ëïòÅ¡Ö…Õï}¡Öùî°¡Ö—†ËÅAÖ—†§Ä¥¯ÅAÖùïAÖ…Õï»Ë(ÄÄÄÅ¡Ö…Õï»ÄÙÅAÖùïAÖ…Õï»†§(ÄÄÄÅ¡Ö…Õï»πôïïê°¡Ö—†π…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§§(ÄÄÄÅ¡Ö…Õï»πç±ΩÕî†§(ÄÄÄÅ…ï—’…∏Å¡Ö…Õï»(()ëïòÅµï—Ö}çΩπ—ïπ–°¡Ö…Õï»ËÅAÖùïAÖ…Õï»∞Ä®∞ÅπÖµîËÅÕ—»ÅÅ9ΩπîÄÙÅ9Ωπî∞Å¡…Ω¿ËÅÕ—»ÅÅ9ΩπîÄÙÅ9Ωπî§Ä¥¯ÅÕ—»Ë(ÄÄÄÅôΩ»Åµï—ÑÅ•∏Å¡Ö…Õï»πµï—ÖÃË(ÄÄÄÄÄÄÄÅ•òÅπÖµîÅÖπêÅµï—Ñπùï–†âπÖµîà§ÄÙÙÅπÖµîË(ÄÄÄÄÄÄÄÄÄÄÄÅ…ï—’…∏Åµï—Ñπùï–†âçΩπ—ïπ–à∞Äàà§(ÄÄÄÄÄÄÄÅ•òÅ¡…Ω¿ÅÖπêÅµï—Ñπùï–†â¡…Ω¡ï…—‰à§ÄÙÙÅ¡…Ω¿Ë(ÄÄÄÄÄÄÄÄÄÄÄÅ…ï—’…∏Åµï—Ñπùï–†âçΩπ—ïπ–à∞Äàà§(ÄÄÄÅ…ï—’…∏Äàà(()ç±ÖÕÃÅM—Ö—•çM•—ïQïÕ—Ã°’π•——ïÕ–πQïÕ—ÖÕî§Ë(ÄÄÄÅëïòÅ—ïÕ—}…ï≈’•…ïë}¡’â±•ç}ô•±ïÕ}ï·•Õ–°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅôΩ»Å…ï±Ö—•ŸîÅ•∏Ä†â•πëï‡π°—µ∞à∞Äâï∏Ω•πëï‡π°—µ∞à∞Äâ…ΩâΩ—Ãπ—·–à∞ÄâÕ•—ïµÖ¿π·µ∞à∞ÄàππΩ©ï≠Â±∞à§Ë(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î†°M%QÄºÅ…ï±Ö—•Ÿî§π•Õ}ô•±î†§∞Å…ï±Ö—•Ÿî§((ÄÄÄÅëïòÅ—ïÕ—}¡ÖùïÕ}°ÖŸï}ŸÖ±•ë}Õ—…’ç—’…ï}Öπë}’π•≈’ï}•ëÃ°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°¡Ö…Õï»π°—µ±}±Öπú∞ÅaAQ}9=9%1L§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°¡Ö…Õï»π†≈}çΩ’π–∞Äƒ§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î†ƒ¿ÄÙÅ±ï∏°¡Ö…Õï»π—•—±îπÕ—…•¿†§§ÄÙÄÿ‘§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°±ï∏°¡Ö…Õï»π•ëÃ§∞Å±ï∏°Õï–°¡Ö…Õï»π•ëÃ§§§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°Öπ‰°±•π¨πùï–†â°…ïòà§ÄÙÙÄàçµÖ•∏àÅôΩ»Å±•π¨Å•∏Å¡Ö…Õï»π±•π≠Ã§§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°Ö±∞°â’——Ω∏πùï–†â—Â¡îà§ÄÙÙÄââ’——Ω∏àÅôΩ»Åâ’——Ω∏Å•∏Å¡Ö…Õï»πâ’——ΩπÃ§§((ÄÄÄÅëïòÅ—ïÕ—}ÕïΩ}µï—ÖëÖ—Ö}•Õ}çΩµ¡±ï—ï}Öπë}±Öπù’Öùï}Õ¡ïç•ô•å°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅ—•—±ïÃËÅÕï—mÕ—…tÄÙÅÕï–†§(ÄÄÄÄÄÄÄÅëïÕç…•¡—•ΩπÃËÅÕï—mÕ—…tÄÙÅÕï–†§(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅ±ÖπúÄÙÅ¡Ö…Õï»π°—µ±}±Öπú(ÄÄÄÄÄÄÄÄÄÄÄÅçÖπΩπ•çÖ∞ÄÙÅπï·–†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ±•π¨πùï–†â°…ïòà∞Äàà§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å±•π¨Å•∏Å¡Ö…Õï»π±•π≠Ã(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ•òÅ±•π¨πùï–†â…ï∞à§ÄÙÙÄâçÖπΩπ•çÖ∞à(ÄÄÄÄÄÄÄÄÄÄÄÄ§Å•òÅÖπ‰°±•π¨πùï–†â…ï∞à§ÄÙÙÄâçÖπΩπ•çÖ∞àÅôΩ»Å±•π¨Å•∏Å¡Ö…Õï»π±•π≠Ã§Åï±ÕîÄàà(ÄÄÄÄÄÄÄÄÄÄÄÅÖ±—ï…πÖ—•ŸïÃÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ±•π¨πùï–†â°…ïô±Öπúà§ËÅ±•π¨πùï–†â°…ïòà§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å±•π¨Å•∏Å¡Ö…Õï»π±•π≠Ã(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ•òÅ±•π¨πùï–†â…ï∞à§ÄÙÙÄâÖ±—ï…πÖ—îà(ÄÄÄÄÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÄÄÄÄÅëïÕç…•¡—•Ω∏ÄÙÅµï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞ÅπÖµîÙâëïÕç…•¡—•Ω∏à§(ÄÄÄÄÄÄÄÄÄÄÄÅï·¡ïç—ïêÄÙÅaAQ}5QQm±Öπùt(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°çÖπΩπ•çÖ∞∞ÅaAQ}9=9%1Mm±Öπùt§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°Ö±—ï…πÖ—•ŸïÃπùï–†â¡∞à§∞ÅaAQ}9=9%1Mlâ¡∞ât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°Ö±—ï…πÖ—•ŸïÃπùï–†âï∏à§∞ÅaAQ}9=9%1Mlâï∏ât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°Ö±—ï…πÖ—•ŸïÃπùï–†â‡µëïôÖ’±–à§∞ÅaAQ}9=9%1Mlâ¡∞ât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°¡Ö…Õï»π—•—±îπÕ—…•¿†§∞Åï·¡ïç—ïëlâ—•—±îât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°¡Ö…Õï»π†≈}—ï·–πÕ—…•¿†§∞Åï·¡ïç—ïëlâ†ƒât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëïÕç…•¡—•Ω∏∞Åï·¡ïç—ïëlâëïÕç…•¡—•Ω∏ât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î†‡¿ÄÙÅ±ï∏°ëïÕç…•¡—•Ω∏§ÄÙÄƒ‡¿§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°µï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞Å¡…Ω¿ÙâΩúÈ’…∞à§∞ÅçÖπΩπ•çÖ∞§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°µï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞Å¡…Ω¿ÙâΩúÈÕ•—ï}πÖµîà§∞ÄâΩ¡ÂAÖÕ—ï	•∏à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°µï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞Å¡…Ω¿ÙâΩúÈ—•—±îà§∞Åï·¡ïç—ïëlâ—•—±îât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°µï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞Å¡…Ω¿ÙâΩúÈëïÕç…•¡—•Ω∏à§∞Åï·¡ïç—ïëlâëïÕç…•¡—•Ω∏ât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°µï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞Å¡…Ω¿ÙâΩúÈ•µÖùîà§πÕ—Ö…—Õ›•—††â°——¡ÃËººà§§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°µï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞Å¡…Ω¿ÙâΩúÈ•µÖùîà§πïπëÕ›•—††âÕ°Ö…îµçÖ…ê¥ƒ∏»π¡πúà§§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°µï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞ÅπÖµîÙâ—›•——ï»È•µÖùîà§∞Åµï—Ö}çΩπ—ïπ–°¡Ö…Õï»∞Å¡…Ω¿ÙâΩúÈ•µÖùîà§§(ÄÄÄÄÄÄÄÄÄÄÄÅ—•—±ïÃπÖëê°¡Ö…Õï»π—•—±îπÕ—…•¿†§§(ÄÄÄÄÄÄÄÄÄÄÄÅëïÕç…•¡—•ΩπÃπÖëê°ëïÕç…•¡—•Ω∏§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°±ï∏°—•—±ïÃ§∞Å±ï∏°AL§§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°±ï∏°ëïÕç…•¡—•ΩπÃ§∞Å±ï∏°AL§§((ÄÄÄÅëïòÅ—ïÕ—}ÕΩô—›Ö…ï}Ö¡¡±•çÖ—•Ωπ}Õ—…’ç—’…ïë}ëÖ—Ö}•Õ}ôÖç—’Ö±}Öπë}â•±•πù’Ö∞°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅµÖ—ç†ÄÙÅ…îπÕïÖ…ç††(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ»úÒÕç…•¡–Å—Â¡îÙâÖ¡¡±•çÖ—•Ω∏Ω±ëp≠©ÕΩ∏à˘qÃ®†∏®¸•qÃ®ΩÕç…•¡–¯ú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çî∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅô±ÖùÃı…îπ=Q10∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°µÖ—ç†∞Å¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅëÖ—ÑÄÙÅ©ÕΩ∏π±ΩÖëÃ°µÖ—ç†πù…Ω’¿†ƒ§§(ÄÄÄÄÄÄÄÄÄÄÄÅ±ÖπúÄÙÅ¡Ö…Õï»π°—µ±}±Öπú(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëÖ—ÖlâçΩπ—ï·–ât∞Äâ°——¡ÃËºΩÕç°ïµÑπΩ…úà§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëÖ—Ölâ—Â¡îât∞ÄâMΩô—›Ö…ï¡¡±•çÖ—•Ω∏à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëÖ—ÖlâπÖµîât∞ÄâΩ¡ÂAÖÕ—ï	•∏à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëÖ—ÖlâÕΩô—›Ö…ïYï…Õ•Ω∏ât∞Äàƒ∏»à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëÖ—ÖlâÖ¡¡±•çÖ—•ΩπÖ—ïùΩ…‰ât∞ÄâMïç’…•—Â¡¡±•çÖ—•Ω∏à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëÖ—ÖlâµÖ•ππ—•—Â=ôAÖùîât∞ÅaAQ}9=9%1Mm±Öπùt§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëÖ—ÖlâëïÕç…•¡—•Ω∏ât∞ÅaAQ}5QQm±ÖπùulâëïÕç…•¡—•Ω∏ât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ëÖ—ÖlâΩôôï…Ãâulâ¡…•çîât∞Ä¿§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°ëÖ—Ölâ•ÕççïÕÕ•â±ïΩ……ïîât§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°±ï∏°ëÖ—ÖlâëΩ›π±ΩÖëU…∞ât§∞Ä–§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—…ïÖ—ï…≈’Ö∞°±ï∏°ëÖ—ÖlâôïÖ—’…ï1•Õ–ât§∞Ä–§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âÖùù…ïùÖ—ïIÖ—•πúà∞ÅëÖ—Ñ§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â…ïŸ•ï‹à∞ÅëÖ—Ñ§((ÄÄÄÅëïòÅ—ïÕ—}Ö±±}±ΩçÖ±}±•π≠Õ}Öπë}…ïÕΩ’…çïÕ}…ïÕΩ±Ÿî°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅçÖπë•ëÖ—ïÃÄÙÅm±•π¨πùï–†â°…ïòà∞Äàà§ÅôΩ»Å±•π¨Å•∏Å¡Ö…Õï»π±•π≠ÕtÄ¨Å¡Ö…Õï»π…ïÕΩ’…çïÃ(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å…Ö‹Å•∏ÅçÖπë•ëÖ—ïÃË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞Å—Ö…ùï–ı…Ö‹§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ•òÅπΩ–Å…Ö‹ÅΩ»Å…Ö‹πÕ—Ö…—Õ›•—†††àåà∞Äâ°——¡ÃËººà∞ÄâµÖ•±—ºËà∞Äâ—ï∞Ëà§§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅçΩπ—•π’î(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ—Ö…ùï–ÄÙÄ°¡Öùîπ¡Ö…ïπ–ÄºÅ…Ö‹πÕ¡±•–†àåà∞Äƒ•l¡tπÕ¡±•–†à¸à∞Äƒ•l¡t§π…ïÕΩ±Ÿî†§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°—Ö…ùï–π•Õ}…ï±Ö—•Ÿï}—º°M%Qπ…ïÕΩ±Ÿî†§§§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°—Ö…ùï–πï·•Õ—Ã†§∞Å—Ö…ùï–§((ÄÄÄÅëïòÅ—ïÕ—}…ï¡ΩÕ•—Ω…Â}ëΩç’µïπ—Õ}±•π≠ïë}ô…Ωµ}Õ•—ï}ï·•Õ–°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅ¡…ïô•‡ÄÙÄâ°——¡ÃËºΩù•—°’àπçΩ¥Ω≠ΩÈ±Ω›Õ≠ÑµÖππÑΩΩ¡ÂAÖÕ—ï	•∏Ωâ±ΩàΩµÖ•∏ºà(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å±•π¨Å•∏Å¡Ö…Õï}¡Öùî°¡Öùî§π±•π≠ÃË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ°…ïòÄÙÅ±•π¨πùï–†â°…ïòà∞Äàà§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ•òÅπΩ–Å°…ïòπÕ—Ö…—Õ›•—†°¡…ïô•‡§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅçΩπ—•π’î(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ—Ö…ùï–ÄÙÅI==PÄºÅ°…ïòπ…ïµΩŸï¡…ïô•‡°¡…ïô•‡§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞Å—Ö…ùï–ı—Ö…ùï–π…ï±Ö—•Ÿï}—º°I==P§§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°—Ö…ùï–π•Õ}ô•±î†§∞Å—Ö…ùï–§((ÄÄÄÅëïòÅ—ïÕ—}•π—ï…πÖ±}ô…Öùµïπ—Õ}…ïÕΩ±Ÿî°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅ•ëÃÄÙÅÕï–°¡Ö…Õï»π•ëÃ§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å±•π¨Å•∏Å¡Ö…Õï»π±•π≠ÃË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ°…ïòÄÙÅ±•π¨πùï–†â°…ïòà∞Äàà§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ•òÅ°…ïòπÕ—Ö…—Õ›•—††àåà§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°°…ïôlƒÈt∞Å•ëÃ∞Ä°¡Öùî∞Å°…ïò§§((ÄÄÄÅëïòÅ—ïÕ—}•µÖùïÕ}Ö…ï}ÖççïÕÕ•â±ï}Öπë}ë•µïπÕ•Ωπïê°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å•µÖùîÅ•∏Å¡Ö…Õï}¡Öùî°¡Öùî§π•µÖùïÃË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞ÅÕ…åı•µÖùîπùï–†âÕ…åà§§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†âÖ±–à∞Å•µÖùî§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ•òÅπΩ–Å•µÖùîπùï–†âÕ…åà§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅçΩπ—•π’î(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°•µÖùîπùï–†â›•ë—†à§§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°•µÖùîπùï–†â°ï•ù°–à§§((ÄÄÄÅëïòÅ—ïÕ—}…’π—•µï}…ïÕΩ’…çïÕ}Ö…ï}±ΩçÖ∞°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å…ïÕΩ’…çîÅ•∏Å¡Ö…Õï»π…ïÕΩ’…çïÃË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Ö±Õî°’…±¡Ö…Õî°…ïÕΩ’…çî§πÕç°ïµî∞Ä°¡Öùî∞Å…ïÕΩ’…çî§§((ÄÄÄÅëïòÅ—ïÕ—}±Öπù’Öùï}Õ›•—ç°}•Õ}â•ë•…ïç—•ΩπÖ∞°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅ¡Ω±•Õ†ÄÙÅ¡Ö…Õï}¡Öùî°M%QÄºÄâ•πëï‡π°—µ∞à§(ÄÄÄÄÄÄÄÅïπù±•Õ†ÄÙÅ¡Ö…Õï}¡Öùî°M%QÄºÄâï∏àÄºÄâ•πëï‡π°—µ∞à§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°Öπ‰°±•π¨πùï–†â°…ïô±Öπúà§ÄÙÙÄâï∏àÅÖπêÅ±•π¨πùï–†â°…ïòà§ÄÙÙÄâï∏ºàÅôΩ»Å±•π¨Å•∏Å¡Ω±•Õ†π±•π≠Ã§§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°Öπ‰°±•π¨πùï–†â°…ïô±Öπúà§ÄÙÙÄâ¡∞àÅÖπêÅ±•π¨πùï–†â°…ïòà§ÄÙÙÄà∏∏ºàÅôΩ»Å±•π¨Å•∏Åïπù±•Õ†π±•π≠Ã§§((ÄÄÄÅëïòÅ—ïÕ—}ë•Õ—…•â’—•Ωπ}ï·Öµ¡±ïÕ}Ö…ï}â•±•πù’Ö∞°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Åï·¡ïç—ïë}—ï·–Å•∏ÅaAQ}=5AQ%	%1%Qem¡Ö…Õï»π°—µ±}±ÖπùtË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞Å—ï·–ıï·¡ïç—ïë}—ï·–§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°ï·¡ïç—ïë}—ï·–∞ÅÕΩ’…çî§((ÄÄÄÅëïòÅ—ïÕ—}Ÿï…Õ•Ωπ|≈|…}…ï±ïÖÕï}•Õ}ëïÕç…•âïë}çΩπÕ•Õ—ïπ—±‰°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅï·¡ïç—ïë}âÂ}±Öπù’ÖùîÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄâ¡∞àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]ÂëÖπ•îÉ
+‹Äƒ∏»à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ!•Õ—Ω…•ÑÅç°…Ωπ•ΩπÑÅ¡…ÈïêÅÕï≠…ï—Öµ§à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâAAÅ±’àÅ•πÕ—Ö±Ö—Ω…‰ÅËÅ•—!’âÑà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâM—Öâ•±πîÅAAÅUâ’π—‘à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâQ…È‰ÅÈùΩëπîÅ¡Ö≠•ï—‰Åà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ…ç°•›’¥Å—Ö»πùËà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâçΩ¡Â¡ÖÕ—ïâ•∏µâÖç≠ïπë|ƒ∏»¥…}Ö±∞πëïàà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâùπΩµîµÕ°ï±∞µï·—ïπÕ•Ω∏µçΩ¡Â¡ÖÕ—ïâ•π|ƒ∏»¥…}Ö±∞πëïàà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâçΩ¡Â¡ÖÕ—ïâ•π|ƒ∏»¥…}Ö±∞πëïàà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâΩ¡ÂAÖÕ—ï	•∏µ±•π’‡¥ƒ∏»π—Ö»πùËà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ…ï±ïÖÕïÃΩëΩ›π±ΩÖêΩÿƒ∏»ΩΩ¡ÂAÖÕ—ï	•∏µ±•π’‡¥ƒ∏»π—Ö»πùËà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ…ï±ïÖÕïÃΩëΩ›π±ΩÖêΩÿƒ∏»ΩM!»‘ŸMU5Là∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâÕ°Ñ»‘ŸÕ’¥Ä¥µç°ïç¨Ä¥µ•ùπΩ…îµµ•ÕÕ•πúÅM!»‘ŸMU5Là∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]Ö—ç†ÉäHÅ’Õ—Ω¥ÉäHÅIï±ïÖÕïÃà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ≠øçΩ›‰Å—ïÕ–Å1%YÅ¡ºÅ¡ó	πÂ¥Å¡…Èï±ΩùΩ›Öπ•‘à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ9•îÉçËÅ•πÕ—Ö±Öç©§ÅAAΩÅËÅ±Ω≠Ö±ªÅ•πÕ—Ö±Öç´Å—Ö»πùËà∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÄÄÄÄÄâï∏àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâIï±ïÖÕîÉ
+‹Äƒ∏»à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ!•Õ—Ω…‰Å¡…Ω—ïç—ïêÅô…Ω¥ÅÕïç…ï—Ãà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâAAÅΩ»Å•—!’àÅ•πÕ—Ö±±ï…Ãà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâM—Öâ±îÅUâ’π—‘ÅAAà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâQ°…ïîÅµÖ—ç°•πúÅÅ¡Öç≠ÖùïÃà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ—Ö»πùËÅÖ…ç°•Ÿîà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâçΩ¡Â¡ÖÕ—ïâ•∏µâÖç≠ïπë|ƒ∏»¥…}Ö±∞πëïàà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâùπΩµîµÕ°ï±∞µï·—ïπÕ•Ω∏µçΩ¡Â¡ÖÕ—ïâ•π|ƒ∏»¥…}Ö±∞πëïàà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâçΩ¡Â¡ÖÕ—ïâ•π|ƒ∏»¥…}Ö±∞πëïàà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâΩ¡ÂAÖÕ—ï	•∏µ±•π’‡¥ƒ∏»π—Ö»πùËà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ…ï±ïÖÕïÃΩëΩ›π±ΩÖêΩÿƒ∏»ΩΩ¡ÂAÖÕ—ï	•∏µ±•π’‡¥ƒ∏»π—Ö»πùËà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ…ï±ïÖÕïÃΩëΩ›π±ΩÖêΩÿƒ∏»ΩM!»‘ŸMU5Là∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâÕ°Ñ»‘ŸÕ’¥Ä¥µç°ïç¨Ä¥µ•ùπΩ…îµµ•ÕÕ•πúÅM!»‘ŸMU5Là∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]Ö—ç†ÉäHÅ’Õ—Ω¥ÉäHÅIï±ïÖÕïÃà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâô•πÖ∞Å1%YÅ—ïÕ—•πúÅÖô—ï»ÅÑÅô’±∞Å±ΩùΩ’–ÅÖπêÅ±Ωù•∏à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâºÅπΩ–Åµ•‡ÅÑÅAAΩÅ•πÕ—Ö±±Ö—•Ω∏Å›•—†Å—°îÅ’Õï»µ±ΩçÖ∞Å—Ö»πùËÅ•πÕ—Ö±±Ö—•Ω∏à∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Åï·¡ïç—ïë}—ï·–Å•∏Åï·¡ïç—ïë}âÂ}±Öπù’Öùïm¡Ö…Õï»π°—µ±}±ÖπùtË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞Å—ï·–ıï·¡ïç—ïë}—ï·–§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°ï·¡ïç—ïë}—ï·–∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â-ÖπëÂëÖ–ÅëºÅ›ÂëÖπ•Ñà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âIï±ïÖÕîÅçÖπë•ëÖ—îà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â¡ΩÈΩÕ—Ö©îÅπ•ïΩ¡’â±•≠Ω›ÖπÑà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â…ïµÖ•πÃÅ’π¡’â±•Õ°ïêà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âAΩâ•ï…ËÅÕ—Öâ•±πîÄƒ∏¿∏¿à∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âΩ›π±ΩÖêÅÕ—Öâ±îÄƒ∏¿∏¿à∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†à»ÿº»ÿà∞ÅÕΩ’…çî§((ÄÄÄÅëïòÅ—ïÕ—}¡’â±•ç}…ΩÖëµÖ¡}Õï¡Ö…Ö—ïÕ}çΩµµ•—µïπ—Õ}ô…Ωµ}ï·¡±Ω…Ö—•Ω∏°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅï·¡ïç—ïë}âÂ}±Öπù’ÖùîÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄâ¡∞àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄù•êÙâ…ΩÖëµÖ¡Ñàú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâºÅëÖ±ï®ÅËÅΩ¡ÂAÖÕ—ï	•∏∏à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâA±ÖπΩ›ÖπîÉ
+‹Äƒ∏Ãà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâÈÂ—ï±π•ï©ÕÈîÅÖ≠ç©îÅµïπ‘à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]ßeçï®ÅÕ¡ΩÕΩãÕ‹ÅΩç°…Ωπ‰à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ	ÖëÖµ‰à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ±Ω≠Ö±πîÅ=Hà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄàΩI=5@π¡∞πµêà∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÄÄÄÄÄâï∏àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄù•êÙâ…ΩÖëµÖ¿àú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]°Ö”äeÃÅπï·–ÅôΩ»ÅΩ¡ÂAÖÕ—ï	•∏∏à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâA±ÖππïêÉ
+‹Äƒ∏Ãà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâÖÕ•ï»µ—ºµÕçÖ∏Åµïπ‘ÅÖç—•ΩπÃà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ5Ω…îÅ›ÖÂÃÅ—ºÅ¡…Ω—ïç–ÅçΩπ—ïπ–à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ·¡±Ω…•πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâΩ∏µëïµÖπêÅ±ΩçÖ∞Å=Hà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄàΩI=5@πµêà∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Åï·¡ïç—ïë}—ï·–Å•∏Åï·¡ïç—ïë}âÂ}±Öπù’Öùïm¡Ö…Õï»π°—µ±}±ÖπùtË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞Å—ï·–ıï·¡ïç—ïë}—ï·–§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°ï·¡ïç—ïë}—ï·–∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â›Â…áÒïπ•ÑÅ…ïù’±Ö…πîà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â…ïù’±Ö»Åï·¡…ïÕÕ•ΩπÃà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âΩµ≠πßeç•îÅ›ï…Õ©§Äƒ∏ƒà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â•πÖ±•ÈîÅŸï…Õ•Ω∏Äƒ∏ƒà∞ÅÕΩ’…çî§((ÄÄÄÅëïòÅ—ïÕ—}¡…Ωë’ç—}¡ΩÕ•—•Ωπ•πù}Öπë}¡…•ŸÖçÂ}Õ’µµÖ…Â}Ö…ï}â•±•πù’Ö∞°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅï·¡ïç—ïë}âÂ}±Öπù’ÖùîÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄâ¡∞àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâA…•ŸÖç‰µôΩç’ÕïêÅ±•¡âΩÖ…êÅ5ÖπÖùï»à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ5ïπïìÒï»∞ÅÖ±îÅπ•îÅ≠±ÖÕÂçÈπîÅÖ…ç°•›’¥ÅÕç°Ω›≠Ñ∏à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâΩç°…ΩπÑÅ¡…ÈïêÅπ•ïôΩ…—’ππÂ¥Å≠±•≠πßeç•ï¥à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ1Ω≠Ö±π•î∞ÅâïËÅ≠Ωπ—ÑÅ§Åç°µ’…‰∏à∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÄÄÄÄÄâï∏àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâA…•ŸÖç‰µôΩç’ÕïêÅ±•¡âΩÖ…êÅ5ÖπÖùï»à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâπΩ–ÅÑÅ—…Öë•—•ΩπÖ∞Åç±•¡âΩÖ…êÅÖ…ç°•Ÿîà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄââ’•±–µ•∏Å¡ÖÕ—îÅïë•—Ω»à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ1ΩçÖ∞∞Å›•—†ÅπºÅÖççΩ’π–ÅΩ»Åç±Ω’ê∏à∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†ùç±ÖÕÃÙâ¡…Ωë’ç–µ¡ΩÕ•—•Ωπ•πúàú∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Åï·¡ïç—ïë}—ï·–Å•∏Åï·¡ïç—ïë}âÂ}±Öπù’Öùïm¡Ö…Õï»π°—µ±}±ÖπùtË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞Å—ï·–ıï·¡ïç—ïë}—ï·–§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°ï·¡ïç—ïë}—ï·–∞ÅÕΩ’…çî§((ÄÄÄÅëïòÅ—ïÕ—}’Õï}çÖÕïÕ}¡…ïÕïπ—}ôΩ’…}çΩπç…ï—ï}â•±•πù’Ö±}Õ•—’Ö—•ΩπÃ°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅï·¡ïç—ïë}âÂ}±Öπù’ÖùîÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄâ¡∞àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄù•êÙâÈÖÕ—ΩÕΩ›Öπ•Ñàú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄù°…ïòÙàçÈÖÕ—ΩÕΩ›Öπ•Ñà˘iÖÕ—ΩÕΩ›Öπ•ÑΩÑ¯ú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ-•ïë‰ÅµøÒîÅÕßdÅ¡…ÈÂëáÅΩ¡ÂAÖÕ—ï	•∏¸à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâë‰Å¡•ÕÈïÕËÅ›•ÖëΩµøoà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâë‰Å¡…Öç’©ïÕËÅËÅ≠Ωëï¥Å±’àÅ—ï…µ•πÖ±ï¥à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâë‰Å≠Ω…ÈÂÕ—ÖÕËÅËÅπÖ…ÎeëÈ•ÑÅ$à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâÕ¡…Ö›ìËÅ≠Ω¡•Ω›Öπ‰Åô…Öùµïπ–ÅëΩ≠’µïπ—‘à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâë‰Å’ëΩÕ”e¡π•ÖÕËÅΩâ…ÖËà∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÄÄÄÄÄâï∏àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄù•êÙâ’ÕîµçÖÕïÃàú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄù°…ïòÙàç’ÕîµçÖÕïÃà˘UÕîÅçÖÕïÃΩÑ¯ú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]°ï∏Åµ•ù°–ÅΩ¡ÂAÖÕ—ï	•∏Å°ï±¿¸à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]°ï∏Å›…•—•πúÅÑÅµïÕÕÖùîà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]°ï∏Å›Ω…≠•πúÅ›•—†ÅçΩëîÅΩ»ÅÑÅ—ï…µ•πÖ∞à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]°ï∏Å’Õ•πúÅÖ∏Å$Å—ΩΩ∞à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ…ïŸ•ï‹ÅçΩ¡•ïêÅ—ï·–Åô…Ω¥ÅÑÅëΩç’µïπ–à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ]°ï∏ÅÕ°Ö…•πúÅÖ∏Å•µÖùîà∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Åï·¡ïç—ïë}—ï·–Å•∏Åï·¡ïç—ïë}âÂ}±Öπù’Öùïm¡Ö…Õï»π°—µ±}±ÖπùtË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞Å—ï·–ıï·¡ïç—ïë}—ï·–§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°ï·¡ïç—ïë}—ï·–∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕïç—•Ωπ}•êÄÙÄâÈÖÕ—ΩÕΩ›Öπ•ÑàÅ•òÅ¡Ö…Õï»π°—µ±}±ÖπúÄÙÙÄâ¡∞àÅï±ÕîÄâ’ÕîµçÖÕïÃà(ÄÄÄÄÄÄÄÄÄÄÄÅÕïç—•Ω∏ÄÙÅ…îπÕïÖ…ç††(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ…òúÒÕïç—•Ωπmx˘t≠•êÙâÌÕïç—•Ωπ}•ëÙâmx˘t®¯†˝@ÒâΩë‰¯∏®¸§ΩÕïç—•Ω∏¯ú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çî∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ…îπ=Q10∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°Õïç—•Ω∏§(ÄÄÄÄÄÄÄÄÄÄÄÅâΩë‰ÄÙÅÕïç—•Ω∏πù…Ω’¿†ââΩë‰à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†ùç±ÖÕÃÙâ’ÕîµçÖÕîµ±•Õ–àú∞ÅâΩë‰§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°âΩë‰πçΩ’π–†àÒ±§¯à§∞Ä–§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â—…’Õ–µÕ—…•¿à∞ÅâΩë‰§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â—…’Õ–µ•—ï¥à∞ÅâΩë‰§((ÄÄÄÅëïòÅ—ïÕ—}ç±•¡âΩÖ…ë}ïë•—Ω…}•Õ}¡…ïÕïπ—ïë}ÖÕ}Ö}ùïπï…Ö±}—ï·—}—ΩΩ∞°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅï·¡ïç—ïë}âÂ}±Öπù’ÖùîÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄâ¡∞àËÄ†âAΩëÀeçÈπ‰ÅïëÂ—Ω»Å—…ómç§à∞Äâ›¡…Ω›ÖìËÅÀeçÈπîÅ¡Ω¡…Ö›≠§à∞ÄâëΩ¡•ï…ºÅ¡ºÅQ›Ω©ï®ÅÖ≠çï¡—Öç©§à§∞(ÄÄÄÄÄÄÄÄÄÄÄÄâï∏àËÄ†â!Öπë‰Å—ï·–Åïë•—Ω»à∞ÄâµÖ≠îÅµÖπ’Ö∞Åç°ÖπùïÃà∞ÄâΩπ±‰ÅÖô—ï»ÅÂΩ’»ÅçΩπô•…µÖ—•Ω∏à§∞(ÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Åï·¡ïç—ïë}—ï·–Å•∏Åï·¡ïç—ïë}âÂ}±Öπù’Öùïm¡Ö…Õï»π°—µ±}±ÖπùtË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°¡Öùîı¡Öùîπ…ï±Ö—•Ÿï}—º°M%Q§∞Å—ï·–ıï·¡ïç—ïë}—ï·–§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°ï·¡ïç—ïë}—ï·–∞ÅÕΩ’…çî§((ÄÄÄÅëïòÅ—ïÕ—}ôïÖ—’…ïÕ}±ïÖë}›•—°}—°ï}Ω›πï…}¡…•Ω…•—•ïÃ°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅï·¡ïç—ïë}âÂ}±Öπù’ÖùîÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄâ¡∞àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâAΩëÀeçÈπ‰ÅïëÂ—Ω»Å—…ómç§à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâπΩπ•µ•ÈÖç©ÑÅΩâ…ÖÎÕ‹à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâIïù◊	‰Å§ÅëΩØ	ÖëπîÅ›Â≠±’çÈïπ•Ñà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ!•Õ—Ω…•ÑÅç°…Ωπ•ΩπÑÅ¡…ÈïêÅÕï≠…ï—Öµ§à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâÈ—ï…‰Å¡ΩÈ•Ωµ‰Å…ÂÈÂ≠Ñà∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÄÄÄÄÄâï∏àËÄ†(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ!Öπë‰Å—ï·–Åïë•—Ω»à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ%µÖùîÅ…ïëÖç—•Ω∏à∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâI’±ïÃÅÖπêÅï·Öç–Åï·çï¡—•ΩπÃà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâ!•Õ—Ω…‰Å¡…Ω—ïç—ïêÅô…Ω¥ÅÕïç…ï—Ãà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄâΩ’»Å…•Õ¨Å±ïŸï±Ãà∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§∞(ÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕïç—•Ωπ}•êÄÙÄâµΩÈ±•›ΩÕç§àÅ•òÅ¡Ö…Õï»π°—µ±}±ÖπúÄÙÙÄâ¡∞àÅï±ÕîÄâôïÖ—’…ïÃà(ÄÄÄÄÄÄÄÄÄÄÄÅÕïç—•Ω∏ÄÙÅ…îπÕïÖ…ç††(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ…òúÒÕïç—•Ωπmx˘t≠•êÙâÌÕïç—•Ωπ}•ëÙâmx˘t®¯†˝@ÒâΩë‰¯∏®¸§ΩÕïç—•Ω∏¯ú∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çî∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ…îπ=Q10∞(ÄÄÄÄÄÄÄÄÄÄÄÄ§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°Õïç—•Ω∏§(ÄÄÄÄÄÄÄÄÄÄÄÅâΩë‰ÄÙÅÕïç—•Ω∏πù…Ω’¿†ââΩë‰à§(ÄÄÄÄÄÄÄÄÄÄÄÅ¡ΩÕ•—•ΩπÃÄÙÅmâΩë‰π•πëï‡°—ï·–§ÅôΩ»Å—ï·–Å•∏Åï·¡ïç—ïë}âÂ}±Öπù’Öùïm¡Ö…Õï»π°—µ±}±Öπùut(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°¡ΩÕ•—•ΩπÃ∞ÅÕΩ…—ïê°¡ΩÕ•—•ΩπÃ§∞Å¡Öùî§((ÄÄÄÅëïòÅ—ïÕ—}ùÖ±±ï…Â}çΩπ—Ö•πÕ}ô’±±}’πç…Ω¡¡ïë}Õç…ïïπÕ°Ω—}Õï–°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅï·¡ïç—ïë}âÂ}±Öπù’ÖùîÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄâ¡∞àËÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿ƒµçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥»µµïπ‘µ°•Õ—Ω…•§µÕç°Ω›≠ÑµùπΩµîµA0π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿»µçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµΩÕ—…ÈïÈïπ•îµ¡…Èïêµ›≠±ï©ïπ•ï¥µëÖπÂç†µ›…ÖÈ±•›Âç†µA0π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿ÃµçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµïëÂ—Ω»µÕç°Ω›≠Ñµ¡ΩëÕ›•ï—±Öπ•îµëÖπÂç†µ›…ÖÈ±•›Âç†µA0π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿–µçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµÕï±ï≠—Â›πÑµÖπΩπ•µ•ÈÖç©ÑµπÖ…ÈïëÈ•ÑµïëÂç©§µA0π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿‘µçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµ…ïù’±‰µ›±ÖÕπîµëΩ≠±Öëπîµ›Â≠±’çÈïπ•ÑµA0π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿ÿµçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµ±Ω≠Ö±π‰µïëÂ—Ω»µÖπΩπ•µ•ÈÖç©§µΩâ…ÖÈΩ‹µA0π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿‹µçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµ—ÂµçÈÖÕΩ›Ñµ°•Õ—Ω…•ÑµÕç°Ω›≠ÑµA0π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÅÙ∞(ÄÄÄÄÄÄÄÄÄÄÄÄâï∏àËÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿ƒµçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥»µç±•¡âΩÖ…êµ°•Õ—Ω…‰µµïπ‘µùπΩµîµ8π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿»µçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµÕïπÕ•—•ŸîµëÖ—Ñµ¡ÖÕ—îµ›Ö…π•πúµ8π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿ÃµçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµç±•¡âΩÖ…êµïë•—Ω»µ…•Õ¨µ°•ù°±•ù°—•πúµ8π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿–µçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµÕï±ïç—•ŸîµÖπΩπÂµ•ÈÖ—•Ω∏µïë•—•πúµ—ΩΩ±Ãµ8π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿‘µçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµç’Õ—Ω¥µ…’±ïÃµï·Öç–µï·çï¡—•ΩπÃµ8π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿ÿµçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµ±ΩçÖ∞µ•µÖùîµ…ïëÖç—•Ω∏µïë•—Ω»µ8π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄà¿‹µçΩ¡Â¡ÖÕ—ïâ•∏¥ƒ¥ƒµÕïÕÕ•Ω∏µΩπ±‰µç±•¡âΩÖ…êµ°•Õ—Ω…‰µ8π¡πúà∞(ÄÄÄÄÄÄÄÄÄÄÄÅÙ∞(ÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö…Õï»ÄÙÅ¡Ö…Õï}¡Öùî°¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çïÃÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅAÖ—†°•µÖùîπùï–†âÕ…åà∞Äàà§§ππÖµî(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å•µÖùîÅ•∏Å¡Ö…Õï»π•µÖùïÃ(ÄÄÄÄÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°ï·¡ïç—ïë}âÂ}±Öπù’Öùïm¡Ö…Õï»π°—µ±}±Öπùtπ•ÕÕ’âÕï–°ÕΩ’…çïÃ§∞Å¡Öùî§((ÄÄÄÄÄÄÄÅçÕÃÄÙÄ°M%QÄºÄâÖÕÕï—ÃàÄºÄâçÕÃàÄºÄâÕ—Â±ïÃπçÕÃà§π…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÅùÖ±±ï…Â}…’±îÄÙÅ…îπÕïÖ…ç†°»âpπùÖ±±ï…‰µâ’——Ω∏Å•µùqÃ©qÏ†˝@ÒâΩë‰˘myıt®•qÙà∞ÅçÕÃ∞Å…îπ=Q10§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°ùÖ±±ï…Â}…’±î§(ÄÄÄÄÄÄÄÅâΩë‰ÄÙÅùÖ±±ï…Â}…’±îπù…Ω’¿†ââΩë‰à§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â›•ë—†ËÅÖ’—ºà∞ÅâΩë‰§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â°ï•ù°–ËÅÖ’—ºà∞ÅâΩë‰§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†âΩâ©ïç–µô•–ËÅçΩπ—Ö•∏à∞ÅâΩë‰§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âÖÕ¡ïç–µ…Ö—•ºà∞ÅâΩë‰§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âΩâ©ïç–µô•–ËÅçΩŸï»à∞ÅâΩë‰§((ÄÄÄÅëïòÅ—ïÕ—}¡Öùï}’ÕïÕ}¡±Ö•π}›°•—ï}Õïç—•Ωπ}âÖç≠ù…Ω’πëÃ°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅçÕÃÄÙÄ°M%QÄºÄâÖÕÕï—ÃàÄºÄâçÕÃàÄºÄâÕ—Â±ïÃπçÕÃà§π…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§π±Ω›ï»†§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âù…Öë•ïπ–†à∞ÅçÕÃ§(ÄÄÄÄÄÄÄÅôΩ»ÅÕï±ïç—Ω»Å•∏Ä†ââΩë‰à∞ÄàπÕ•—îµ°ïÖëï»à∞Äàπ°ï…ºà∞ÄàπÕïç—•Ω∏µÕΩô–à∞ÄàπÕïç—•Ω∏µëÖ…¨à∞Äàπç—Ñà§Ë(ÄÄÄÄÄÄÄÄÄÄÄÅ›•—†ÅÕï±òπÕ’âQïÕ–°Õï±ïç—Ω»ıÕï±ïç—Ω»§Ë(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅ…’±îÄÙÅ…îπÕïÖ…ç†°…òâÌ…îπïÕçÖ¡î°Õï±ïç—Ω»•ıqÃ©qÌÏ†˝@ÒâΩë‰˘myııt®•qıÙà∞ÅçÕÃ∞Å…îπ=Q10§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°…’±î§(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Iïùï‡°…’±îπù…Ω’¿†ââΩë‰à§∞Å»ââÖç≠ù…Ω’πêÈqÃ®†¸ËçôôôÒŸÖ…p†¥µ¡Ö¡ï…p§§Ïà§((ÄÄÄÅëïòÅ—ïÕ—}Õ•—ï}¡Ö±ï——ï}’ÕïÕ}Ωπï}çÂÖπ}Öççïπ—}›•—°Ω’—}ù…ïï∏°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅçÕÃÄÙÄ°M%QÄºÄâÖÕÕï—ÃàÄºÄâçÕÃàÄºÄâÕ—Â±ïÃπçÕÃà§π…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§π±Ω›ï»†§(ÄÄÄÄÄÄÄÅôΩ»Å—Ω≠ï∏Å•∏Ä†(ÄÄÄÄÄÄÄÄÄÄÄÄà¥µ•π¨ËÄåƒ–»–ÕÑà∞(ÄÄÄÄÄÄÄÄÄÄÄÄà¥µçÂÖ∏ËÄå¡ò‹‡Âòà∞(ÄÄÄÄÄÄÄÄÄÄÄÄà¥µçÂÖ∏µëÖ…¨ËÄå¿‹’ê›êà∞(ÄÄÄÄÄÄÄÄÄÄÄÄà¥µ±•πîËÄçêŸî…ò¿à∞(ÄÄÄÄÄÄÄÄ§Ë(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°—Ω≠ï∏∞ÅçÕÃ§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†à¥µù…ïï∏à∞ÅçÕÃ§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†à¥µâ±’îà∞ÅçÕÃ§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†à¥µŸ•Ω±ï–à∞ÅçÕÃ§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†àåƒ‹‡ƒ–Ãà∞ÅçÕÃ§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†àå¡òÿ‡ÃÃà∞ÅçÕÃ§(ÄÄÄÄÄÄÄÅ¡…•µÖ…‰ÄÙÅ…îπÕïÖ…ç†°»âpπâ’——Ω∏µ¡…•µÖ…ÂqÃ©qÏ†˝@ÒâΩë‰˘myıt®•qÙà∞ÅçÕÃ∞Å…îπ=Q10§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°¡…•µÖ…‰§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†ââÖç≠ù…Ω’πêËÅŸÖ»†¥µçÂÖ∏§à∞Å¡…•µÖ…‰πù…Ω’¿†ââΩë‰à§§((ÄÄÄÅëïòÅ—ïÕ—}°ï…Ω}Ö……ÖπùïÕ}Ö±±}ôΩ’…}¡…Ωë’ç—}…•Õ≠}âÖππï…Ã°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅï·¡ïç—ïêÄÙÅÏ(ÄÄÄÄÄÄÄÄÄÄÄÄâ…•Õ¨µ±Ω‹àËÄàå»–’òÂîà∞(ÄÄÄÄÄÄÄÄÄÄÄÄâ…•Õ¨µµïë•’¥àËÄàå·Ñ’Ñ¿¿à∞(ÄÄÄÄÄÄÄÄÄÄÄÄâ…•Õ¨µ°•ù†àËÄàçÑÿ≈à»‰à∞(ÄÄÄÄÄÄÄÄÄÄÄÄâ…•Õ¨µç…•—•çÖ∞àËÄàåÿ‹ƒ¿≈àà∞(ÄÄÄÄÄÄÄÅÙ(ÄÄÄÄÄÄÄÅçÕÃÄÙÄ°M%QÄºÄâÖÕÕï—ÃàÄºÄâçÕÃàÄºÄâÕ—Â±ïÃπçÕÃà§π…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§π±Ω›ï»†§(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â!5à∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—…ïÖ—ï…≈’Ö∞°ÕΩ’…çîπ±Ω›ï»†§πçΩ’π–†âΩ¡ï∏ÅÕΩ’…çîà§∞Ä»∞Å¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ÕΩ’…çîπçΩ’π–†ùç±ÖÕÃÙâ¡…Ω©ïç–µç…ïë•–àú§∞Ä»∞Å¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â°Ö—APà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†âΩëï‡à∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â=¡ïπ$à∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—1ïÕÃ°ÕΩ’…çîπ•πëï‡†â°Ö—APà§∞ÅÕΩ’…çîπ•πëï‡†âA0¥Ã∏¿µΩ»µ±Ö—ï»à∞ÅÕΩ’…çîπ•πëï‡†â°Ö—APà§§∞Å¡Öùî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†ù°…ïòÙàç©Ö¨µëÈ•Ö±ÑàúÅ•òÅ¡ÖùîÄÙÙÅM%QÄºÄâ•πëï‡π°—µ∞àÅï±ÕîÄù°…ïòÙàç°Ω‹µ•–µ›Ω…≠Ãàú∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Åç±ÖÕÕ}πÖµîÅ•∏Åï·¡ïç—ïêË(ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ÕΩ’…çîπçΩ’π–°òâ…•Õ¨µâÖππï»ÅÌç±ÖÕÕ}πÖµïÙà§∞Äƒ∞Ä°¡Öùî∞Åç±ÖÕÕ}πÖµî§§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â°ΩµîÅ¡Ö—†à∞ÅÕΩ’…çîπ±Ω›ï»†§§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†ãmç•óÒ≠ÑÅëΩµΩ›Ñà∞ÅÕΩ’…çîπ±Ω›ï»†§§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âÕïïêÅ¡°…ÖÕîà∞ÅÕΩ’…çîπ±Ω›ï»†§§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âô…ÖÈÑÅÕïïêà∞ÅÕΩ’…çîπ±Ω›ï»†§§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â•—!’àÅAÖùïÃÅëΩç’µïπ—Ö—•Ω∏à∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â	ïËÅ’ëÖ›Öπ•Ñ∞ÉÒîÅ…ÂÈÂ≠ºÅÈπ•≠Ñà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â]•—°Ω’–Å¡…ï—ïπë•πúÅ…•Õ¨Åë•ÕÖ¡¡ïÖ…Ãà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†ùπÖµîÙâ≠ïÂ›Ω…ëÃàú∞ÅÕΩ’…çîπ±Ω›ï»†§§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†âÕ—Â±ïÃπçÕÃ˝ÿÙ»¿»ÿƒ¿»ÿ¥Ãà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†âÕ•—îπ©Ã˝ÿÙ»¿»ÿƒ¿ƒ‰¥ÿà∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÅÕ—Öç≠}…’±îÄÙÅ…îπÕïÖ…ç†°»âpπ…•Õ¨µÕ—Öç≠qÃ©qÏ†˝@ÒâΩë‰˘myıt®•qÙà∞ÅçÕÃ∞Å…îπ=Q10§(ÄÄÄÄÄÄÄÅâÖππï…}…’±îÄÙÅ…îπÕïÖ…ç†°»âpπ…•Õ¨µâÖππï…qÃ©qÏ†˝@ÒâΩë‰˘myıt®•qÙà∞ÅçÕÃ∞Å…îπ=Q10§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°Õ—Öç≠}…’±î§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°âÖππï…}…’±î§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â¡ΩÕ•—•Ω∏ËÅ…ï±Ö—•Ÿîà∞ÅÕ—Öç≠}…’±îπù…Ω’¿†ââΩë‰à§§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â¡ΩÕ•—•Ω∏ËÅÖâÕΩ±’—îà∞ÅâÖππï…}…’±îπù…Ω’¿†ââΩë‰à§§(ÄÄÄÄÄÄÄÅâ…Öπë}…’±îÄÙÅ…îπÕïÖ…ç†°»âpπâ…ÖπêÅ•µùqÃ©qÏ†˝@ÒâΩë‰˘myıt®•qÙà∞ÅçÕÃ∞Å…îπ=Q10§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°â…Öπë}…’±î§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â›•ë—†ËÄÃ∏»’…ï¥à∞Åâ…Öπë}…’±îπù…Ω’¿†ââΩë‰à§§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â°ï•ù°–ËÄÃ∏»’…ï¥à∞Åâ…Öπë}…’±îπù…Ω’¿†ââΩë‰à§§(ÄÄÄÄÄÄÄÅçÖ…ë}…’±îÄÙÅ…îπÕïÖ…ç††(ÄÄÄÄÄÄÄÄÄÄÄÅ»âpπÕÂÕ—ï¥µçÖ…ê±qÃ©pπëΩ›π±ΩÖêµçÖ…ëqÃ©qÏ†˝@ÒâΩë‰˘myıt®•qÙà∞(ÄÄÄÄÄÄÄÄÄÄÄÅçÕÃ∞(ÄÄÄÄÄÄÄÄÄÄÄÅ…îπ=Q10∞(ÄÄÄÄÄÄÄÄ§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°çÖ…ë}…’±î§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†âµ•∏µ›•ë—†ËÄ¿à∞ÅçÖ…ë}…’±îπù…Ω’¿†ââΩë‰à§§(ÄÄÄÄÄÄÄÅôΩ»Åç±ÖÕÕ}πÖµî∞ÅçΩ±Ω»Å•∏Åï·¡ïç—ïêπ•—ïµÃ†§Ë(ÄÄÄÄÄÄÄÄÄÄÄÅ…’±îÄÙÅ…îπÕïÖ…ç†°…òâpπÌç±ÖÕÕ}πÖµïıqÃ©qÌÏ†˝@ÒâΩë‰˘myııt®•qıÙà∞ÅçÕÃ∞Å…îπ=Q10§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%Õ9Ω—9Ωπî°…’±î§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°òââÖç≠ù…Ω’πêËÅÌçΩ±Ω…Ùà∞Å…’±îπù…Ω’¿†ââΩë‰à§§((ÄÄÄÅëïòÅ—ïÕ—}Ÿ•Õ•â±ï}â…Öπë}’ÕïÕ}›ïâ}ÕŸù}›•—°}ëÖ…≠}πÖŸÂ}çΩπ—Ω’»°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅçÕÃÄÙÄ°M%QÄºÄâÖÕÕï—ÃàÄºÄâçÕÃàÄºÄâÕ—Â±ïÃπçÕÃà§π…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§π±Ω›ï»†§(ÄÄÄÄÄÄÄÅÖ¡¡}±ΩùºÄÙÅM%QÄºÄâÖÕÕï—ÃàÄºÄâ•µÖùïÃàÄºÄâ±ΩùºπÕŸúà(ÄÄÄÄÄÄÄÅ›ïâ}±ΩùºÄÙÅM%QÄºÄâÖÕÕï—ÃàÄºÄâ•µÖùïÃàÄºÄâ±Ωùºµ›ïàπÕŸúà(ÄÄÄÄÄÄÄÅÕ°Ö…ï}çÖ…êÄÙÅM%QÄºÄâÖÕÕï—ÃàÄºÄâ•µÖùïÃàÄºÄâÕ°Ö…îµçÖ…ê¥ƒ∏»π¡πúà(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°Ö¡¡}±Ωùºπ•Õ}ô•±î†§§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°›ïâ}±Ωùºπ•Õ}ô•±î†§§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°Õ°Ö…ï}çÖ…êπ•Õ}ô•±î†§§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—…ïÖ—ï»°Õ°Ö…ï}çÖ…êπÕ—Ö–†§πÕ—}Õ•Èî∞Äƒ¡|¿¿¿§(ÄÄÄÄÄÄÄÅPπ¡Ö…Õî°Ö¡¡}±Ωùº§(ÄÄÄÄÄÄÄÅPπ¡Ö…Õî°›ïâ}±Ωùº§(ÄÄÄÄÄÄÄÅ›ïâ}±ΩùΩ}ÕΩ’…çîÄÙÅ›ïâ}±Ωùºπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§π±Ω›ï»†§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—…ïÖ—ï…≈’Ö∞°›ïâ}±ΩùΩ}ÕΩ’…çîπçΩ’π–†ùÕ—…Ω≠îÙàå¿‹≈êÃ‘àú§∞Ä»§(ÄÄÄÄÄÄÄÅôΩ»ÅçΩ±Ω»Å•∏Ä†àå‘¡å·ôòà∞Äàçôôêƒ…îà∞Äàçôò’Ñÿ‰à∞Äàçå‰…ò‘»à§Ë(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏°çΩ±Ω»∞Å›ïâ}±ΩùΩ}ÕΩ’…çî§(ÄÄÄÄÄÄÄÅôΩ»Å¡ÖùîÅ•∏ÅALË(ÄÄÄÄÄÄÄÄÄÄÄÅÕΩ’…çîÄÙÅ¡Öùîπ…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†ù±Ωùºπ¡πúàú∞ÅÕΩ’…çî§(ÄÄÄÄÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°ÕΩ’…çîπçΩ’π–†â±Ωùºµ›ïàπÕŸúà§∞ÄÃ∞Å¡Öùî§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—…ïÖ—ï…≈’Ö∞°çÕÃπçΩ’π–†âë…Ω¿µÕ°ÖëΩ‹†¿Ä¿Ä≈¡‡Äå¿ÿƒ‡»‹§à§∞Ä»§((ÄÄÄÅëïòÅ—ïÕ—}Õ•—ïµÖ¡}Öπë}…ΩâΩ—Õ}µÖ—ç°}¡’â±•ç}’…±Ã°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅÕ•—ïµÖ¿ÄÙÅPπ¡Ö…Õî°M%QÄºÄâÕ•—ïµÖ¿π·µ∞à§(ÄÄÄÄÄÄÄÅπÖµïÕ¡ÖçîÄÙÅÏâÃàËÄâ°——¿ËºΩ››‹πÕ•—ïµÖ¡ÃπΩ…úΩÕç°ïµÖÃΩÕ•—ïµÖ¿º¿∏‰âÙ(ÄÄÄÄÄÄÄÅ±ΩçÖ—•ΩπÃÄÙÅÌπΩëîπ—ï·–ÅôΩ»ÅπΩëîÅ•∏ÅÕ•—ïµÖ¿πô•πëÖ±∞†âÃÈ’…∞ΩÃÈ±Ωåà∞ÅπÖµïÕ¡Öçî•Ù(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—≈’Ö∞°±ΩçÖ—•ΩπÃ∞ÅÕï–°aAQ}9=9%1LπŸÖ±’ïÃ†§§§(ÄÄÄÄÄÄÄÅ…ΩâΩ—ÃÄÙÄ°M%QÄºÄâ…ΩâΩ—Ãπ—·–à§π…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â±±Ω‹ËÄºà∞Å…ΩâΩ—Ã§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—%∏†â°——¡ÃËºΩ≠ΩÈ±Ω›Õ≠ÑµÖππÑπù•—°’àπ•ºΩΩ¡ÂAÖÕ—ï	•∏ΩÕ•—ïµÖ¿π·µ∞à∞Å…ΩâΩ—Ã§((ÄÄÄÅëïòÅ—ïÕ—}¡’â±•Õ°}—…ïï}çΩπ—Ö•πÕ}πΩ}ÕÂµ±•π≠Õ}Ω…}ΩâŸ•Ω’Õ}¡…•ŸÖ—ï}¡Ö—°Ã°Õï±ò§Ä¥¯Å9ΩπîË(ÄÄÄÄÄÄÄÅô•±ïÃÄÙÅm¡Ö—†ÅôΩ»Å¡Ö—†Å•∏ÅM%Qπ…ù±Ωà†à®à§Å•òÅ¡Ö—†π•Õ}ô•±î†•t(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Q…’î°ô•±ïÃ§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—Ö±Õî°Öπ‰°¡Ö—†π•Õ}ÕÂµ±•π¨†§ÅôΩ»Å¡Ö—†Å•∏ÅM%Qπ…ù±Ωà†à®à§§§(ÄÄÄÄÄÄÄÅ—ï·–ÄÙÄâq∏àπ©Ω•∏†(ÄÄÄÄÄÄÄÄÄÄÄÅ¡Ö—†π…ïÖë}—ï·–°ïπçΩë•πúÙâ’—ò¥‡à∞Åï……Ω…ÃÙâ•ùπΩ…îà§(ÄÄÄÄÄÄÄÄÄÄÄÅôΩ»Å¡Ö—†Å•∏Åô•±ïÃ(ÄÄÄÄÄÄÄÄÄÄÄÅ•òÅ¡Ö—†πÕ’ôô•‡Å•∏ÅÏàπ°—µ∞à∞ÄàπçÕÃà∞Äàπ©Ãà∞Äàπ—·–à∞Äàπ·µ∞âÙ(ÄÄÄÄÄÄÄÄ§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—Iïùï‡°—ï·–∞Å…îπçΩµ¡•±î°»àΩ°Ωµîº†¸Öï·Öµ¡±î†¸ËΩÒqà§•myqÃÒt¨à§§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†â	%8ÅAI%YQÅ-dà∞Å—ï·–§(ÄÄÄÄÄÄÄÅÕï±òπÖÕÕï…—9Ω—%∏†âù•—°’â}¡Ö—|à∞Å—ï·–§(()•òÅ}}πÖµï}|ÄÙÙÄâ}}µÖ•π}|àË(ÄÄÄÅ’π•——ïÕ–πµÖ•∏†§
