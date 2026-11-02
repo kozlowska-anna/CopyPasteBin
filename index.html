@@ -1,337 +1,8 @@
-<!doctype html>
-<html lang="pl">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CopyPasteBin | MenedÅ¼er schowka dla GNOME</title>
-    <meta name="description" content="CopyPasteBin to menedÅ¼er schowka dla GNOME, ktÃ³ry wykrywa dane wraÅ¼liwe, ostrzega przed wklejeniem i umoÅ¼liwia lokalnÄ… anonimizacjÄ™ tekstu i obrazÃ³w.">
-    <meta name="theme-color" content="#ffffff">
-    <meta name="robots" content="index,follow,max-image-preview:large">
-    <link rel="canonical" href="https://kozlowska-anna.github.io/CopyPasteBin/">
-    <link rel="alternate" hreflang="pl" href="https://kozlowska-anna.github.io/CopyPasteBin/">
-    <link rel="alternate" hreflang="en" href="https://kozlowska-anna.github.io/CopyPasteBin/en/">
-    <link rel="alternate" hreflang="x-default" href="https://kozlowska-anna.github.io/CopyPasteBin/">
-    <link rel="icon" type="image/svg+xml" href="assets/images/logo-web.svg">
-    <link rel="stylesheet" href="assets/css/styles.css?v=20261101-2">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="CopyPasteBin">
-    <meta property="og:locale" content="pl_PL">
-    <meta property="og:locale:alternate" content="en_US">
-    <meta property="og:title" content="CopyPasteBin | MenedÅ¼er schowka dla GNOME">
-    <meta property="og:description" content="CopyPasteBin to menedÅ¼er schowka dla GNOME, ktÃ³ry wykrywa dane wraÅ¼liwe, ostrzega przed wklejeniem i umoÅ¼liwia lokalnÄ… anonimizacjÄ™ tekstu i obrazÃ³w.">
-    <meta property="og:url" content="https://kozlowska-anna.github.io/CopyPasteBin/">
-    <meta property="og:image" content="https://kozlowska-anna.github.io/CopyPasteBin/assets/images/share-card-1.1.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Logo CopyPasteBin â€” menedÅ¼er schowka dla GNOME">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://kozlowska-anna.github.io/CopyPasteBin/assets/images/share-card-1.1.png">
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "@id": "https://kozlowska-anna.github.io/CopyPasteBin/#software",
-        "name": "CopyPasteBin",
-        "url": "https://kozlowska-anna.github.io/CopyPasteBin/",
-        "mainEntityOfPage": "https://kozlowska-anna.github.io/CopyPasteBin/",
-        "sameAs": "https://github.com/kozlowska-anna/CopyPasteBin",
-        "description": "CopyPasteBin to menedÅ¼er schowka dla GNOME, ktÃ³ry wykrywa dane wraÅ¼liwe, ostrzega przed wklejeniem i umoÅ¼liwia lokalnÄ… anonimizacjÄ™ tekstu i obrazÃ³w.",
-        "applicationCategory": "SecurityApplication",
-        "applicationSubCategory": "MenedÅ¼er schowka",
-        "operatingSystem": "Linux z GNOME Shell 50 na Waylandzie",
-        "softwareRequirements": "Python 3.11 lub nowszy, GJS, GTK 4, GioUnix i GNOME Extensions",
-        "softwareVersion": "1.1",
-        "datePublished": "2026-10-26",
-        "dateModified": "2026-11-01",
-        "isAccessibleForFree": true,
-        "license": "https://github.com/kozlowska-anna/CopyPasteBin/blob/main/LICENSE",
-        "author": {
-          "@type": "Person",
-          "name": "Anna KozÅ‚owska",
-          "url": "https://github.com/kozlowska-anna"
-        },
-        "image": "https://kozlowska-anna.github.io/CopyPasteBin/assets/images/share-card-1.1.png",
-        "screenshot": "https://kozlowska-anna.github.io/CopyPasteBin/assets/images/03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png",
-        "downloadUrl": [
-          "https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb",
-          "https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz"
-        ],
-        "installUrl": "https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.md",
-        "releaseNotes": "https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.1",
-        "featureList": [
-          "Lokalne wykrywanie danych wraÅ¼liwych w schowku",
-          "OstrzeÅ¼enia przed wklejeniem",
-          "Anonimizacja tekstu i obrazÃ³w",
-          "Edytor schowka",
-          "Sesyjna historia ostatnich tekstÃ³w"
-        ],
-        "offers": {
-          "@type": "Offer",
-          "price": 0,
-          "url": "https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.1"
-        }
-      }
-    </script>
-    <script defer src="assets/js/site.js?v=20261019-6"></script>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">PrzejdÅº do treÅ›ci</a>
-    <header class="site-header">
-      <div class="container nav-shell">
-        <a class="brand" href="#top" aria-label="CopyPasteBin â€” strona gÅ‚Ã³wna">
-          <img src="assets/images/logo-web.svg" width="52" height="52" alt="">
-          <span>CopyPasteBin</span>
-        </a>
-        <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-navigation" data-menu-button>Menu</button>
-        <nav class="site-nav" id="site-navigation" aria-label="GÅ‚Ã³wna nawigacja" data-navigation data-open="false">
-          <a href="#jak-dziala">Dlaczego warto</a>
-          <a href="#zastosowania">Zastosowania</a>
-          <a href="#mozliwosci">MoÅ¼liwoÅ›ci</a>
-          <a href="#galeria">Galeria</a>
-          <a href="#prywatnosc">PrywatnoÅ›Ä‡</a>
-          <a href="#pobierz">Wersja 1.1</a>
-          <a href="#roadmapa">RozwÃ³j</a>
-          <a class="language-link" href="en/" lang="en" hreflang="en" aria-label="English version">EN</a>
-        </nav>
-      </div>
-    </header>
-
-    <main id="main">
-      <section class="hero" id="top">
-        <div class="container hero-grid">
-          <div>
-            <p class="eyebrow">MenedÅ¼er schowka skoncentrowany na prywatnoÅ›ci Â· GNOME</p>
-            <h1>SprawdÅº, zanim wkleisz.</h1>
-            <p class="hero-lede">Kopiujesz jak zwykle. CopyPasteBin ostrzega, gdy tekst przypomina hasÅ‚o, klucz, dane osobowe lub finansowe. Pomaga Ci sprawdziÄ‡, poprawiÄ‡ lub zanonimizowaÄ‡ treÅ›Ä‡ przed uÅ¼yciem â€” a decyzja, co ostatecznie wkleiÄ‡, pozostaje po Twojej stronie.</p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="#pobierz">Pobierz wersjÄ™ 1.1</a>
-              <a class="button button-secondary" href="#jak-dziala">Zobacz, jak dziaÅ‚a</a>
-            </div>
-            <ul class="hero-proof" aria-label="NajwaÅ¼niejsze informacje">
-              <li>dziaÅ‚a lokalnie</li>
-              <li>bez konta i telemetrii</li>
-              <li>open source Â· GPL-3.0-or-later</li>
-              <li>wersja 1.1 Â· dwa instalatory</li>
-            </ul>
-          </div>
-          <div class="banner-showcase" role="group" aria-labelledby="risk-demo-title">
-            <div class="banner-showcase-heading">
-              <p class="banner-kicker">Chwila namysÅ‚u przed wklejeniem</p>
-              <p id="risk-demo-title"><strong>Kolor ostrzega. Ty decydujesz.</strong></p>
-            </div>
-            <div class="risk-stack" role="list" aria-label="Cztery poziomy ryzyka CopyPasteBin">
-              <div class="risk-banner risk-low" role="listitem"><span class="risk-copy"><strong>CPBin: niskie ryzyko</strong><span>Wykryto: numer telefonu.</span></span><span class="risk-action">OtwÃ³rz edytor</span><span class="risk-close" aria-hidden="true">Ã—</span></div>
-              <div class="risk-banner risk-medium" role="listitem"><span class="risk-copy"><strong>CPBin: Å›rednie ryzyko</strong><span>Wykryto: e-mail.</span></span><span class="risk-action">OtwÃ³rz edytor</span><span class="risk-close" aria-hidden="true">Ã—</span></div>
-              <div class="risk-banner risk-high" role="listitem"><span class="risk-copy"><strong>CPBin: wysokie ryzyko</strong><span>Wykryto: karta pÅ‚atnicza.</span></span><span class="risk-action">OtwÃ³rz edytor</span><span class="risk-close" aria-hidden="true">Ã—</span></div>
-              <div class="risk-banner risk-critical" role="listitem"><span class="risk-copy"><strong>CPBin: krytyczne ryzyko</strong><span>Wykryto: klucz prywatny.</span></span><span class="risk-action">OtwÃ³rz edytor</span><span class="risk-close" aria-hidden="true">Ã—</span></div>
-            </div>
-            <p class="banner-note">Kolor pokazuje najwyÅ¼szy wykryty poziom. Baner nie ujawnia treÅ›ci schowka.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="jak-dziala">
-        <div class="container">
-          <div class="why-grid">
-            <div class="origin-story">
-              <p class="eyebrow">Historia projektu</p>
-              <h2>Dlaczego powstaÅ‚ CopyPasteBin?</h2>
-              <div class="origin-story-copy">
-                <p>CopyPasteBin narodziÅ‚ siÄ™ z codziennej pracy z tekstem, obrazami i narzÄ™dziami AI. Kopiowanie fragmentÃ³w informacji, przygotowywanie promptÃ³w czy udostÄ™pnianie zrzutÃ³w ekranu staÅ‚o siÄ™ naturalnÄ… czÄ™Å›ciÄ… tej pracy. Ale <strong>nie wszystko, co kopiujemy, chcemy rÃ³wnieÅ¼ przekazaÄ‡ dalej.</strong></p>
-                <p>BrakowaÅ‚o prostego narzÄ™dzia, ktÃ³re pozwoliÅ‚oby <strong>sprawdziÄ‡, co znajduje siÄ™ w kopiowanych treÅ›ciach</strong>, ostrzegÅ‚o przed przypadkowym ujawnieniem danych wraÅ¼liwych i umoÅ¼liwiÅ‚o ich anonimizacjÄ™ bez zbÄ™dnych dodatkowych krokÃ³w.</p>
-                <p>Tak powstaÅ‚ CopyPasteBin. Lokalny program, ktÃ³ry pomaga bezpieczniej i wygodniej pracowaÄ‡ z informacjami, pozostawiajÄ…c uÅ¼ytkownikowi kontrolÄ™ nad tym, co udostÄ™pnia.</p>
-                <p>ChoÄ‡ inspiracjÄ… byÅ‚a praca z AI, <strong>jego zastosowanie jest znacznie szersze.</strong> WszÄ™dzie tam, gdzie kopiujemy, edytujemy i przekazujemy informacje, warto wiedzieÄ‡, co naprawdÄ™ trafia dalej.</p>
-              </div>
-            </div>
-            <aside class="product-positioning" aria-label="Rola CopyPasteBin">
-              <div class="product-positioning-copy">
-                <p class="eyebrow">Dlaczego warto</p>
-                <h3>MenedÅ¼er, ale nie klasyczne archiwum schowka.</h3>
-                <p>Klasyczne menedÅ¼ery schowkÃ³w skupiajÄ… siÄ™ przede wszystkim na przechowywaniu, wyszukiwaniu i ponownym uÅ¼ywaniu kopii. CopyPasteBin rÃ³wnieÅ¼ daje dostÄ™p do krÃ³tkiej historii, lecz jego priorytetem jest wychwycenie ryzyka, przygotowanie tekstu i ochrona przed niefortunnym klikniÄ™ciem â€žWklejâ€.</p>
-              </div>
-            </aside>
-          </div>
-          <div class="trust-strip" role="group" aria-label="NajwaÅ¼niejsze korzyÅ›ci">
-            <div class="trust-item"><strong>ZauwaÅ¼asz ryzyko wczeÅ›niej</strong><span>OstrzeÅ¼enie pojawia siÄ™, gdy tekst przypomina obsÅ‚ugiwany rodzaj danych wraÅ¼liwych.</span></div>
-            <div class="trust-item"><strong>Decyzja naleÅ¼y do Ciebie</strong><span>Program nie wkleja tekstu i domyÅ›lnie nie zmienia schowka automatycznie.</span></div>
-            <div class="trust-item"><strong>Dane zostajÄ… na komputerze</strong><span>Wykrywanie i anonimizacja dziaÅ‚ajÄ… lokalnie, bez wysyÅ‚ania treÅ›ci do chmury.</span></div>
-            <div class="trust-item"><strong>Åatwiej poprawiasz tekst</strong><span>Edytor pomaga usunÄ…Ä‡ lub zanonimizowaÄ‡ wybrane wartoÅ›ci przed uÅ¼yciem.</span></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="zastosowania">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">PrzykÅ‚adowe zastosowania</p>
-            <h2>Kiedy moÅ¼e siÄ™ przydaÄ‡ CopyPasteBin?</h2>
-          </div>
-          <ul class="use-case-list" aria-label="Cztery sytuacje, w ktÃ³rych moÅ¼e przydaÄ‡ siÄ™ CopyPasteBin">
-            <li><strong>Gdy piszesz wiadomoÅ›Ä‡:</strong> sprawdÅº, czy kopiowany tekst nie zawiera przypadkowo danych osobowych, kontaktowych lub finansowych.</li>
-            <li><strong>Gdy pracujesz z kodem lub terminalem:</strong> zwrÃ³Ä‡ uwagÄ™ na tokeny, klucze i ciÄ…gi poÅ‚Ä…czeÅ„ przed ich wklejeniem do rozmowy, zgÅ‚oszenia lub dokumentacji.</li>
-            <li><strong>Gdy korzystasz z narzÄ™dzia AI:</strong> przygotuj lub rozbuduj prompt bez otwierania osobnego edytora, sprawdÅº kopiowany fragment dokumentu, kodu, logu lub polecenia i w razie potrzeby zanonimizuj wraÅ¼liwe dane przed wklejeniem.</li>
-            <li><strong>Gdy udostÄ™pniasz obraz:</strong> rÄ™cznie zakryj wybrane obszary zdjÄ™cia lub screenshota i zapisz nowÄ… kopiÄ™ PNG.</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="section section-soft" id="mozliwosci">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">NajwaÅ¼niejsze moÅ¼liwoÅ›ci</p>
-            <h2>Praktyczna pomoc w codziennym kopiowaniu i wklejaniu.</h2>
-          </div>
-          <div class="feature-grid">
-            <article class="feature-card"><span class="feature-number">01</span><h3>PodrÄ™czny edytor treÅ›ci</h3><p>OtwÃ³rz skopiowanÄ… treÅ›Ä‡, popraw jÄ…, rozbuduj lub zanonimizuj wykryte fragmenty. Edytor zastÄ…pi zawartoÅ›Ä‡ schowka dopiero po Twojej akceptacji.</p></article>
-            <article class="feature-card"><span class="feature-number">02</span><h3>Anonimizacja obrazÃ³w</h3><p>OtwÃ³rz lokalny plik PNG lub JPEG, zakryj wybrane fragmenty prostokÄ…tami i zapisz nowy PNG. OryginaÅ‚ pozostaje bez zmian.</p></article>
-            <article class="feature-card"><span class="feature-number">03</span><h3>ReguÅ‚y i dokÅ‚adne wykluczenia</h3><p>WÅ‚asne znaczniki dziaÅ‚ajÄ… lokalnie. Wykluczenia sÄ… dozwolone tylko dla dokÅ‚adnego trafienia o niskim lub Å›rednim ryzyku.</p></article>
-            <article class="feature-card"><span class="feature-number">04</span><h3>Historia ostatnich 15 kopiowaÅ„</h3><p>WrÃ³Ä‡ do jednego z 15 ostatnio skopiowanych tekstÃ³w bez tworzenia przez CopyPasteBin trwaÅ‚ego archiwum treÅ›ci. Lista pozostaje w RAM bieÅ¼Ä…cej sesji i znika po blokadzie ekranu, wylogowaniu lub wyÅ‚Ä…czeniu rozszerzenia.</p></article>
-            <article class="feature-card"><span class="feature-number">05</span><h3>Cztery poziomy ryzyka</h3><p>ReguÅ‚y rozrÃ³Å¼niajÄ… poziomy od niskiego do krytycznego i kategorie takie jak dane kontaktowe, numery finansowe, tokeny czy klucze prywatne.</p></article>
-            <article class="feature-card"><span class="feature-number">06</span><h3>Bezpieczne wklejenie</h3><p>UÅ¼yj <code>Super+Shift+V</code>, aby sprawdziÄ‡ tekst znajdujÄ…cy siÄ™ w schowku. JeÅ›li program wykryje ryzyko, otworzy edytor z propozycjÄ… anonimizacji. Niczego nie wklei ani nie zmieni bez potwierdzenia.</p></article>
-            <article class="feature-card"><span class="feature-number">07</span><h3>Pauza i opcjonalne czyszczenie</h3><p>Podczas pauzy opcje czasu pozostajÄ… widoczne, a przycisk wznowienia jest pod rÄ™kÄ…. Opcjonalne czyszczenie schowka pozostaje wyÅ‚Ä…czone domyÅ›lnie.</p></article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="galeria">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">Prawdziwy interfejs</p>
-            <h2>CopyPasteBin w GNOME.</h2>
-            <p>Zrzuty pokazujÄ… interfejs CopyPasteBin 1.1 i wyÅ‚Ä…cznie dane demonstracyjne.</p>
-          </div>
-          <div class="gallery-grid">
-            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Integracja z pulpitem GNOME</strong><span>Menu CopyPasteBin rozwiniÄ™te z panelu GNOME, z widocznymi grupami ustawieÅ„ i narzÄ™dzi.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="CopyPasteBin 1.1 â€” Menu menedÅ¼era schowka w GNOME"><img src="assets/images/01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png" width="411" height="613" loading="lazy" alt="Menu CopyPasteBin 1.1 w GNOME z historiÄ… schowka, filtrami wykrywania, reguÅ‚ami wÅ‚asnymi, anonimizacjÄ… tekstu i obrazÃ³w oraz ustawieniami pauzy."></button></figure>
-            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>OstrzeÅ¼enie o danych wraÅ¼liwych</strong><span>Banner wysokiego ryzyka z nazwÄ… wykrytej kategorii i przyciskiem â€žOtwÃ³rz edytorâ€.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="CopyPasteBin 1.1 â€” OstrzeÅ¼enie o danych wraÅ¼liwych przed wklejeniem"><img src="assets/images/02-copypastebin-1-1-ostrzezenie-przed-wklejeniem-danych-wrazliwych-PL.png" width="594" height="140" loading="lazy" alt="OstrzeÅ¼enie CopyPasteBin 1.1 o wysokim ryzyku po wykryciu demonstracyjnej karty pÅ‚atniczej w schowku."></button></figure>
-            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Edytor schowka i podÅ›wietlenie ryzyka</strong><span>Okno edytora z podÅ›wietlonym demonstracyjnym adresem e-mail i hasÅ‚em.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="CopyPasteBin 1.1 â€” Edytor schowka i podÅ›wietlanie danych wraÅ¼liwych"><img src="assets/images/03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png" width="1076" height="606" loading="lazy" alt="Edytor schowka CopyPasteBin 1.1 z podÅ›wietlonym demonstracyjnym adresem e-mail i hasÅ‚em przed anonimizacjÄ…."></button></figure>
-            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Selektywna anonimizacja i edycja tekstu</strong><span>Widok edytora z zaznaczonym adresem e-mail, otwartym menu dziaÅ‚aÅ„ i rozwiniÄ™tym zestawem narzÄ™dzi tekstowych.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="CopyPasteBin 1.1 â€” Selektywna anonimizacja i narzÄ™dzia edycji schowka"><img src="assets/images/04-copypastebin-1-1-selektywna-anonimizacja-narzedzia-edycji-PL.png" width="1076" height="606" loading="lazy" alt="Edytor CopyPasteBin 1.1 z zaznaczonym adresem e-mail, otwartymi dziaÅ‚aniami anonimizacji i wykluczenia oraz widocznymi narzÄ™dziami poprawiania tekstu."></button></figure>
-            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>ReguÅ‚y wÅ‚asne i dokÅ‚adne wykluczenia</strong><span>Okno z syntetycznymi reguÅ‚ami wÅ‚asnymi i przykÅ‚adami dokÅ‚adnych wykluczeÅ„.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="CopyPasteBin 1.1 â€” ReguÅ‚y wÅ‚asne i dokÅ‚adne wykluczenia"><img src="assets/images/05-copypastebin-1-1-reguly-wlasne-dokladne-wykluczenia-PL.png" width="1208" height="649" loading="lazy" alt="Okno CopyPasteBin 1.1 z syntetycznymi reguÅ‚ami wykrywania oraz dokÅ‚adnymi wykluczeniami dla przykÅ‚adowego adresu e-mail i dokumentacyjnego adresu IP."></button></figure>
-            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Edytor anonimizacji obrazÃ³w</strong><span>Edytor obrazu z prostokÄ…tami zasÅ‚aniajÄ…cymi przykÅ‚adowe dane odbiorcy, adres i podpis.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="CopyPasteBin 1.1 â€” Lokalny edytor anonimizacji obrazÃ³w"><img src="assets/images/06-copypastebin-1-1-lokalny-edytor-anonimizacji-obrazow-PL.png" width="1128" height="789" loading="lazy" alt="Edytor anonimizacji obrazÃ³w CopyPasteBin 1.1 z czterema rÄ™cznymi zakryciami syntetycznego odbiorcy, adresu, adresu e-mail i podpisu."></button></figure>
-            <figure class="gallery-card"><figcaption class="gallery-caption"><strong>Okno ostatnich wpisÃ³w</strong><span>Okno ostatnich wpisÃ³w z oÅ›mioma syntetycznymi tekstami i przyciskiem przywrÃ³cenia wybranego wpisu.</span></figcaption><button class="gallery-button" type="button" data-gallery-image data-caption="CopyPasteBin 1.1 â€” Tymczasowa historia schowka"><img src="assets/images/07-copypastebin-1-1-tymczasowa-historia-schowka-PL.png" width="1048" height="721" loading="lazy" alt="Historia schowka CopyPasteBin 1.1 z oÅ›mioma syntetycznymi wpisami tekstowymi przechowywanymi wyÅ‚Ä…cznie w pamiÄ™ci podrÄ™cznej sesji."></button></figure>
-          </div>
-        </div>
-      </section>
-
-      <section class="section section-dark" id="prywatnosc">
-        <div class="container privacy-grid">
-          <div>
-            <p class="eyebrow">PrywatnoÅ›Ä‡ i bezpieczeÅ„stwo</p>
-            <h2>Lokalnie, bez konta i chmury.</h2>
-            <p>Wykrywanie i anonimizacja dziaÅ‚ajÄ… na Twoim komputerze. CopyPasteBin nie wymaga konta ani poÅ‚Ä…czenia z usÅ‚ugÄ… AI i nie zapisuje treÅ›ci schowka w trwaÅ‚ej historii.</p>
-            <div class="privacy-points">
-              <div class="privacy-point"><h3>Bez telemetrii i trackerÃ³w</h3><p>Aplikacja i ta strona nie wysyÅ‚ajÄ… analityki uÅ¼ytkowania.</p></div>
-              <div class="privacy-point"><h3>Jawne granice</h3><p>Brak ostrzeÅ¼enia nie oznacza, Å¼e tekst jest bezpieczny. ReguÅ‚y mogÄ… coÅ› przeoczyÄ‡ lub zgÅ‚osiÄ‡ faÅ‚szywy alarm.</p></div>
-              <div class="privacy-point"><h3>Bez trwaÅ‚ej historii treÅ›ci</h3><p>Do 15 ostatnich tekstÃ³w pozostaje tylko w pamiÄ™ci RAM bieÅ¼Ä…cej sesji.</p></div>
-            </div>
-          </div>
-          <aside class="limits-card" aria-labelledby="limits-title">
-            <h3 id="limits-title">Czego program nie moÅ¼e zagwarantowaÄ‡</h3>
-            <p>CopyPasteBin pomaga zauwaÅ¼yÄ‡ potencjalne ryzyko, ale nie jest izolowanym sejfem.</p>
-            <ul>
-              <li>Nie chroni przed rootem ani innym procesem tego samego uÅ¼ytkownika.</li>
-              <li>Nie kontroluje zewnÄ™trznych menedÅ¼erÃ³w schowka, obserwacji ekranu ani aplikacji docelowej.</li>
-              <li>Nie gwarantuje bezpiecznego wymazywania danych z RAM, swapu lub zrzutÃ³w procesu.</li>
-              <li>Nie potwierdza, Å¼e brak wykrycia oznacza brak danych wraÅ¼liwych.</li>
-            </ul>
-            <p><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/security.pl.md">Przeczytaj model bezpieczeÅ„stwa</a></p>
-          </aside>
-        </div>
-      </section>
-
-      <section class="section section-soft" id="pobierz">
-        <div class="container download-grid">
-          <div class="system-card">
-            <p class="eyebrow">Wymagania systemowe</p>
-            <h2>Wymagane Å›rodowisko.</h2>
-            <ul class="requirements-list">
-              <li>Linux z GNOME Shell 50</li>
-              <li>sesja Wayland</li>
-              <li>Python 3.11 lub nowszy z <code>venv</code></li>
-              <li><code>gjs</code>, GTK 4, GdkPixbuf, GioUnix i <code>gnome-extensions</code></li>
-              <li><code>sha256sum</code> do kontroli pobranego archiwum</li>
-            </ul>
-            <p><strong>ObsÅ‚ugiwane dystrybucje:</strong></p>
-            <ul class="requirements-list">
-              <li>Ubuntu 26.04 LTS (GNOME Shell 50, Wayland)</li>
-              <li>Fedora Workstation 44, x86_64 (GNOME Shell 50.0, Wayland) â€” instalacja przez archiwum tar.gz</li>
-            </ul>
-            <p>Obecnie nieobsÅ‚ugiwane Å›rodowiska: KDE Plasma, Cinnamon, Xfce oraz sesje X11.</p>
-            <p>ZgodnoÅ›Ä‡ zaleÅ¼y od Å›rodowiska graficznego i jego wersji, a nie wyÅ‚Ä…cznie od nazwy dystrybucji.</p>
-          </div>
-          <div class="download-card">
-            <span class="version-badge">Wydanie Â· 1.1</span>
-            <h2>Dwa instalatory z tego samego kodu.</h2>
-            <p>Wybierz jeden sposÃ³b instalacji:</p>
-            <ul class="requirements-list">
-              <li><strong>Pakiet DEB</strong> â€” instalacja systemowa zarzÄ…dzana przez APT.</li>
-              <li><strong>Archiwum tar.gz</strong> â€” instalacja lokalna dla jednego uÅ¼ytkownika, bez <code>sudo</code>.</li>
-            </ul>
-            <p>Na Fedorze wybierz archiwum tar.gz; pakiet DEB jest przeznaczony dla systemÃ³w zarzÄ…dzanych przez APT.</p>
-            <div class="download-actions">
-              <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/copypastebin_1.1-1_all.deb">â†“ Pobierz DEB</a>
-              <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/CopyPasteBin-linux-1.1.tar.gz">â†“ Pobierz tar.gz</a>
-              <a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/SHA256SUMS">Pobierz SHA256SUMS</a>
-            </div>
-            <p>Po pobraniu instalatora i pliku sum sprawdÅº paczkÄ™ w tym samym katalogu:</p>
-            <pre class="verification-command"><code>sha256sum --check --ignore-missing SHA256SUMS</code></pre>
-            <p>Archiwum 1.1 tar.gz zawiera dokumentacjÄ™ polskÄ… i angielskÄ…. Zacznij od <code>README.pl.md</code> i <code>INSTALL.pl.md</code>; odnoÅ›niki jÄ™zykowe pozwalajÄ… przeÅ‚Ä…czyÄ‡ jÄ™zyk. Obie wersje strony korzystajÄ… z tej samej paczki.</p>
-            <p>Oba warianty instalacji sprawdzono w docelowym Å›rodowisku GNOME/Wayland.</p>
-            <p>Aktualizacja pakietu DEB wymaga obecnie pobrania nowej wersji i zainstalowania jej przez APT.</p>
-            <p><strong>Nie instaluj obu wariantÃ³w jednoczeÅ›nie.</strong></p>
-            <h3>Aktualizacje</h3>
-            <p>CopyPasteBin nie sprawdza aktualizacji w tle. Nowe wersje sÄ… publikowane w GitHub Releases. Aby otrzymywaÄ‡ powiadomienia z GitHuba, wybierz w repozytorium <strong>Watch â†’ Custom â†’ Releases</strong>.</p>
-            <p><a href="https://github.com/kozlowska-anna/CopyPasteBin/releases/latest">SprawdÅº najnowsze wydanie â†’</a></p>
-            <p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/CHANGELOG.md">Zobacz zmiany w wersji 1.1 â†’</a></p>
-            <p><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.md">PeÅ‚na instrukcja instalacji, aktualizacji i odinstalowania â†’</a></p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="roadmapa">
-        <div class="container">
-          <div class="section-heading">
-            <p class="eyebrow">Publiczna roadmapa</p>
-            <h2>Co dalej z CopyPasteBin.</h2>
-            <p>Pokazujemy przyjÄ™te kierunki rozwoju oraz obszary, ktÃ³re nadal badamy. Roadmapa nie zawiera sztywnych terminÃ³w.</p>
-          </div>
-          <div class="feature-grid">
-            <article class="feature-card"><span class="feature-number">Planowane</span><h3>Wygodniejsze przygotowanie treÅ›ci</h3><p>Chcemy rozwijaÄ‡ edytor, wÅ‚asne reguÅ‚y i anonimizacjÄ™ tak, aby Å‚atwiej dopasowaÄ‡ CopyPasteBin do codziennej pracy â€” nadal lokalnie i bez odbierania uÅ¼ytkownikowi decyzji.</p></article>
-            <article class="feature-card"><span class="feature-number">Badamy</span><h3>WiÄ™cej sposobÃ³w ochrony</h3><p>Wersja 1.1 pozwala rÄ™cznie zakrywaÄ‡ fragmenty obrazÃ³w. Badamy lokalne rozpoznawanie treÅ›ci w obrazach oraz integracje z innymi Å›rodowiskami.</p></article>
-          </div>
-          <p><a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/ROADMAP.pl.md">Zobacz peÅ‚nÄ… roadmapÄ™ â†’</a></p>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="cta">
-            <p class="eyebrow">Projekt otwartoÅºrÃ³dÅ‚owy</p>
-            <h2>TwÃ³j schowek. Twoje reguÅ‚y. Twoja decyzja.</h2>
-            <p class="project-credit"><strong>Projekt powstaje przy wsparciu narzÄ™dzi ChatGPT i Codex od OpenAI.</strong> CopyPasteBin jest niezaleÅ¼nym projektem; nie jest powiÄ…zany z OpenAI, zatwierdzony przez OpenAI ani sponsorowany przez OpenAI.</p>
-            <p class="project-credit"><strong>CopyPasteBin jest oprogramowaniem open source na licencji GPL-3.0-or-later.</strong> SprawdÅº kod ÅºrÃ³dÅ‚owy, dokumentacjÄ™ i model bezpieczeÅ„stwa. JeÅ›li znajdziesz bÅ‚Ä…d, zgÅ‚oÅ› go publicznie bez doÅ‚Ä…czania prawdziwych sekretÃ³w ani prywatnej treÅ›ci schowka.</p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="https://github.com/kozlowska-anna/CopyPasteBin">OtwÃ³rz repozytorium</a>
-              <a class="button button-secondary" href="https://github.com/kozlowska-anna/CopyPasteBin/issues">ZgÅ‚oÅ› problem</a>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <div class="container">
-        <div class="footer-grid">
-          <div class="footer-brand"><img src="assets/images/logo-web.svg" width="48" height="48" alt=""><div><strong>CopyPasteBin</strong><span>MenedÅ¼er schowka dla GNOME z wykrywaniem danych wraÅ¼liwych, ostrzeÅ¼eniami przed wklejeniem, anonimizacjÄ… tekstu i obrazÃ³w oraz podrÄ™cznym edytorem treÅ›ci.</span></div></div>
-          <div><strong>Dokumentacja</strong><ul class="footer-links"><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/README.pl.md">Opis projektu</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/ROADMAP.pl.md">Roadmapa</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/offline-installation.md">Instalacja</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/image-redaction.pl.md">Anonimizacja obrazÃ³w</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/docs/security.pl.md">BezpieczeÅ„stwo</a></li></ul></div>
-          <div><strong>Projekt</strong><ul class="footer-links"><li><a href="https://github.com/kozlowska-anna/CopyPasteBin">GitHub</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/blob/main/LICENSE">GPL-3.0-or-later</a></li><li><a href="https://github.com/kozlowska-anna/CopyPasteBin/issues">ZgÅ‚aszanie bÅ‚Ä™dÃ³w</a></li></ul></div>
-        </div>
-        <div class="footer-bottom"><span>Â© 2026 Anna KozÅ‚owska</span></div>
-      </div>
-    </footer>
-
-    <dialog class="lightbox" data-lightbox aria-label="PowiÄ™kszony zrzut ekranu">
-      <button class="lightbox-close" type="button" aria-label="Zamknij" data-lightbox-close>Ã—</button>
-      <figure><img src="assets/images/03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png" width="1076" height="606" data-lightbox-image alt=""><figcaption data-lightbox-caption></figcaption></figure>
-    </dialog>
-  </body>
-</html>
+¨¥yÛhr·šµë-­æ¦}Ó©z¶­Š‰ç¢Ú^®h­µçEj)^vÚ­æ­zËky©Ÿtê^­«b¢yè¶—«š+myÑZŠW¶‡+y«^²ÚÞjgÝ:—«jØ¨žz-¥êæŠÛ^tð…‘½ÑåÁ”¡Ñµ°ø(ñ¡Ñµ°±…¹œô‰Á°ˆø(€€ñ¡•…ø(€€€€ñµ•Ñ„¡…ÉÍ•Ðô‰ÕÑ˜´àˆø(€€€€ñµ•Ñ„¹…µ”ô‰Ù¥•ÝÁ½ÉÐˆ½¹Ñ•¹Ðô‰Ý¥‘Ñ õ‘•Ù¥”µÝ¥‘Ñ °¥¹¥Ñ¥…°µÍ…±”ôÄˆø(€€€€ñÑ¥Ñ±”ù½ÁåA…ÍÑ•	¥¸ð5•¹•“ñ•ÈÍ¡½Ý­„‘±„9=5ð½Ñ¥Ñ±”ø(€€€€ñµ•Ñ„¹…µ”ô‰‘•ÍÉ¥ÁÑ¥½¸ˆ½¹Ñ•¹Ðô‰½ÁåA…ÍÑ•	¥¸Ñ¼µ•¹•“ñ•ÈÍ¡½Ý­„‘±„9=5°­ÓÍÉäÝå­ÉåÝ„‘…¹”ÝÉ‡ñ±¥Ý”°½ÍÑÉé•„ÁÉé•Ý­±•©•¹¥•´¤Õµ¿ñ±¥Ý¥„±½­…±»…¹½¹¥µ¥é…«dÑ•­ÍÑÔ¤½‰É…ëÍÜ¸ˆø(€€€€ñµ•Ñ„¹…µ”ô‰Ñ¡•µ”µ½±½Èˆ½¹Ñ•¹Ðôˆ™™™™™˜ˆø(€€€€ñµ•Ñ„¹…µ”ô‰É½‰½ÑÌˆ½¹Ñ•¹Ðô‰¥¹‘•à±™½±±½Ü±µ…àµ¥µ…”µÁÉ•Ù¥•Üé±…É”ˆø(€€€€ñ±¥¹¬É•°ô‰…¹½¹¥…°ˆ¡É•˜ô‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸¼ˆø(€€€€ñ±¥¹¬É•°ô‰…±Ñ•É¹…Ñ”ˆ¡É•™±…¹œô‰Á°ˆ¡É•˜ô‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸¼ˆø(€€€€ñ±¥¹¬É•°ô‰…±Ñ•É¹…Ñ”ˆ¡É•™±…¹œô‰•¸ˆ¡É•˜ô‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸½•¸¼ˆø(€€€€ñ±¥¹¬É•°ô‰…±Ñ•É¹…Ñ”ˆ¡É•™±…¹œô‰àµ‘•™…Õ±Ðˆ¡É•˜ô‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸¼ˆø(€€€€ñ±¥¹¬É•°ô‰¥½¸ˆÑåÁ”ô‰¥µ…”½ÍÙœ­áµ°ˆ¡É•˜ô‰…ÍÍ•ÑÌ½¥µ…•Ì½±½¼µÝ•ˆ¹ÍÙœˆø(€€€€ñ±¥¹¬É•°ô‰ÍÑå±•Í¡••Ðˆ¡É•˜ô‰…ÍÍ•ÑÌ½ÍÌ½ÍÑå±•Ì¹ÍÌýØôÈÀÈØÄÀÈØ´Ìˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œéÑåÁ”ˆ½¹Ñ•¹Ðô‰Ý•‰Í¥Ñ”ˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œéÍ¥Ñ•}¹…µ”ˆ½¹Ñ•¹Ðô‰½ÁåA…ÍÑ•	¥¸ˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œé±½…±”ˆ½¹Ñ•¹Ðô‰Á±}A0ˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œé±½…±”é…±Ñ•É¹…Ñ”ˆ½¹Ñ•¹Ðô‰•¹}ULˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œéÑ¥Ñ±”ˆ½¹Ñ•¹Ðô‰½ÁåA…ÍÑ•	¥¸ð5•¹•“ñ•ÈÍ¡½Ý­„‘±„9=5ˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œé‘•ÍÉ¥ÁÑ¥½¸ˆ½¹Ñ•¹Ðô‰½ÁåA…ÍÑ•	¥¸Ñ¼µ•¹•“ñ•ÈÍ¡½Ý­„‘±„9=5°­ÓÍÉäÝå­ÉåÝ„‘…¹”ÝÉ‡ñ±¥Ý”°½ÍÑÉé•„ÁÉé•Ý­±•©•¹¥•´¤Õµ¿ñ±¥Ý¥„±½­…±»…¹½¹¥µ¥é…«dÑ•­ÍÑÔ¤½‰É…ëÍÜ¸ˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œéÕÉ°ˆ½¹Ñ•¹Ðô‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸¼ˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œé¥µ…”ˆ½¹Ñ•¹Ðô‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸½…ÍÍ•ÑÌ½¥µ…•Ì½Í¡…É”µ…É´Ä¸È¹Á¹œˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œé¥µ…”éÝ¥‘Ñ ˆ½¹Ñ•¹ÐôˆÄÈÀÀˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œé¥µ…”é¡•¥¡Ðˆ½¹Ñ•¹ÐôˆØÌÀˆø(€€€€ñµ•Ñ„ÁÉ½Á•ÉÑäô‰½œé¥µ…”é…±Ðˆ½¹Ñ•¹Ðô‰1½¼½ÁåA…ÍÑ•	¥¸ƒŠPµ•¹•“ñ•ÈÍ¡½Ý­„‘±„9=5ˆø(€€€€ñµ•Ñ„¹…µ”ô‰ÑÝ¥ÑÑ•Èé…Éˆ½¹Ñ•¹Ðô‰ÍÕµµ…Éå}±…É•}¥µ…”ˆø(€€€€ñµ•Ñ„¹…µ”ô‰ÑÝ¥ÑÑ•Èé¥µ…”ˆ½¹Ñ•¹Ðô‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸½…ÍÍ•ÑÌ½¥µ…•Ì½Í¡…É”µ…É´Ä¸È¹Á¹œˆø(€€€€ñÍÉ¥ÁÐÑåÁ”ô‰…ÁÁ±¥…Ñ¥½¸½±­©Í½¸ˆø(€€€€€ì(€€€€€€€€‰½¹Ñ•áÐˆè€‰¡ÑÑÁÌè¼½Í¡•µ„¹½Éœˆ°(€€€€€€€€‰ÑåÁ”ˆè€‰M½™ÑÝ…É•ÁÁ±¥…Ñ¥½¸ˆ°(€€€€€€€€‰¥ˆè€‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸¼Í½™ÑÝ…É”ˆ°(€€€€€€€€‰¹…µ”ˆè€‰½ÁåA…ÍÑ•	¥¸ˆ°(€€€€€€€€‰ÕÉ°ˆè€‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸¼ˆ°(€€€€€€€€‰µ…¥¹¹Ñ¥Ñå=™A…”ˆè€‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸¼ˆ°(€€€€€€€€‰Í…µ•Ìˆè€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸ˆ°(€€€€€€€€‰‘•ÍÉ¥ÁÑ¥½¸ˆè€‰½ÁåA…ÍÑ•	¥¸Ñ¼µ•¹•“ñ•ÈÍ¡½Ý­„‘±„9=5°­ÓÍÉäÝå­ÉåÝ„‘…¹”ÝÉ‡ñ±¥Ý”°½ÍÑÉé•„ÁÉé•Ý­±•©•¹¥•´¤Õµ¿ñ±¥Ý¥„±½­…±»…¹½¹¥µ¥é…«dÑ•­ÍÑÔ¤½‰É…ëÍÜ¸ˆ°(€€€€€€€€‰…ÁÁ±¥…Ñ¥½¹…Ñ•½Éäˆè€‰M•ÕÉ¥ÑåÁÁ±¥…Ñ¥½¸ˆ°(€€€€€€€€‰…ÁÁ±¥…Ñ¥½¹MÕ‰…Ñ•½Éäˆè€‰5•¹•“ñ•ÈÍ¡½Ý­„ˆ°(€€€€€€€€‰½Á•É…Ñ¥¹MåÍÑ•´ˆè€‰1¥¹Õàè9=5M¡•±°€ÔÀ¹„]…å±…¹‘é¥”ˆ°(€€€€€€€€‰Í½™ÑÝ…É•I•ÅÕ¥É•µ•¹ÑÌˆè€‰AåÑ¡½¸€Ì¸ÄÄ±Õˆ¹½ÝÍéä°)L°Q,€Ð°¥½U¹¥à¤9=5áÑ•¹Í¥½¹Ìˆ°(€€€€€€€€‰Í½™ÑÝ…É•Y•ÉÍ¥½¸ˆè€ˆÄ¸Èˆ°(€€€€€€€€‰‘…Ñ•AÕ‰±¥Í¡•ˆè€ˆÈÀÈØ´ÄÄ´ÀÈˆ°(€€€€€€€€‰‘…Ñ•5½‘¥™¥•ˆè€ˆÈÀÈØ´ÄÄ´ÀÈˆ°(€€€€€€€€‰¥Í•ÍÍ¥‰±•½ÉÉ•”ˆèÑÉÕ”°(€€€€€€€€‰±¥•¹Í”ˆè€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½1%9Mˆ°(€€€€€€€€‰…ÕÑ¡½Èˆèì(€€€€€€€€€€‰ÑåÁ”ˆè€‰A•ÉÍ½¸ˆ°(€€€€€€€€€€‰¹…µ”ˆè€‰¹¹„-½ë	½ÝÍ­„ˆ°(€€€€€€€€€€‰ÕÉ°ˆè€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„ˆ(€€€€€€€ô°(€€€€€€€€‰¥µ…”ˆè€‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸½…ÍÍ•ÑÌ½¥µ…•Ì½Í¡…É”µ…É´Ä¸È¹Á¹œˆ°(€€€€€€€€‰ÍÉ••¹Í¡½Ðˆè€‰¡ÑÑÁÌè¼½­½é±½ÝÍ­„µ…¹¹„¹¥Ñ¡Õˆ¹¥¼½½ÁåA…ÍÑ•	¥¸½…ÍÍ•ÑÌ½¥µ…•Ì¼ÀÄµ½ÁåÁ…ÍÑ•‰¥¸´Ä´Èµµ•¹Ôµ¡¥ÍÑ½É¥¤µÍ¡½Ý­„µ¹½µ”µA0¹Á¹œˆ°(€€€€€€€€‰‘½Ý¹±½…‘UÉ°ˆèl(€€€€€€€€€€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½‘½Ý¹±½…½ØÄ¸È½½ÁåÁ…ÍÑ•‰¥¸µ‰…­•¹‘|Ä¸È´É}…±°¹‘•ˆˆ°(€€€€€€€€€€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½‘½Ý¹±½…½ØÄ¸È½¹½µ”µÍ¡•±°µ•áÑ•¹Í¥½¸µ½ÁåÁ…ÍÑ•‰¥¹|Ä¸È´É}…±°¹‘•ˆˆ°(€€€€€€€€€€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½‘½Ý¹±½…½ØÄ¸È½½ÁåÁ…ÍÑ•‰¥¹|Ä¸È´É}…±°¹‘•ˆˆ°(€€€€€€€€€€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½‘½Ý¹±½…½ØÄ¸È½½ÁåA…ÍÑ•	¥¸µ±¥¹Õà´Ä¸È¹Ñ…È¹èˆ(€€€€€€€t°(€€€€€€€€‰¥¹ÍÑ…±±UÉ°ˆè€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½‘½Ì½½™™±¥¹”µ¥¹ÍÑ…±±…Ñ¥½¸¹µˆ°(€€€€€€€€‰É•±•…Í•9½Ñ•Ìˆè€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½Ñ…œ½ØÄ¸Èˆ°(€€€€€€€€‰™•…ÑÕÉ•1¥ÍÐˆèl(€€€€€€€€€€‰1½­…±¹”Ýå­ÉåÝ…¹¥”‘…¹å ÝÉ‡ñ±¥Ýå ÜÍ¡½Ý­Ôˆ°(€€€€€€€€€€‰=ÍÑÉé—ñ•¹¥„ÁÉé•Ý­±•©•¹¥•´ˆ°(€€€€€€€€€€‰¹½¹¥µ¥é…©„Ñ•­ÍÑÔ¤½‰É…ëÍÜˆ°(€€€€€€€€€€‰‘åÑ½ÈÍ¡½Ý­„ˆ°(€€€€€€€€€€‰!¥ÍÑ½É¥„Í•Íå©¹„Á½µ¥©…«„É½éÁ½é¹…¹”Í•­É•Ñä¤ÑÉ—m¤ÝåÍ½­¥•¼Éåéå­„ˆ(€€€€€€€t°(€€€€€€€€‰½™™•ÉÌˆèì(€€€€€€€€€€‰ÑåÁ”ˆè€‰=™™•Èˆ°(€€€€€€€€€€‰ÁÉ¥”ˆè€À°(€€€€€€€€€€‰ÕÉ°ˆè€‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½Ñ…œ½ØÄ¸Èˆ(€€€€€€€ô(€€€€€ô(€€€€ð½ÍÉ¥ÁÐø(€€€€ñÍÉ¥ÁÐ‘•™•ÈÍÉŒô‰…ÍÍ•ÑÌ½©Ì½Í¥Ñ”¹©ÌýØôÈÀÈØÄÀÄä´Øˆøð½ÍÉ¥ÁÐø(€€ð½¡•…ø(€€ñ‰½‘äø(€€€€ñ„±…ÍÌô‰Í­¥Àµ±¥¹¬ˆ¡É•˜ôˆµ…¥¸ˆùAÉé•©“è‘¼ÑÉ—m¤ð½„ø(€€€€ñ¡•…‘•È±…ÍÌô‰Í¥Ñ”µ¡•…‘•Èˆø(€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•È¹…ØµÍ¡•±°ˆø(€€€€€€€€ñ„±…ÍÌô‰‰É…¹ˆ¡É•˜ôˆÑ½Àˆ…É¥„µ±…‰•°ô‰½ÁåA…ÍÑ•	¥¸ƒŠPÍÑÉ½¹„ŸÍÝ¹„ˆø(€€€€€€€€€€ñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì½±½¼µÝ•ˆ¹ÍÙœˆÝ¥‘Ñ ôˆÔÈˆ¡•¥¡ÐôˆÔÈˆ…±Ðôˆˆø(€€€€€€€€€€ñÍÁ…¸ù½ÁåA…ÍÑ•	¥¸ð½ÍÁ…¸ø(€€€€€€€€ð½„ø(€€€€€€€€ñ‰ÕÑÑ½¸±…ÍÌô‰µ•¹Ôµ‰ÕÑÑ½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ…É¥„µ•áÁ…¹‘•ô‰™…±Í”ˆ…É¥„µ½¹ÑÉ½±Ìô‰Í¥Ñ”µ¹…Ù¥…Ñ¥½¸ˆ‘…Ñ„µµ•¹Ôµ‰ÕÑÑ½¸ù5•¹Ôð½‰ÕÑÑ½¸ø(€€€€€€€€ñ¹…Ø±…ÍÌô‰Í¥Ñ”µ¹…Øˆ¥ô‰Í¥Ñ”µ¹…Ù¥…Ñ¥½¸ˆ…É¥„µ±…‰•°ô‰ÍÝ¹„¹…Ý¥…©„ˆ‘…Ñ„µ¹…Ù¥…Ñ¥½¸‘…Ñ„µ½Á•¸ô‰™…±Í”ˆø(€€€€€€€€€€ñ„¡É•˜ôˆ©…¬µ‘é¥…±„ˆù±…é•¼Ý…ÉÑ¼ð½„ø(€€€€€€€€€€ñ„¡É•˜ôˆé…ÍÑ½Í½Ý…¹¥„ˆùi…ÍÑ½Í½Ý…¹¥„ð½„ø(€€€€€€€€€€ñ„¡É•˜ôˆµ½é±¥Ý½Í¤ˆù5¿ñ±¥Ý¿m¤ð½„ø(€€€€€€€€€€ñ„¡É•˜ôˆ…±•É¥„ˆù…±•É¥„ð½„ø(€€€€€€€€€€ñ„¡É•˜ôˆÁÉåÝ…Ñ¹½ÍŒˆùAÉåÝ…Ñ¹¿oð½„ø(€€€€€€€€€€ñ„¡É•˜ôˆÁ½‰¥•Éèˆù]•ÉÍ©„€Ä¸Èð½„ø(€€€€€€€€€€ñ„¡É•˜ôˆÉ½…‘µ…Á„ˆùI½éßÍ¨ð½„ø(€€€€€€€€€€ñ„±…ÍÌô‰±…¹Õ…”µ±¥¹¬ˆ¡É•˜ô‰•¸¼ˆ±…¹œô‰•¸ˆ¡É•™±…¹œô‰•¸ˆ…É¥„µ±…‰•°ô‰¹±¥Í Ù•ÉÍ¥½¸ˆù8ð½„ø(€€€€€€€€ð½¹…Øø(€€€€€€ð½‘¥Øø(€€€€ð½¡•…‘•Èø((€€€€ñµ…¥¸¥ô‰µ…¥¸ˆø(€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰¡•É¼ˆ¥ô‰Ñ½Àˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•È¡•É¼µÉ¥ˆø(€€€€€€€€€€ñ‘¥Øø(€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½Üˆù5•¹•“ñ•ÈÍ¡½Ý­„Í­½¹•¹ÑÉ½Ý…¹ä¹„ÁÉåÝ…Ñ¹¿m¤ƒ
+Ü9=5ð½Àø(€€€€€€€€€€€€ñ ÄùMÁÉ…Ý“è°é…¹¥´Ý­±•¥Íè¸ð½ Äø(€€€€€€€€€€€€ñÀ±…ÍÌô‰¡•É¼µ±•‘”ˆù-½Á¥Õ©•Íè©…¬éÝå­±”¸½ÁåA…ÍÑ•	¥¸½ÍÑÉé•„°‘äÑ•­ÍÐÁÉéåÁ½µ¥¹„¡…Ï	¼°­±Õè°‘…¹”½Í½‰½Ý”±Õˆ™¥¹…¹Í½Ý”¸A½µ…„¤ÍÁÉ…Ý‘é§°Á½ÁÉ…Ý§±Õˆé…¹½¹¥µ¥é½Ý‡ÑÉ—oÁÉé•×ñå¥•´ƒŠP„‘•åé©„°¼½ÍÑ…Ñ•é¹¥”Ý­±•§°Á½é½ÍÑ…©”Á¼QÝ½©•¨ÍÑÉ½¹¥”¸ð½Àø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰¡•É¼µ…Ñ¥½¹Ìˆø(€€€€€€€€€€€€€€ñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÁÉ¥µ…Éäˆ¡É•˜ôˆÁ½‰¥•ÉèˆùA½‰¥•ÉèÝ•ÉÍ«d€Ä¸Èð½„ø(€€€€€€€€€€€€€€ñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÍ•½¹‘…Éäˆ¡É•˜ôˆ©…¬µ‘é¥…±„ˆùi½‰…è°©…¬‘é¥‡	„ð½„ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñÕ°±…ÍÌô‰¡•É¼µÁÉ½½˜ˆ…É¥„µ±…‰•°ô‰9…©Ý‡ñ¹¥•©Íé”¥¹™½Éµ…©”ˆø(€€€€€€€€€€€€€€ñ±¤ù‘é¥‡	„±½­…±¹¥”ð½±¤ø(€€€€€€€€€€€€€€ñ±¤ù‰•è­½¹Ñ„¤Ñ•±•µ•ÑÉ¥¤ð½±¤ø(€€€€€€€€€€€€€€ñ±¤ù½Á•¸Í½ÕÉ”ƒ
+ÜA0´Ì¸Àµ½Èµ±…Ñ•Èð½±¤ø(€€€€€€€€€€€€€€ñ±¤ùÝ•ÉÍ©„€Ä¸Èƒ
+ÜAA¤¥Ñ!Õˆð½±¤ø(€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰‰…¹¹•ÈµÍ¡½Ý…Í”ˆÉ½±”ô‰É½ÕÀˆ…É¥„µ±…‰•±±•‘‰äô‰É¥Í¬µ‘•µ¼µÑ¥Ñ±”ˆø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰‰…¹¹•ÈµÍ¡½Ý…Í”µ¡•…‘¥¹œˆø(€€€€€€€€€€€€€€ñÀ±…ÍÌô‰‰…¹¹•Èµ­¥­•Èˆù¡Ý¥±„¹…µåÏ	ÔÁÉé•Ý­±•©•¹¥•´ð½Àø(€€€€€€€€€€€€€€ñÀ¥ô‰É¥Í¬µ‘•µ¼µÑ¥Ñ±”ˆøñÍÑÉ½¹œù-½±½È½ÍÑÉé•„¸Qä‘•å‘Õ©•Íè¸ð½ÍÑÉ½¹œøð½Àø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰É¥Í¬µÍÑ…¬ˆÉ½±”ô‰±¥ÍÐˆ…É¥„µ±…‰•°ô‰éÑ•ÉäÁ½é¥½µäÉåéå­„½ÁåA…ÍÑ•	¥¸ˆø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰É¥Í¬µ‰…¹¹•ÈÉ¥Í¬µ±½ÜˆÉ½±”ô‰±¥ÍÑ¥Ñ•´ˆøñÍÁ…¸±…ÍÌô‰É¥Í¬µ½ÁäˆøñÍÑÉ½¹œùA	¥¸è¹¥Í­¥”Éåéå­¼ð½ÍÑÉ½¹œøñÍÁ…¸ù]å­ÉåÑ¼è¹Õµ•ÈÑ•±•™½¹Ô¸ð½ÍÁ…¸øð½ÍÁ…¸øñÍÁ…¸±…ÍÌô‰É¥Í¬µ…Ñ¥½¸ˆù=ÑßÍÉè•‘åÑ½Èð½ÍÁ…¸øñÍÁ…¸±…ÍÌô‰É¥Í¬µ±½Í”ˆ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆû\ð½ÍÁ…¸øð½‘¥Øø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰É¥Í¬µ‰…¹¹•ÈÉ¥Í¬µµ•‘¥Õ´ˆÉ½±”ô‰±¥ÍÑ¥Ñ•´ˆøñÍÁ…¸±…ÍÌô‰É¥Í¬µ½ÁäˆøñÍÑÉ½¹œùA	¥¸èƒmÉ•‘¹¥”Éåéå­¼ð½ÍÑÉ½¹œøñÍÁ…¸ù]å­ÉåÑ¼è”µµ…¥°¸ð½ÍÁ…¸øð½ÍÁ…¸øñÍÁ…¸±…ÍÌô‰É¥Í¬µ…Ñ¥½¸ˆù=ÑßÍÉè•‘åÑ½Èð½ÍÁ…¸øñÍÁ…¸±…ÍÌô‰É¥Í¬µ±½Í”ˆ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆû\ð½ÍÁ…¸øð½‘¥Øø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰É¥Í¬µ‰…¹¹•ÈÉ¥Í¬µ¡¥ ˆÉ½±”ô‰±¥ÍÑ¥Ñ•´ˆøñÍÁ…¸±…ÍÌô‰É¥Í¬µ½ÁäˆøñÍÑÉ½¹œùA	¥¸èÝåÍ½­¥”Éåéå­¼ð½ÍÑÉ½¹œøñÍÁ…¸ù]å­ÉåÑ¼è­…ÉÑ„Ã	…Ñ¹¥é„¸ð½ÍÁ…¸øð½ÍÁ…¸øñÍÁ…¸±…ÍÌô‰É¥Í¬µ…Ñ¥½¸ˆù=ÑßÍÉè•‘åÑ½Èð½ÍÁ…¸øñÍÁ…¸±…ÍÌô‰É¥Í¬µ±½Í”ˆ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆû\ð½ÍÁ…¸øð½‘¥Øø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰É¥Í¬µ‰…¹¹•ÈÉ¥Í¬µÉ¥Ñ¥…°ˆÉ½±”ô‰±¥ÍÑ¥Ñ•´ˆøñÍÁ…¸±…ÍÌô‰É¥Í¬µ½ÁäˆøñÍÑÉ½¹œùA	¥¸è­ÉåÑåé¹”Éåéå­¼ð½ÍÑÉ½¹œøñÍÁ…¸ù]å­ÉåÑ¼è­±ÕèÁÉåÝ…Ñ¹ä¸ð½ÍÁ…¸øð½ÍÁ…¸øñÍÁ…¸±…ÍÌô‰É¥Í¬µ…Ñ¥½¸ˆù=ÑßÍÉè•‘åÑ½Èð½ÍÁ…¸øñÍÁ…¸±…ÍÌô‰É¥Í¬µ±½Í”ˆ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆû\ð½ÍÁ…¸øð½‘¥Øø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñÀ±…ÍÌô‰‰…¹¹•Èµ¹½Ñ”ˆù-½±½ÈÁ½­…éÕ©”¹…©ÝçñÍéäÝå­ÉåÑäÁ½é¥½´¸	…¹•È¹¥”Õ©…Ý¹¥„ÑÉ—m¤Í¡½Ý­„¸ð½Àø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰Í•Ñ¥½¸ˆ¥ô‰©…¬µ‘é¥…±„ˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÁÉ½‘ÕÐµÁ½Í¥Ñ¥½¹¥¹œˆø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÁÉ½‘ÕÐµÁ½Í¥Ñ¥½¹¥¹œµ½Áäˆø(€€€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½Üˆù±…é•¼Ý…ÉÑ¼ƒ
+ÜAÉ¥Ù…äµ™½ÕÍ•±¥Á‰½…É5…¹…•Èð½Àø(€€€€€€€€€€€€€€ñ Èù5•¹•“ñ•È°…±”¹¥”­±…Íåé¹”…É¡¥ÝÕ´Í¡½Ý­„¸ð½ Èø(€€€€€€€€€€€€€€ñÀù-±…Íåé¹”µ•¹•“ñ•ÉäÍ¡½Ý¯ÍÜÍ­ÕÁ¥…«Í§dÁÉé•‘”ÝÍéåÍÑ­¥´¹„ÁÉé•¡½ÝåÝ…¹¥Ô°ÝåÍéÕ­¥Ý…¹¥Ô¤Á½¹½Ý¹å´×ñåÝ…¹¥Ô­½Á¥¤¸½ÁåA…ÍÑ•	¥¸ËÍÝ¹¥—ð‘…©”‘½ÍÓeÀ‘¼­ËÍÑ­¥•¨¡¥ÍÑ½É¥¤°±•è©•¼ÁÉ¥½ÉåÑ•Ñ•´©•ÍÐÝå¡Ýå•¹¥”Éåéå­„°ÁÉéå½Ñ½Ý…¹¥”Ñ•­ÍÑÔ¤½¡É½¹„ÁÉé•¹¥•™½ÉÑÕ¹¹å´­±¥­¹§e¥•´ƒŠy]­±•«Št¸ð½Àø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÑÉÕÍÐµÍÑÉ¥ÀˆÉ½±”ô‰É½ÕÀˆ…É¥„µ±…‰•°ô‰9…©Ý‡ñ¹¥•©Íé”­½Ééçm¤ˆø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÑÉÕÍÐµ¥Ñ•´ˆøñÍÑÉ½¹œùi…ÕÝ‡ñ…ÍèÉåéå­¼Ýé—m¹¥•¨ð½ÍÑÉ½¹œøñÍÁ…¸ù=ÍÑÉé—ñ•¹¥”Á½©…Ý¥„Í§d°‘äÑ•­ÍÐÁÉéåÁ½µ¥¹„½‰Ï	Õ¥Ý…¹äÉ½‘é…¨‘…¹å ÝÉ‡ñ±¥Ýå ¸ð½ÍÁ…¸øð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÑÉÕÍÐµ¥Ñ•´ˆøñÍÑÉ½¹œù•åé©„¹…±—ñä‘¼¥•‰¥”ð½ÍÑÉ½¹œøñÍÁ…¸ùAÉ½É…´¹¥”Ý­±•©„Ñ•­ÍÑÔ¤‘½µçm±¹¥”¹¥”éµ¥•¹¥„Í¡½Ý­„…ÕÑ½µ…Ñåé¹¥”¸ð½ÍÁ…¸øð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÑÉÕÍÐµ¥Ñ•´ˆøñÍÑÉ½¹œù…¹”é½ÍÑ…«¹„­½µÁÕÑ•Éé”ð½ÍÑÉ½¹œøñÍÁ…¸ù]å­ÉåÝ…¹¥”¤…¹½¹¥µ¥é…©„‘é¥‡	…«±½­…±¹¥”°‰•èÝåÍç	…¹¥„ÑÉ—m¤‘¼¡µÕÉä¸ð½ÍÁ…¸øð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÑÉÕÍÐµ¥Ñ•´ˆøñÍÑÉ½¹œû…ÑÝ¥•¨Á½ÁÉ…Ý¥…ÍèÑ•­ÍÐð½ÍÑÉ½¹œøñÍÁ…¸ù‘åÑ½ÈÁ½µ…„ÕÍÕ»±Õˆé…¹½¹¥µ¥é½Ý‡Ýå‰É…¹”Ý…ÉÑ¿m¤ÁÉé•×ñå¥•´¸ð½ÍÁ…¸øð½‘¥Øø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰Í•Ñ¥½¸ˆ¥ô‰é…ÍÑ½Í½Ý…¹¥„ˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰Í•Ñ¥½¸µ¡•…‘¥¹œˆø(€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½ÜˆùAÉéå¯	…‘½Ý”é…ÍÑ½Í½Ý…¹¥„ð½Àø(€€€€€€€€€€€€ñ Èù-¥•‘äµ¿ñ”Í§dÁÉéå‘‡½ÁåA…ÍÑ•	¥¸üð½ Èø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñÕ°±…ÍÌô‰ÕÍ”µ…Í”µ±¥ÍÐˆ…É¥„µ±…‰•°ô‰éÑ•ÉäÍåÑÕ…©”°Ü­ÓÍÉå µ¿ñ”ÁÉéå‘‡Í§d½ÁåA…ÍÑ•	¥¸ˆø(€€€€€€€€€€€€ñ±¤øñÍÑÉ½¹œù‘äÁ¥Íé•ÍèÝ¥…‘½µ¿oèð½ÍÑÉ½¹œøÍÁÉ…Ý“è°éä­½Á¥½Ý…¹äÑ•­ÍÐ¹¥”é…Ý¥•É„ÁÉéåÁ…‘­½Ý¼‘…¹å ½Í½‰½Ýå °­½¹Ñ…­Ñ½Ýå ±Õˆ™¥¹…¹Í½Ýå ¸ð½±¤ø(€€€€€€€€€€€€ñ±¤øñÍÑÉ½¹œù‘äÁÉ…Õ©•Íèè­½‘•´±ÕˆÑ•Éµ¥¹…±•´èð½ÍÑÉ½¹œøéÝËÏÕÝ…Ÿd¹„Ñ½­•¹ä°­±Õé”¤§¤Á¿é—ÁÉé•¥ Ý­±•©•¹¥•´‘¼É½éµ½Ýä°éŸ	½Íé•¹¥„±Õˆ‘½­Õµ•¹Ñ…©¤¸ð½±¤ø(€€€€€€€€€€€€ñ±¤øñÍÑÉ½¹œù‘ä­½ÉéåÍÑ…Íèè¹…Éëe‘é¥„$èð½ÍÑÉ½¹œøÍÁÉ…Ý“è­½Á¥½Ý…¹ä™É…µ•¹Ð‘½­Õµ•¹ÑÔ°­½‘Ô°±½Ô±ÕˆÁ½±••¹¥„¤ÜÉ…é¥”Á½ÑÉé•‰äé…¹½¹¥µ¥éÕ¨ÝÉ‡ñ±¥Ý”‘…¹”ÁÉé•Ý­±•©•¹¥•´¸ð½±¤ø(€€€€€€€€€€€€ñ±¤øñÍÑÉ½¹œù‘äÕ‘½ÍÓeÁ¹¥…Íè½‰É…èèð½ÍÑÉ½¹œøËeé¹¥”é…­Éå¨Ýå‰É…¹”½‰Íé…Éäé‘«e¥„±ÕˆÍÉ••¹Í¡½Ñ„¤é…Á¥Íè¹½ß­½Á§dA9¸ð½±¤ø(€€€€€€€€€€ð½Õ°ø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰Í•Ñ¥½¸Í•Ñ¥½¸µÍ½™Ðˆ¥ô‰µ½é±¥Ý½Í¤ˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰Í•Ñ¥½¸µ¡•…‘¥¹œˆø(€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½Üˆù9…©Ý‡ñ¹¥•©Íé”µ¿ñ±¥Ý¿m¤ð½Àø(€€€€€€€€€€€€ñ ÈùAÉ…­Ñåé¹„Á½µ½ŒÜ½‘é¥•¹¹å´­½Á¥½Ý…¹¥Ô¤Ý­±•©…¹¥Ô¸ð½ Èø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰™•…ÑÕÉ”µÉ¥ˆø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•ÈˆøÀÄð½ÍÁ…¸øñ ÌùA½‘Ëeé¹ä•‘åÑ½ÈÑÉ—m¤ð½ ÌøñÀù=ÑßÍÉèÍ­½Á¥½Ý…»ÑÉ—o°ÝÁÉ½Ý…“èËeé¹”Á½ÁÉ…Ý­¤±Õˆé…¹½¹¥µ¥éÕ¨Ýå­ÉåÑ”™É…µ•¹Ñä¸M¡½Ý•¬éµ¥•¹¤Í§d‘½Á¥•É¼Á¼QÝ½©•¨…­•ÁÑ…©¤¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•ÈˆøÀÈð½ÍÁ…¸øñ Ìù¹½¹¥µ¥é…©„½‰É…ëÍÜð½ ÌøñÀù=ÑßÍÉè±½­…±¹äÁ±¥¬A9±Õˆ)A°é…­Éå¨Ýå‰É…¹”™É…µ•¹ÑäÁÉ½ÍÑ½¯Ñ…µ¤¤é…Á¥Íè¹½ÝäA9¸=Éå¥¹‡Á½é½ÍÑ…©”‰•èéµ¥…¸¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•ÈˆøÀÌð½ÍÁ…¸øñ ÌùI•×	ä¤‘½¯	…‘¹”Ýå­±Õé•¹¥„ð½ ÌøñÀù_	…Í¹”é¹…é¹¥­¤‘é¥‡	…«±½­…±¹¥”¸]å­±Õé•¹¥„Ï‘½éÝ½±½¹”Ñå±­¼‘±„‘½¯	…‘¹•¼ÑÉ…™¥•¹¥„¼¹¥Í­¥´±ÕˆƒmÉ•‘¹¥´Éåéå­Ô¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•ÈˆøÀÐð½ÍÁ…¸øñ Ìù!¥ÍÑ½É¥„¡É½¹¥½¹„ÁÉé•Í•­É•Ñ…µ¤ð½ ÌøñÀù¼€ÄÔ½ÍÑ…Ñ¹¥¼Í­½Á¥½Ý…¹å Ñ•­ÍÓÍÜµ¿ñ”Á½é½ÍÑ‡ÜI4‰¥—ó•¨Í•Í©¤°…±”É½éÁ½é¹…¹”Í•­É•Ñä¤ÑÉ—m¤ÝåÍ½­¥•¼Éåéå­„ÏÁ½µ¥©…¹”¹¥•é…±—ñ¹¥”½™¥±ÑËÍÜ½ÍÑÉé—ñ—¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•ÈˆøÀÔð½ÍÁ…¸øñ ÌùéÑ•ÉäÁ½é¥½µäÉåéå­„ð½ ÌøñÀùI•×	äÉ½éËÏñ¹¥…«Á½é¥½µä½¹¥Í­¥•¼‘¼­ÉåÑåé¹•¼¤­…Ñ•½É¥”Ñ…­¥”©…¬‘…¹”­½¹Ñ…­Ñ½Ý”°¹Õµ•Éä™¥¹…¹Í½Ý”°Ñ½­•¹äéä­±Õé”ÁÉåÝ…Ñ¹”¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•ÈˆøÀØð½ÍÁ…¸øñ Ìù9¥•é…±—ñ¹”é…Á¥ÍåÝ…¹¥”¡¥ÍÑ½É¥¤ð½ ÌøñÀùi…Á¥ÍåÝ…¹¥”¡¥ÍÑ½É¥¤µ¿ñ¹„Ýçéç‰•èé…ÑÉéåµåÝ…¹¥„Ýå­ÉåÝ…¹¥„°½ÍÑÉé—ñ—…¹¤•‘åÑ½É„¸]çé•¹¥”¹…Ñå¡µ¥…ÍÐéçm¤±¥ÍÓdÑ•­ÍÓÍÜ¤é…µå­„©•¨½­¹¼¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•ÈˆøÀÜð½ÍÁ…¸øñ ÌùA…Õé„¤½Á©½¹…±¹”éåÍéé•¹¥”ð½ ÌøñÀùA½‘é…ÌÁ…Õéä½Á©”é…ÍÔÁ½é½ÍÑ…«Ý¥‘½é¹”°„ÁÉéå¥Í¬Ýé¹½Ý¥•¹¥„©•ÍÐÁ½Ëe¯¸=Á©½¹…±¹”éåÍéé•¹¥”Í¡½Ý­„Á½é½ÍÑ…©”Ýçé½¹”‘½µçm±¹¥”¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰™•…ÑÕÉ”µ™…ÑÌˆø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™…ÑÌµ…Éˆø(€€€€€€€€€€€€€€ñ Ìù¼µ¿ñ”É½éÁ½é¹‡ð½ Ìø(€€€€€€€€€€€€€€ñÕ°ø(€€€€€€€€€€€€€€€€ñ±¤ù…‘É•Íä”µµ…¥°°Ñ•±•™½¹ä°AM0°%	8¤­…ÉÑäÃ	…Ñ¹¥é”ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù­±Õé”ÕÏ	Õœ°Ñ½­•¹ä°)]P¤§¤Á¿é—‰…è‘…¹å ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù­±Õé”ÁÉåÝ…Ñ¹”°½‘éåÍ­¥Ý…¹¥„¤Á½ÁÉ…Ý¹”™É…éä	%@´Ìäìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù¥¹¹”¡•ÕÉåÍÑå­¤é…±—ñ¹¥”½ßé½¹å ™¥±ÑËÍÜ¸ð½±¤ø(€€€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€€€ð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™…ÑÌµ…Éˆø(€€€€€€€€€€€€€€ñ Ìù¼é…¡½ÝÕ©”ð½ Ìø(€€€€€€€€€€€€€€ñÕ°ø(€€€€€€€€€€€€€€€€ñ±¤ùÑ•¡¹¥é»¡¥ÍÑ½É§dé‘…Éé—‰•èÑÉ—m¤Í¡½Ý­„ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù‘¼€ÄÔ‘½éÝ½±½¹å Ñ•­ÍÓÍÜÜI4‰¥—ó•¨Í•Í©¤°‰•èÉ½éÁ½é¹…¹å Í•­É•ÓÍÜ¤ÑÉ—m¤ÝåÍ½­¥•¼Éåéå­„ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù±½­…±¹”ÕÍÑ…Ý¥•¹¥„°É•×	äß	…Í¹”¤‘½¯	…‘¹”Ýå­±Õé•¹¥„ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù‰É…¬Ñ•±•µ•ÑÉ¥¤°­½¹Ñ„¤Íå¹¡É½¹¥é…©¤è¡µÕË¸ð½±¤ø(€€€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€€€ð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™…ÑÌµ…Éˆø(€€€€€€€€€€€€€€ñ Ìù¼­½¹ÑÉ½±Õ©•Íèð½ Ìø(€€€€€€€€€€€€€€ñÕ°ø(€€€€€€€€€€€€€€€€ñ±¤ùé…Á¥ÍåÝ…¹¥”¡¥ÍÑ½É¥¤¹¥•é…±—ñ¹¥”½™¥±ÑËÍÜÝå­ÉåÝ…¹¥„ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù™¥±ÑÉäÁ½Íéé•ŸÍ±¹å ­…Ñ•½É¥¤Ýå­ÉåÝ…¹¥„ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ùÁ…Õëd¹„€ÌÀµ¥¹ÕÐ°½‘é¥»d±Õˆ‘¼Ýé¹½Ý¥•¹¥„ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ùéåÍéé•¹¥”Á¼€Ä°€Ô±Õˆ€ÄÔµ¥¹ÕÑ… …±‰¼Ýçé•¹¥”ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù«eéå¬ÍåÍÑ•µ½Ýä°Á½±Í­¤±Õˆ…¹¥•±Í­¤ìð½±¤ø(€€€€€€€€€€€€€€€€ñ±¤ù±½­…±¹ä½‰É…èÝ•«m¥½Ýä¤µ¥•©Í”é…Á¥ÍÔé…¹½¹¥µ¥é½Ý…¹•¨­½Á¥¤¸ð½±¤ø(€€€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€€€ð½…ÉÑ¥±”ø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰Í•Ñ¥½¸ˆ¥ô‰…±•É¥„ˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰Í•Ñ¥½¸µ¡•…‘¥¹œˆø(€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½ÜˆùAÉ…Ý‘é¥Ýä¥¹Ñ•É™•©Ìð½Àø(€€€€€€€€€€€€ñ Èù½ÁåA…ÍÑ•	¥¸Ü9=5¸ð½ Èø(€€€€€€€€€€€€ñÀùiÉéÕÑäÁ½­…éÕ«µ•¹Ô½ÁåA…ÍÑ•	¥¸€Ä¸È½É…è¹¥•éµ¥•¹¥½¹”Ý¥‘½­¤èÝ•ÉÍ©¤€Ä¸Ä¸]ÍéåÍÑ­¥”ÁÉé•‘ÍÑ…Ý¥…«Ýçé¹¥”‘…¹”‘•µ½¹ÍÑÉ…å©¹”¸ð½Àø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰…±±•ÉäµÉ¥ˆø(€€€€€€€€€€€€ñ™¥ÕÉ”±…ÍÌô‰…±±•Éäµ…Éˆøñ™¥…ÁÑ¥½¸±…ÍÌô‰…±±•Éäµ…ÁÑ¥½¸ˆøñÍÑÉ½¹œù%¹Ñ•É…©„èÁÕ±Á¥Ñ•´9=5ð½ÍÑÉ½¹œøñÍÁ…¸ù5•¹ÔÝ•ÉÍ©¤€Ä¸ÈÁ½­…éÕ©”ÍÑ…¸¡¥ÍÑ½É¥¤Í¡½Ý­„°½Í½‰»…­«dßé…¹¥„±ÕˆÝçé…¹¥„©•¨é…Á¥ÍåÝ…¹¥„°™¥±ÑÉä°É•×	äß	…Í¹”°…¹½¹¥µ¥é…«dÑ•­ÍÑÔ¤½‰É…ëÍÜ°…ÕÑ½µ…Ñåé¹”éåÍéé•¹¥”½É…èÕÍÑ…Ý¥•¹¥„Á…Õéä¸ð½ÍÁ…¸øð½™¥…ÁÑ¥½¸øñ‰ÕÑÑ½¸±…ÍÌô‰…±±•Éäµ‰ÕÑÑ½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µ…±±•Éäµ¥µ…”‘…Ñ„µ…ÁÑ¥½¸ô‰½ÁåA…ÍÑ•	¥¸€Ä¸ÈƒŠP5•¹Ôµ•¹•“ñ•É„Í¡½Ý­„Ü9=5ˆøñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì¼ÀÄµ½ÁåÁ…ÍÑ•‰¥¸´Ä´Èµµ•¹Ôµ¡¥ÍÑ½É¥¤µÍ¡½Ý­„µ¹½µ”µA0¹Á¹œˆÝ¥‘Ñ ôˆÐàÀˆ¡•¥¡ÐôˆØØÀˆ±½…‘¥¹œô‰±…éäˆ…±Ðô‰A½±Í­¥”µ•¹Ô½ÁåA…ÍÑ•	¥¸€Ä¸ÈÜ9=5é”ÍÑ…¹•´¡¥ÍÑ½É¥¤Í¡½Ý­„°Ýçé…¹¥•´©•¨é…Á¥ÍåÝ…¹¥„°™¥±ÑÉ…µ¤°É•×	…µ¤ß	…Í¹åµ¤°…¹½¹¥µ¥é…«Ñ•­ÍÑÔ¤½‰É…ëÍÜ½É…èÕÍÑ…Ý¥•¹¥…µ¤Á…Õéä¸ˆøð½‰ÕÑÑ½¸øð½™¥ÕÉ”ø(€€€€€€€€€€€€ñ™¥ÕÉ”±…ÍÌô‰…±±•Éäµ…Éˆøñ™¥…ÁÑ¥½¸±…ÍÌô‰…±±•Éäµ…ÁÑ¥½¸ˆøñÍÑÉ½¹œù=ÍÑÉé—ñ•¹¥”¼‘…¹å ÝÉ‡ñ±¥Ýå ð½ÍÑÉ½¹œøñÍÁ…¸ù½ÁåA…ÍÑ•	¥¸ÝçmÝ¥•Ñ±„½é¹…é½¹”­½±½É•´½ÍÑÉé—ñ•¹¥”°‰•èÕ©…Ý¹¥…¹¥„é…Ý…ÉÑ¿m¤Í¡½Ý­„Ü‰…¹•Éé”°¤Á½éÝ…±„ÁÉé•«o‘¼±½­…±¹•¼•‘åÑ½É„¸ð½ÍÁ…¸øð½™¥…ÁÑ¥½¸øñ‰ÕÑÑ½¸±…ÍÌô‰…±±•Éäµ‰ÕÑÑ½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µ…±±•Éäµ¥µ…”‘…Ñ„µ…ÁÑ¥½¸ô‰½ÁåA…ÍÑ•	¥¸€Ä¸ÄƒŠP=ÍÑÉé—ñ•¹¥”¼‘…¹å ÝÉ‡ñ±¥Ýå ÁÉé•Ý­±•©•¹¥•´ˆøñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì¼ÀÈµ½ÁåÁ…ÍÑ•‰¥¸´Ä´Äµ½ÍÑÉé•é•¹¥”µÁÉé•µÝ­±•©•¹¥•´µ‘…¹å µÝÉ…é±¥Ýå µA0¹Á¹œˆÝ¥‘Ñ ôˆÔäÐˆ¡•¥¡ÐôˆÄÐÀˆ±½…‘¥¹œô‰±…éäˆ…±Ðô‰=ÍÑÉé—ñ•¹¥”½ÁåA…ÍÑ•	¥¸€Ä¸Ä¼ÝåÍ½­¥´Éåéå­ÔÁ¼Ýå­Éå¥Ô‘•µ½¹ÍÑÉ…å©¹•¨­…ÉÑäÃ	…Ñ¹¥é•¨ÜÍ¡½Ý­Ô¸ˆøð½‰ÕÑÑ½¸øð½™¥ÕÉ”ø(€€€€€€€€€€€€ñ™¥ÕÉ”±…ÍÌô‰…±±•Éäµ…Éˆøñ™¥…ÁÑ¥½¸±…ÍÌô‰…±±•Éäµ…ÁÑ¥½¸ˆøñÍÑÉ½¹œù‘åÑ½ÈÍ¡½Ý­„¤Á½“mÝ¥•Ñ±•¹¥”Éåéå­„ð½ÍÑÉ½¹œøñÍÁ…¸ù1½­…±¹ä•‘åÑ½ÈÁ½“mÝ¥•Ñ±„Ýå­ÉåÑ”‘…¹”ÝÉ‡ñ±¥Ý”¤ÁÉéå½Ñ½ÝÕ©”ÁÉ½Á½éå©”…¹½¹¥µ¥é…©¤¸i…Ý…ÉÑ¿oÍ¡½Ý­„éµ¥•¹¥„Í§d‘½Á¥•É¼Á¼ÝåÉ‡é¹å´é…ÑÝ¥•É‘é•¹¥Ô¸ð½ÍÁ…¸øð½™¥…ÁÑ¥½¸øñ‰ÕÑÑ½¸±…ÍÌô‰…±±•Éäµ‰ÕÑÑ½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µ…±±•Éäµ¥µ…”‘…Ñ„µ…ÁÑ¥½¸ô‰½ÁåA…ÍÑ•	¥¸€Ä¸ÄƒŠP‘åÑ½ÈÍ¡½Ý­„¤Á½“mÝ¥•Ñ±…¹¥”‘…¹å ÝÉ‡ñ±¥Ýå ˆøñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì¼ÀÌµ½ÁåÁ…ÍÑ•‰¥¸´Ä´Äµ•‘åÑ½ÈµÍ¡½Ý­„µÁ½‘ÍÝ¥•Ñ±…¹¥”µ‘…¹å µÝÉ…é±¥Ýå µA0¹Á¹œˆÝ¥‘Ñ ôˆÄÀÜØˆ¡•¥¡ÐôˆØÀØˆ±½…‘¥¹œô‰±…éäˆ…±Ðô‰‘åÑ½ÈÍ¡½Ý­„½ÁåA…ÍÑ•	¥¸€Ä¸ÄèÁ½“mÝ¥•Ñ±½¹å´‘•µ½¹ÍÑÉ…å©¹å´…‘É•Í•´”µµ…¥°¤¡…Ï	•´ÁÉé•…¹½¹¥µ¥é…«¸ˆøð½‰ÕÑÑ½¸øð½™¥ÕÉ”ø(€€€€€€€€€€€€ñ™¥ÕÉ”±…ÍÌô‰…±±•Éäµ…Éˆøñ™¥…ÁÑ¥½¸±…ÍÌô‰…±±•Éäµ…ÁÑ¥½¸ˆøñÍÑÉ½¹œùM•±•­ÑåÝ¹„…¹½¹¥µ¥é…©„¤•‘å©„Ñ•­ÍÑÔð½ÍÑÉ½¹œøñÍÁ…¸ùi…é¹…é½¹”ÑÉ…™¥•¹¥”µ¿ñ¹„é…¹½¹¥µ¥é½Ý‡…±‰¼‘½‘‡©…­¼‘½¯	…‘¹”Ýå­±Õé•¹¥”¸1½­…±¹”¹…Éëe‘é¥„Õµ¿ñ±¥Ý¥…«ËÍÝ¹¥—ðÁ½Éë‘­½Ý…¹¥”™½Éµ…Ñ½Ý…¹¥„°Ý¥•±­¿m¤±¥Ñ•È°Ý¥•ÉÍéä½É…èÝåÍéÕ­¥Ý…¹¥”¤é…µ¥…»d¸ð½ÍÁ…¸øð½™¥…ÁÑ¥½¸øñ‰ÕÑÑ½¸±…ÍÌô‰…±±•Éäµ‰ÕÑÑ½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µ…±±•Éäµ¥µ…”‘…Ñ„µ…ÁÑ¥½¸ô‰½ÁåA…ÍÑ•	¥¸€Ä¸ÄƒŠPM•±•­ÑåÝ¹„…¹½¹¥µ¥é…©„¤¹…Éëe‘é¥„•‘å©¤Í¡½Ý­„ˆøñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì¼ÀÐµ½ÁåÁ…ÍÑ•‰¥¸´Ä´ÄµÍ•±•­ÑåÝ¹„µ…¹½¹¥µ¥é…©„µ¹…Éé•‘é¥„µ•‘å©¤µA0¹Á¹œˆÝ¥‘Ñ ôˆÄÀÜØˆ¡•¥¡ÐôˆØÀØˆ±½…‘¥¹œô‰±…éäˆ…±Ðô‰‘åÑ½È½ÁåA…ÍÑ•	¥¸€Ä¸Äèé…é¹…é½¹å´…‘É•Í•´”µµ…¥°°½ÑÝ…ÉÑåµ¤‘é¥‡	…¹¥…µ¤…¹½¹¥µ¥é…©¤¤Ýå­±Õé•¹¥„½É…èÝ¥‘½é¹åµ¤¹…Éëe‘é¥…µ¤Á½ÁÉ…Ý¥…¹¥„Ñ•­ÍÑÔ¸ˆøð½‰ÕÑÑ½¸øð½™¥ÕÉ”ø(€€€€€€€€€€€€ñ™¥ÕÉ”±…ÍÌô‰…±±•Éäµ…Éˆøñ™¥…ÁÑ¥½¸±…ÍÌô‰…±±•Éäµ…ÁÑ¥½¸ˆøñÍÑÉ½¹œùI•×	äß	…Í¹”¤‘½¯	…‘¹”Ýå­±Õé•¹¥„ð½ÍÑÉ½¹œøñÍÁ…¸ùI•×	äß	…Í¹”ÁÉéåÁ¥ÍÕ«Á½é¥½µäÉåéå­„‘¼ÍÑ‡	å °¹¥•Í•­É•Ñ¹å ½é¹…é—Ñ•­ÍÑ½Ýå ¸½¯	…‘¹”Ýå­±Õé•¹¥”Ýå¥Íé„Ñå±­¼­½¹­É•Ñ»Ý…ÉÑ¿o¤­…Ñ•½É§dÝå­Éå¥„¸ð½ÍÁ…¸øð½™¥…ÁÑ¥½¸øñ‰ÕÑÑ½¸±…ÍÌô‰…±±•Éäµ‰ÕÑÑ½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µ…±±•Éäµ¥µ…”‘…Ñ„µ…ÁÑ¥½¸ô‰½ÁåA…ÍÑ•	¥¸€Ä¸ÄƒŠPI•×	äß	…Í¹”¤‘½¯	…‘¹”Ýå­±Õé•¹¥„ˆøñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì¼ÀÔµ½ÁåÁ…ÍÑ•‰¥¸´Ä´ÄµÉ•Õ±äµÝ±…Í¹”µ‘½­±…‘¹”µÝå­±Õé•¹¥„µA0¹Á¹œˆÝ¥‘Ñ ôˆÄÈÀàˆ¡•¥¡ÐôˆØÐäˆ±½…‘¥¹œô‰±…éäˆ…±Ðô‰=­¹¼½ÁåA…ÍÑ•	¥¸€Ä¸ÄèÍå¹Ñ•Ñåé¹åµ¤É•×	…µ¤Ýå­ÉåÝ…¹¥„½É…è‘½¯	…‘¹åµ¤Ýå­±Õé•¹¥…µ¤‘±„ÁÉéå¯	…‘½Ý•¼…‘É•ÍÔ”µµ…¥°¤‘½­Õµ•¹Ñ…å©¹•¼…‘É•ÍÔ%@¸ˆøð½‰ÕÑÑ½¸øð½™¥ÕÉ”ø(€€€€€€€€€€€€ñ™¥ÕÉ”±…ÍÌô‰…±±•Éäµ…Éˆøñ™¥…ÁÑ¥½¸±…ÍÌô‰…±±•Éäµ…ÁÑ¥½¸ˆøñÍÑÉ½¹œù1½­…±¹„…¹½¹¥µ¥é…©„½‰É…ëÍÜð½ÍÑÉ½¹œøñÍÁ…¸ù1½­…±¹ä•‘åÑ½ÈÁ½éÝ…±„Ëeé¹¥”é…­ÉçÝå‰É…¹”½‰Íé…Éä¤é…Á¥Í‡¹½ß°‰•éÁ¥•é»­½Á§dA9‰•èµ½‘å™¥­½Ý…¹¥„½Éå¥¹…±¹•¼½‰É…éÔ¸ð½ÍÁ…¸øð½™¥…ÁÑ¥½¸øñ‰ÕÑÑ½¸±…ÍÌô‰…±±•Éäµ‰ÕÑÑ½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µ…±±•Éäµ¥µ…”‘…Ñ„µ…ÁÑ¥½¸ô‰½ÁåA…ÍÑ•	¥¸€Ä¸ÄƒŠP1½­…±¹ä•‘åÑ½È…¹½¹¥µ¥é…©¤½‰É…ëÍÜˆøñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì¼ÀØµ½ÁåÁ…ÍÑ•‰¥¸´Ä´Äµ±½­…±¹äµ•‘åÑ½Èµ…¹½¹¥µ¥é…©¤µ½‰É…é½ÜµA0¹Á¹œˆÝ¥‘Ñ ôˆÄÄÈàˆ¡•¥¡ÐôˆÜàäˆ±½…‘¥¹œô‰±…éäˆ…±Ðô‰‘åÑ½È…¹½¹¥µ¥é…©¤½‰É…ëÍÜ½ÁåA…ÍÑ•	¥¸€Ä¸ÄèéÑ•É•µ„Ëeé¹åµ¤é…­Éå¥…µ¤Íå¹Ñ•Ñåé¹•¼½‘‰¥½Éä°…‘É•ÍÔ°…‘É•ÍÔ”µµ…¥°¤Á½‘Á¥ÍÔ¸ˆøð½‰ÕÑÑ½¸øð½™¥ÕÉ”ø(€€€€€€€€€€€€ñ™¥ÕÉ”±…ÍÌô‰…±±•Éäµ…Éˆøñ™¥…ÁÑ¥½¸±…ÍÌô‰…±±•Éäµ…ÁÑ¥½¸ˆøñÍÑÉ½¹œù=ÍÑ…Ñ¹¥”ÝÁ¥ÍäÑå±­¼ÜÁ…µ§e¤Í•Í©¤ð½ÍÑÉ½¹œøñÍÁ…¸ù¼€ÄÔ½ÍÑ…Ñ¹¥¼Í­½Á¥½Ý…¹å Ñ•­ÍÓÍÜÁ½é½ÍÑ…©”Ýçé¹¥”ÜÁ…µ§e¤Á½‘Ëeé¹•¨¸i…‰±½­½Ý…¹¥”•­É…¹Ô°Ýå±½½Ý…¹¥”±ÕˆÝçé•¹¥”½ÁåA…ÍÑ•	¥¸ÕÍÕÝ„±¥ÍÓd°„ÁÉéåÝËÍ•¹¥”ÝÁ¥ÍÔÝåµ…„ÝåÉ‡é¹•¨éå¹¹¿m¤×ñåÑ­½Ý¹¥­„¸ð½ÍÁ…¸øð½™¥…ÁÑ¥½¸øñ‰ÕÑÑ½¸±…ÍÌô‰…±±•Éäµ‰ÕÑÑ½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µ…±±•Éäµ¥µ…”‘…Ñ„µ…ÁÑ¥½¸ô‰½ÁåA…ÍÑ•	¥¸€Ä¸ÄƒŠPQåµé…Í½Ý„¡¥ÍÑ½É¥„Í¡½Ý­„ˆøñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì¼ÀÜµ½ÁåÁ…ÍÑ•‰¥¸´Ä´ÄµÑåµé…Í½Ý„µ¡¥ÍÑ½É¥„µÍ¡½Ý­„µA0¹Á¹œˆÝ¥‘Ñ ôˆÄÀÐàˆ¡•¥¡ÐôˆÜÈÄˆ±½…‘¥¹œô‰±…éäˆ…±Ðô‰!¥ÍÑ½É¥„Í¡½Ý­„½ÁåA…ÍÑ•	¥¸€Ä¸Äè¿mµ¥½µ„Íå¹Ñ•Ñåé¹åµ¤ÝÁ¥Í…µ¤Ñ•­ÍÑ½Ýåµ¤ÁÉé•¡½ÝåÝ…¹åµ¤Ýçé¹¥”ÜÁ…µ§e¤Á½‘Ëeé¹•¨Í•Í©¤¸ˆøð½‰ÕÑÑ½¸øð½™¥ÕÉ”ø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰Í•Ñ¥½¸Í•Ñ¥½¸µ‘…É¬ˆ¥ô‰ÁÉåÝ…Ñ¹½ÍŒˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•ÈÁÉ¥Ù…äµÉ¥ˆø(€€€€€€€€€€ñ‘¥Øø(€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½ÜˆùAÉåÝ…Ñ¹¿o¤‰•éÁ¥•é—ÍÑÝ¼ð½Àø(€€€€€€€€€€€€ñ Èù1½­…±¹¥”°‰•è­½¹Ñ„¤¡µÕÉä¸ð½ Èø(€€€€€€€€€€€€ñÀù]å­ÉåÝ…¹¥”¤…¹½¹¥µ¥é…©„‘é¥‡	…«¹„QÝ½¥´­½µÁÕÑ•Éé”¸½ÁåA…ÍÑ•	¥¸¹¥”Ýåµ…„­½¹Ñ„…¹¤Á¿é•¹¥„èÕÏ	ÕŸ$¤¹¥”é…Á¥ÍÕ©”ÑÉ—m¤Í¡½Ý­„ÜÑÉÝ‡	•¨¡¥ÍÑ½É¥¤¸ð½Àø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÁÉ¥Ù…äµÁ½¥¹ÑÌˆø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÁÉ¥Ù…äµÁ½¥¹Ðˆøñ Ìù	•èÑ•±•µ•ÑÉ¥¤¤ÑÉ…­•ËÍÜð½ ÌøñÀùÁ±¥­…©„¤Ñ„ÍÑÉ½¹„¹¥”ÝåÍç	…«…¹…±¥Ñå­¤×ñåÑ­½Ý…¹¥„¸ð½Àøð½‘¥Øø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÁÉ¥Ù…äµÁ½¥¹Ðˆøñ Ìù)…Ý¹”É…¹¥”ð½ ÌøñÀù	É…¬½ÍÑÉé—ñ•¹¥„¹¥”½é¹…é„°ƒñ”Ñ•­ÍÐ©•ÍÐ‰•éÁ¥•é¹ä¸I•×	äµ½Ÿ¿lÁÉé•½éç±ÕˆéŸ	½Í§™‡	ÍéåÝä…±…É´¸ð½Àøð½‘¥Øø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÁÉ¥Ù…äµÁ½¥¹Ðˆøñ Ìù	•èÑÉÝ‡	•¨¡¥ÍÑ½É¥¤ÑÉ—m¤ð½ ÌøñÀù¼€ÄÔ½ÍÑ…Ñ¹¥ Ñ•­ÍÓÍÜÁ½é½ÍÑ…©”Ñå±­¼ÜÁ…µ§e¤I4‰¥—ó•¨Í•Í©¤¸ð½Àøð½‘¥Øø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ…Í¥‘”±…ÍÌô‰±¥µ¥ÑÌµ…Éˆ…É¥„µ±…‰•±±•‘‰äô‰±¥µ¥ÑÌµÑ¥Ñ±”ˆø(€€€€€€€€€€€€ñ Ì¥ô‰±¥µ¥ÑÌµÑ¥Ñ±”ˆùé•¼ÁÉ½É…´¹¥”µ¿ñ”é…Ý…É…¹Ñ½Ý‡ð½ Ìø(€€€€€€€€€€€€ñÀù½ÁåA…ÍÑ•	¥¸Á½µ…„é…ÕÝ‡ñçÁ½Ñ•¹©…±¹”Éåéå­¼°…±”¹¥”©•ÍÐ¥é½±½Ý…¹å´Í•©™•´¸ð½Àø(€€€€€€€€€€€€ñÕ°ø(€€€€€€€€€€€€€€ñ±¤ù9¥”¡É½¹¤ÁÉé•É½½Ñ•´…¹¤¥¹¹å´ÁÉ½•Í•´Ñ•¼Í…µ•¼×ñåÑ­½Ý¹¥­„¸ð½±¤ø(€€€€€€€€€€€€€€ñ±¤ù9¥”­½¹ÑÉ½±Õ©”é•Ý»eÑÉé¹å µ•¹•“ñ•ËÍÜÍ¡½Ý­„°½‰Í•ÉÝ…©¤•­É…¹Ô…¹¤…Á±¥­…©¤‘½•±½Ý•¨¸ð½±¤ø(€€€€€€€€€€€€€€ñ±¤ù9¥”Ý…É…¹ÑÕ©”‰•éÁ¥•é¹•¼Ýåµ…éåÝ…¹¥„‘…¹å èI4°ÍÝ…ÁÔ±ÕˆéÉéÕÓÍÜÁÉ½•ÍÔ¸ð½±¤ø(€€€€€€€€€€€€€€ñ±¤ù9¥”Á½ÑÝ¥•É‘é„°ƒñ”‰É…¬Ýå­Éå¥„½é¹…é„‰É…¬‘…¹å ÝÉ‡ñ±¥Ýå ¸ð½±¤ø(€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€€€ñÀøñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÍ•½¹‘…Éäˆ¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½‘½Ì½Í•ÕÉ¥Ñä¹Á°¹µˆùAÉé•éåÑ…¨µ½‘•°‰•éÁ¥•é—ÍÑÝ„ð½„øð½Àø(€€€€€€€€€€ð½…Í¥‘”ø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰Í•Ñ¥½¸Í•Ñ¥½¸µÍ½™Ðˆ¥ô‰Á½‰¥•Éèˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•È‘½Ý¹±½…µÉ¥ˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰ÍåÍÑ•´µ…Éˆø(€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½Üˆù]åµ……¹¥„ÍåÍÑ•µ½Ý”ð½Àø(€€€€€€€€€€€€ñ Èù]åµ……¹”ƒmÉ½‘½Ý¥Í­¼¸ð½ Èø(€€€€€€€€€€€€ñÕ°±…ÍÌô‰É•ÅÕ¥É•µ•¹ÑÌµ±¥ÍÐˆø(€€€€€€€€€€€€€€ñ±¤ù1¥¹Õàè9=5M¡•±°€ÔÀð½±¤ø(€€€€€€€€€€€€€€ñ±¤ùÍ•Í©„]…å±…¹ð½±¤ø(€€€€€€€€€€€€€€ñ±¤ùAåÑ¡½¸€Ì¸ÄÄ±Õˆ¹½ÝÍéäè€ñ½‘”ùÙ•¹Øð½½‘”øð½±¤ø(€€€€€€€€€€€€€€ñ±¤øñ½‘”ù©Ìð½½‘”ø°Q,€Ð°‘­A¥á‰Õ˜°¥½U¹¥à¤€ñ½‘”ù¹½µ”µ•áÑ•¹Í¥½¹Ìð½½‘”øð½±¤ø(€€€€€€€€€€€€€€ñ±¤øñ½‘”ùÍ¡„ÈÔÙÍÕ´ð½½‘”ø‘¼­½¹ÑÉ½±¤Á½‰É…¹•¼…É¡¥ÝÕ´ð½±¤ø(€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€€€ñÀøñÍÑÉ½¹œùAÉéå¯	…é½‘¹•¨‘åÍÑÉå‰Õ©¤èð½ÍÑÉ½¹œøð½Àø(€€€€€€€€€€€€ñÕ°±…ÍÌô‰É•ÅÕ¥É•µ•¹ÑÌµ±¥ÍÐˆø(€€€€€€€€€€€€€€ñ±¤ùU‰Õ¹ÑÔ€ÈØ¸ÀÐ1QL€¡9=5€ÔÀ°]…å±…¹¤ð½±¤ø(€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€€€ñÀù=‰•¹¥”¹¥•½‰Ï	Õ¥Ý…¹”ƒmÉ½‘½Ý¥Í­„è-A±…Íµ„°¥¹¹…µ½¸°a™”½É…èÍ•Í©”`ÄÄ¸ð½Àø(€€€€€€€€€€€€ñÀùi½‘¹¿oé…±—ñä½ƒmÉ½‘½Ý¥Í­„É…™¥é¹•¼¤©•¼Ý•ÉÍ©¤°„¹¥”Ýçé¹¥”½¹…éÝä‘åÍÑÉå‰Õ©¤¸ð½Àø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰‘½Ý¹±½…µ…Éˆø(€€€€€€€€€€€€ñÍÁ…¸±…ÍÌô‰Ù•ÉÍ¥½¸µ‰…‘”ˆù]å‘…¹¥”ƒ
+Ü€Ä¸Èð½ÍÁ…¸ø(€€€€€€€€€€€€ñ ÈùAA±Õˆ¥¹ÍÑ…±…Ñ½Éäè¥Ñ!Õ‰„¸ð½ Èø(€€€€€€€€€€€€ñÀù]å‰¥•Éè©•‘•¸ÍÁ½ÏÍˆ¥¹ÍÑ…±…©¤èð½Àø(€€€€€€€€€€€€ñÕ°±…ÍÌô‰É•ÅÕ¥É•µ•¹ÑÌµ±¥ÍÐˆø(€€€€€€€€€€€€€€ñ±¤øñÍÑÉ½¹œùMÑ…‰¥±¹”AAU‰Õ¹ÑÔð½ÍÑÉ½¹œøƒŠP¥¹ÍÑ…±…©„ÍåÍÑ•µ½Ý„¤…­ÑÕ…±¥é…©”é…Éë‘é…¹”ÁÉé•èAP¸ð½±¤ø(€€€€€€€€€€€€€€ñ±¤øñÍÑÉ½¹œùQÉéäé½‘¹”Á…­¥•Ñäð½ÍÑÉ½¹œøƒŠPËeé¹„¥¹ÍÑ…±…©„ÍåÍÑ•µ½Ý„è¥Ñ!ÕˆI•±•…Í”¸ð½±¤ø(€€€€€€€€€€€€€€ñ±¤øñÍÑÉ½¹œùÉ¡¥ÝÕ´Ñ…È¹èð½ÍÑÉ½¹œøƒŠP¥¹ÍÑ…±…©„±½­…±¹„‘±„©•‘¹•¼×ñåÑ­½Ý¹¥­„°‰•è€ñ½‘”ùÍÕ‘¼ð½½‘”ø¸ð½±¤ø(€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰‘½Ý¹±½…µ…Ñ¥½¹Ìˆø(€€€€€€€€€€€€€€ñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÁÉ¥µ…Éäˆ¡É•˜ô‰¡ÑÑÁÌè¼½±…Õ¹¡Á…¹¹•Ð½ù…¹¹…­½é±½ÝÍ­„¼­…É¡¥Ù”½Õ‰Õ¹ÑÔ½½ÁåÁ…ÍÑ•‰¥¸ˆùi…¥¹ÍÑ…±Õ¨èAAð½„ø(€€€€€€€€€€€€€€ñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÁÉ¥µ…Éäˆ¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½Ñ…œ½ØÄ¸ÈˆûŠLA½‰¥•Éè€ÌÁ…­¥•Ñäð½„ø(€€€€€€€€€€€€€€ñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÁÉ¥µ…Éäˆ¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½‘½Ý¹±½…½ØÄ¸È½½ÁåA…ÍÑ•	¥¸µ±¥¹Õà´Ä¸È¹Ñ…È¹èˆûŠLA½‰¥•ÉèÑ…È¹èð½„ø(€€€€€€€€€€€€€€ñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÍ•½¹‘…Éäˆ¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½‘½Ý¹±½…½ØÄ¸È½M!ÈÔÙMU5LˆùA½‰¥•ÉèM!ÈÔÙMU5Lð½„ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñÀùA¼Á½‰É…¹¥Ô¥¹ÍÑ…±…Ñ½É„¤Á±¥­ÔÍÕ´ÍÁÉ…Ý“èÁ…é¯dÜÑå´Í…µå´­…Ñ…±½Ôèð½Àø(€€€€€€€€€€€€ñÁÉ”±…ÍÌô‰Ù•É¥™¥…Ñ¥½¸µ½µµ…¹ˆøñ½‘”ùÍ¡„ÈÔÙÍÕ´€´µ¡•¬€´µ¥¹½É”µµ¥ÍÍ¥¹œM!ÈÔÙMU5Lð½½‘”øð½ÁÉ”ø(€€€€€€€€€€€€ñÀùÉ¡¥ÝÕ´€Ä¸ÈÑ…È¹èé…Ý¥•É„‘½­Õµ•¹Ñ…«dÁ½±Í¯¤…¹¥•±Í¯¸i…é¹¥¨½€ñ½‘”ùI5¹Á°¹µð½½‘”ø¤€ñ½‘”ù%9MQ10¹Á°¹µð½½‘”øì½‘¹¿m¹¥­¤«eéå­½Ý”Á½éÝ…±…«ÁÉé—éç«eéå¬¸ð½Àø(€€€€€€€€€€€€ñÀù]•ÉÍ©„€ñ½‘”øÄ¸È´Èð½½‘”øé”ÍÑ…‰¥±¹•¼AAÁÉé•Íë	„Ñ•ÍÐ¥¹ÍÑ…±…©¤°…­ÑÕ…±¥é…©¤°½‘¥¹ÍÑ…±½Ý…¹¥„¤­¿½ÝäÑ•ÍÐ1%YÁ¼Á—	¹å´ÁÉé•±½½Ý…¹¥Ô¸ð½Àø(€€€€€€€€€€€€ñÀùAÉéä¥¹ÍÑ…±…©¤Ëeé¹•¨Á½‰¥•ÉèÝÍéåÍÑ­¥”ÑÉéäÁ…­¥•ÑäÜÑ•¨Í…µ•¨Ý•ÉÍ©¤è€ñ½‘”ù½ÁåÁ…ÍÑ•‰¥¸µ‰…­•¹ð½½‘”ø°€ñ½‘”ù¹½µ”µÍ¡•±°µ•áÑ•¹Í¥½¸µ½ÁåÁ…ÍÑ•‰¥¸ð½½‘”ø¤€ñ½‘”ù½ÁåÁ…ÍÑ•‰¥¸ð½½‘”ø¸ð½Àø(€€€€€€€€€€€€ñÀøñÍÑÉ½¹œù9¥”ƒè¥¹ÍÑ…±…©¤AA½è±½­…±»¥¹ÍÑ…±…«Ñ…È¹è¸ð½ÍÑÉ½¹œøð½Àø(€€€€€€€€€€€€ñ Ìù­ÑÕ…±¥é…©”ð½ Ìø(€€€€€€€€€€€€ñÀù½ÁåA…ÍÑ•	¥¸¹¥”ÍÁÉ…Ý‘é„…­ÑÕ…±¥é…©¤ÜÑ±”¸9½Ý”Ý•ÉÍ©”ÏÁÕ‰±¥­½Ý…¹”Ü¥Ñ!ÕˆI•±•…Í•Ì¸‰ä½ÑÉéåµåÝ‡Á½Ý¥…‘½µ¥•¹¥„è¥Ñ!Õ‰„°Ýå‰¥•ÉèÜÉ•Á½éåÑ½É¥Õ´€ñÍÑÉ½¹œù]…Ñ ƒŠHÕÍÑ½´ƒŠHI•±•…Í•Ìð½ÍÑÉ½¹œø¸ð½Àø(€€€€€€€€€€€€ñÀøñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½±…Ñ•ÍÐˆùMÁÉ…Ý“è¹…©¹½ÝÍé”Ýå‘…¹¥”ƒŠHð½„øð½Àø(€€€€€€€€€€€€ñÀøñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½É•±•…Í•Ì½Ñ…œ½ØÄ¸Èˆùi½‰…èéµ¥…¹äÜÝ•ÉÍ©¤€Ä¸ÈƒŠHð½„øð½Àø(€€€€€€€€€€€€ñÀøñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½‘½Ì½½™™±¥¹”µ¥¹ÍÑ…±±…Ñ¥½¸¹µˆùA—	¹„¥¹ÍÑÉÕ­©„¥¹ÍÑ…±…©¤°…­ÑÕ…±¥é…©¤¤½‘¥¹ÍÑ…±½Ý…¹¥„ƒŠHð½„øð½Àø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰Í•Ñ¥½¸ˆ¥ô‰É½…‘µ…Á„ˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰Í•Ñ¥½¸µ¡•…‘¥¹œˆø(€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½ÜˆùAÕ‰±¥é¹„É½…‘µ…Á„ð½Àø(€€€€€€€€€€€€ñ Èù¼‘…±•¨è½ÁåA…ÍÑ•	¥¸¸ð½ Èø(€€€€€€€€€€€€ñÀùA½­…éÕ©•µäÁÉéå«eÑ”­¥•ÉÕ¹­¤É½éÝ½©Ô½É…è½‰Íé…Éä°­ÓÍÉ”¹…‘…°‰…‘…µä¸I½…‘µ…Á„¹¥”é…Ý¥•É„ÍéÑåÝ¹å Ñ•Éµ¥»ÍÜ¸ð½Àø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰™•…ÑÕÉ”µÉ¥ˆø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•ÈˆùA±…¹½Ý…¹”ƒ
+Ü€Ä¸Ìð½ÍÁ…¸øñ ÌùéåÑ•±¹¥•©Íé”…­©”µ•¹Ôð½ ÌøñÀùA±…¹½Ý…¹”Ï¹•ÕÑÉ…±¹”¥­½¹äÍåµ‰½±¥é¹”ÁÉé•…­©…µ¤•‘å©¤Í¡½Ý­„¤…¹½¹¥µ¥é…©¤½‰É…éÔ°èé…¡½Ý…¹¥•´Ý¥‘½é¹•¼Ñ•­ÍÑÔ½É…èÁ—	¹•¨½‰Ï	Õ¤µåÍéä¤­±…Ý¥…ÑÕÉä¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€€€ñ…ÉÑ¥±”±…ÍÌô‰™•…ÑÕÉ”µ…ÉˆøñÍÁ…¸±…ÍÌô‰™•…ÑÕÉ”µ¹Õµ‰•Èˆù	…‘…µäð½ÍÁ…¸øñ Ìù]§e•¨ÍÁ½Í½‹ÍÜ½¡É½¹äð½ ÌøñÀù	…‘…µäÕÉÕ¡…µ¥…¹”Ýçé¹¥”¹„ƒó‘…¹¥”°±½­…±¹”=H½É…è¥¹Ñ•É…©”è¥¹¹åµ¤ƒmÉ½‘½Ý¥Í­…µ¤É…™¥é¹åµ¤¸9¥”½é¹…é„Ñ¼¥¡•¼µ½¹¥Ñ½É½Ý…¹¥„½‰É…ëÍÜ¸ð½Àøð½…ÉÑ¥±”ø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñÀøñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÍ•½¹‘…Éäˆ¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½I=5@¹Á°¹µˆùi½‰…èÁ—	»É½…‘µ…ÃdƒŠHð½„øð½Àø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€€ñÍ•Ñ¥½¸±…ÍÌô‰Í•Ñ¥½¸ˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰Ñ„ˆø(€€€€€€€€€€€€ñÀ±…ÍÌô‰•å•‰É½ÜˆùAÉ½©•­Ð½ÑÝ…ÉÑ¿éËÍ“	½Ýäð½Àø(€€€€€€€€€€€€ñ ÈùQßÍ¨Í¡½Ý•¬¸QÝ½©”É•×	ä¸QÝ½©„‘•åé©„¸ð½ Èø(€€€€€€€€€€€€ñÀ±…ÍÌô‰ÁÉ½©•ÐµÉ•‘¥ÐˆøñÍÑÉ½¹œùAÉ½©•­ÐÁ½ÝÍÑ…©”ÁÉéäÝÍÁ…É¥Ô¹…Éëe‘é¤¡…ÑAP¤½‘•à½=Á•¹$¸ð½ÍÑÉ½¹œø½ÁåA…ÍÑ•	¥¸©•ÍÐ¹¥•é…±—ñ¹å´ÁÉ½©•­Ñ•´ì¹¥”©•ÍÐÁ½Ý§é…¹äè=Á•¹$°é…ÑÝ¥•É‘é½¹äÁÉé•è=Á•¹$…¹¤ÍÁ½¹Í½É½Ý…¹äÁÉé•è=Á•¹$¸ð½Àø(€€€€€€€€€€€€ñÀ±…ÍÌô‰ÁÉ½©•ÐµÉ•‘¥ÐˆøñÍÑÉ½¹œù½ÁåA…ÍÑ•	¥¸©•ÍÐ½ÁÉ½É…µ½Ý…¹¥•´½Á•¸Í½ÕÉ”¹„±¥•¹©¤A0´Ì¸Àµ½Èµ±…Ñ•È¸ð½ÍÑÉ½¹œøMÁÉ…Ý“è­½ƒéËÍ“	½Ýä°‘½­Õµ•¹Ñ…«d¤µ½‘•°‰•éÁ¥•é—ÍÑÝ„¸)—m±¤é¹…©‘é¥•Íè‹°éŸ	¿l¼ÁÕ‰±¥é¹¥”‰•è‘¿é…¹¥„ÁÉ…Ý‘é¥Ýå Í•­É•ÓÍÜ…¹¤ÁÉåÝ…Ñ¹•¨ÑÉ—m¤Í¡½Ý­„¸ð½Àø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰¡•É¼µ…Ñ¥½¹Ìˆø(€€€€€€€€€€€€€€ñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÁÉ¥µ…Éäˆ¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸ˆù=ÑßÍÉèÉ•Á½éåÑ½É¥Õ´ð½„ø(€€€€€€€€€€€€€€ñ„±…ÍÌô‰‰ÕÑÑ½¸‰ÕÑÑ½¸µÍ•½¹‘…Éäˆ¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½¥ÍÍÕ•ÌˆùiŸ	¿lÁÉ½‰±•´ð½„ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø(€€€€ð½µ…¥¸ø((€€€€ñ™½½Ñ•È±…ÍÌô‰Í¥Ñ”µ™½½Ñ•Èˆø(€€€€€€ñ‘¥Ø±…ÍÌô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰™½½Ñ•ÈµÉ¥ˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰™½½Ñ•Èµ‰É…¹ˆøñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì½±½¼µÝ•ˆ¹ÍÙœˆÝ¥‘Ñ ôˆÐàˆ¡•¥¡ÐôˆÐàˆ…±Ðôˆˆøñ‘¥ØøñÍÑÉ½¹œù½ÁåA…ÍÑ•	¥¸ð½ÍÑÉ½¹œøñÍÁ…¸ù5•¹•“ñ•ÈÍ¡½Ý­„‘±„9=5èÝå­ÉåÝ…¹¥•´‘…¹å ÝÉ‡ñ±¥Ýå °½ÍÑÉé—ñ•¹¥…µ¤ÁÉé•Ý­±•©•¹¥•´°…¹½¹¥µ¥é…«Ñ•­ÍÑÔ¤½‰É…ëÍÜ½É…èÁ½‘Ëeé¹å´•‘åÑ½É•´ÑÉ—m¤¸ð½ÍÁ…¸øð½‘¥Øøð½‘¥Øø(€€€€€€€€€€ñ‘¥ØøñÍÑÉ½¹œù½­Õµ•¹Ñ…©„ð½ÍÑÉ½¹œøñÕ°±…ÍÌô‰™½½Ñ•Èµ±¥¹­Ìˆøñ±¤øñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½I5¹Á°¹µˆù=Á¥ÌÁÉ½©•­ÑÔð½„øð½±¤øñ±¤øñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½I=5@¹Á°¹µˆùI½…‘µ…Á„ð½„øð½±¤øñ±¤øñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½‘½Ì½½™™±¥¹”µ¥¹ÍÑ…±±…Ñ¥½¸¹µˆù%¹ÍÑ…±…©„ð½„øð½±¤øñ±¤øñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½‘½Ì½¥µ…”µÉ•‘…Ñ¥½¸¹Á°¹µˆù¹½¹¥µ¥é…©„½‰É…ëÍÜð½„øð½±¤øñ±¤øñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½‘½Ì½Í•ÕÉ¥Ñä¹Á°¹µˆù	•éÁ¥•é—ÍÑÝ¼ð½„øð½±¤øð½Õ°øð½‘¥Øø(€€€€€€€€€€ñ‘¥ØøñÍÑÉ½¹œùAÉ½©•­Ðð½ÍÑÉ½¹œøñÕ°±…ÍÌô‰™½½Ñ•Èµ±¥¹­Ìˆøñ±¤øñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸ˆù¥Ñ!Õˆð½„øð½±¤øñ±¤øñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½‰±½ˆ½µ…¥¸½1%9MˆùA0´Ì¸Àµ½Èµ±…Ñ•Èð½„øð½±¤øñ±¤øñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½­½é±½ÝÍ­„µ…¹¹„½½ÁåA…ÍÑ•	¥¸½¥ÍÍÕ•ÌˆùiŸ	…Íé…¹¥”‹e“ÍÜð½„øð½±¤øð½Õ°øð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰™½½Ñ•Èµ‰½ÑÑ½´ˆøñÍÁ…¸û
+¤€ÈÀÈØ¹¹„-½ë	½ÝÍ­„ð½ÍÁ…¸øð½‘¥Øø(€€€€€€ð½‘¥Øø(€€€€ð½™½½Ñ•Èø((€€€€ñ‘¥…±½œ±…ÍÌô‰±¥¡Ñ‰½àˆ‘…Ñ„µ±¥¡Ñ‰½à…É¥„µ±…‰•°ô‰A½Ý§e­Íé½¹äéÉéÕÐ•­É…¹Ôˆø(€€€€€€ñ‰ÕÑÑ½¸±…ÍÌô‰±¥¡Ñ‰½àµ±½Í”ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ…É¥„µ±…‰•°ô‰i…µ­¹¥¨ˆ‘…Ñ„µ±¥¡Ñ‰½àµ±½Í”û\ð½‰ÕÑÑ½¸ø(€€€€€€ñ™¥ÕÉ”øñ¥µœÍÉŒô‰…ÍÍ•ÑÌ½¥µ…•Ì¼ÀÌµ½ÁåÁ…ÍÑ•‰¥¸´Ä´Äµ•‘åÑ½ÈµÍ¡½Ý­„µÁ½‘ÍÝ¥•Ñ±…¹¥”µ‘…¹å µÝÉ…é±¥Ýå µA0¹Á¹œˆÝ¥‘Ñ ôˆÄÀÜØˆ¡•¥¡ÐôˆØÀØˆ‘…Ñ„µ±¥¡Ñ‰½àµ¥µ…”…±Ðôˆˆøñ™¥…ÁÑ¥½¸‘…Ñ„µ±¥¡Ñ‰½àµ…ÁÑ¥½¸øð½™¥…ÁÑ¥½¸øð½™¥ÕÉ”ø(€€€€ð½‘¥…±½œø(€€ð½‰½‘äø(ð½¡Ñµ°ø(
