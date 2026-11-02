@@ -266,6 +266,24 @@ Klient GNOME uruchamia worker leniwie, utrzymuje najwyżej jedno aktywne żądan
 i kończy proces przy pauzie, blokadzie, wyłączeniu rozszerzenia, błędzie albo
 po 30 sekundach bezczynności.
 
+## Rozwój z pomocą AI
+
+CopyPasteBin powstaje przy znaczącym wsparciu generatywnej AI: ChatGPT i
+Codexa od OpenAI. Narzędzia te są szeroko wykorzystywane w implementacji kodu,
+analizie technicznej, rozwiązywaniu problemów, przygotowywaniu testów,
+dokumentacji i refaktoryzacji.
+
+Autorka projektu określa wymagania, wybiera priorytety, podejmuje decyzje
+projektowe i zatwierdza wydania. Powstałe zmiany są weryfikowane za pomocą
+testów automatycznych opartych na danych syntetycznych, analizy zmian w kodzie
+oraz praktycznych testów w rzeczywistych środowiskach GNOME/Wayland, między
+innymi Ubuntu i Fedora. Testy automatyczne pomagają wykrywać regresje, ale nie
+gwarantują poprawności ani bezpieczeństwa i nie zastępują testów w działającej
+sesji pulpitu.
+
+Odpowiedzialność za decyzje dotyczące rozwoju, utrzymania i publikacji
+CopyPasteBin pozostaje po stronie autorki projektu.
+
 ## Licencja i autorstwo
 
 Copyright © 2026 Anna Kozłowska.

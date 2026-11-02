@@ -262,6 +262,23 @@ synthetic state in a temporary directory. The GNOME client starts that worker
 lazily, keeps at most one request active, and stops it on pause, lock,
 extension shutdown, error, or 30 seconds of inactivity.
 
+## AI-assisted development
+
+CopyPasteBin is developed with significant generative-AI assistance from
+ChatGPT and Codex by OpenAI. These tools are used extensively for code
+implementation, technical analysis, problem solving, test preparation,
+documentation, and refactoring.
+
+The project author defines requirements, chooses priorities, makes design
+decisions, and approves releases. Resulting changes are verified through
+automated tests using synthetic data, analysis of code changes, and practical
+testing in real GNOME/Wayland environments, including Ubuntu and Fedora.
+Automated tests help identify regressions, but they are not a guarantee of
+correctness or security and do not replace testing in a live desktop session.
+
+Responsibility for decisions about the development, maintenance, and
+publication of CopyPasteBin remains with the project author.
+
 ## License and authorship
 
 Copyright © 2026 Anna Kozłowska.
