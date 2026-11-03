@@ -201,7 +201,9 @@ automatically.
 To update the archive installation, run `./install.sh` from the new package.
 To update manually installed DEB packages, use APT with the three new matching
 files. Updates and removal preserve the user's private configuration and
-history.
+persistent history metadata, including the technical HMAC, but not the
+session-only list of recently copied text. That list exists only in process
+memory and is cleared when the process or session ends.
 
 ### Learning about new versions
 

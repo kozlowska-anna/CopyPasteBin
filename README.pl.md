@@ -202,8 +202,10 @@ uruchomić się automatycznie.
 
 Aby zaktualizować instalację archiwalną, uruchom `./install.sh` z nowej paczki.
 Ręcznie zainstalowane pakiety DEB aktualizuj przez APT z trzema nowymi,
-zgodnymi plikami. Aktualizacja i usuwanie zachowują prywatną konfigurację oraz
-historię użytkownika.
+zgodnymi plikami. Aktualizacja i usuwanie zachowują prywatną konfigurację
+użytkownika oraz trwałe metadane historii wraz z technicznym HMAC, lecz nie
+sesyjną listę ostatnio skopiowanych tekstów. Lista ta istnieje wyłącznie w
+pamięci procesu i znika po zakończeniu procesu lub sesji.
 
 ### Informacje o nowych wersjach
 
