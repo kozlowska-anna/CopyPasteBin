@@ -37,18 +37,20 @@ EXPECTED_METADATA = {
 }
 EXPECTED_COMPATIBILITY = {
     "pl": (
-        "Wymagane środowisko.",
-        "Przykład zgodnej dystrybucji:",
-        "Ubuntu 26.04 LTS (GNOME 50, Wayland)",
-        "Obecnie nieobsługiwane środowiska: KDE Plasma, Cinnamon, Xfce oraz sesje X11.",
-        "Zgodność zależy od środowiska graficznego i jego wersji, a nie wyłącznie od nazwy dystrybucji.",
+        "GNOME Shell 50 na Waylandzie.",
+        "Sprawdzone przykłady",
+        "Ubuntu 26.04 LTS",
+        "Fedora Workstation 44, x86_64",
+        "wydanie 1.2 nie było tam osobno testowane",
+        "KDE Plasma, Cinnamon, Xfce i sesje X11 pozostają poza potwierdzonym zakresem.",
     ),
     "en": (
-        "Required environment.",
-        "Example of a compatible Linux distribution:",
-        "Ubuntu 26.04 LTS (GNOME 50, Wayland)",
-        "Currently unsupported: KDE Plasma, Cinnamon, Xfce, and X11 sessions.",
-        "Compatibility depends on the desktop environment and its version, not just the Linux distribution.",
+        "GNOME Shell 50 on Wayland.",
+        "Confirmed examples",
+        "Ubuntu 26.04 LTS",
+        "Fedora Workstation 44, x86_64",
+        "release 1.2 was not separately tested there",
+        "KDE Plasma, Cinnamon, Xfce, and X11 sessions remain outside the confirmed scope.",
     ),
 }
 
@@ -268,11 +270,11 @@ class StaticSiteTests(unittest.TestCase):
         expected_by_language = {
             "pl": (
                 "Wydanie · 1.2",
-                "Historia chroniona przed sekretami",
-                "PPA lub instalatory z GitHuba",
+                "Historia chroniona i pod Twoją kontrolą",
+                "Dwie główne drogi instalacji",
                 "Stabilne PPA Ubuntu",
-                "Trzy zgodne pakiety DEB",
                 "Archiwum tar.gz",
+                "Potrzebujesz ręcznej instalacji systemowej?",
                 "copypastebin-backend_1.2-2_all.deb",
                 "gnome-shell-extension-copypastebin_1.2-2_all.deb",
                 "copypastebin_1.2-2_all.deb",
@@ -280,17 +282,17 @@ class StaticSiteTests(unittest.TestCase):
                 "releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz",
                 "releases/download/v1.2/SHA256SUMS",
                 "sha256sum --check --ignore-missing SHA256SUMS",
-                "Watch → Custom → Releases",
-                "końcowy test LIVE po pełnym przelogowaniu",
+                "Jak aktualizować",
+                "końcowy test LIVE",
                 "Nie łącz instalacji PPA/DEB z lokalną instalacją tar.gz",
             ),
             "en": (
                 "Release · 1.2",
-                "History protected from secrets",
-                "PPA or GitHub installers",
+                "Protected history under your control",
+                "Two primary installation paths",
                 "Stable Ubuntu PPA",
-                "Three matching DEB packages",
                 "tar.gz archive",
+                "Need a manual system installation?",
                 "copypastebin-backend_1.2-2_all.deb",
                 "gnome-shell-extension-copypastebin_1.2-2_all.deb",
                 "copypastebin_1.2-2_all.deb",
@@ -298,8 +300,8 @@ class StaticSiteTests(unittest.TestCase):
                 "releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz",
                 "releases/download/v1.2/SHA256SUMS",
                 "sha256sum --check --ignore-missing SHA256SUMS",
-                "Watch → Custom → Releases",
-                "final LIVE testing after a full logout and login",
+                "How to update",
+                "final LIVE testing",
                 "Do not mix a PPA/DEB installation with the user-local tar.gz installation",
             ),
         }
@@ -322,21 +324,27 @@ class StaticSiteTests(unittest.TestCase):
             "pl": (
                 'id="roadmapa"',
                 "Co dalej z CopyPasteBin.",
-                "Planowane · 1.3",
-                "Czytelniejsze akcje menu",
-                "Więcej sposobów ochrony",
+                "Codzienną obsługę i ochronę",
+                "prostszy interfejs i czytelniejsza warstwa graficzna",
+                "dokładniejsze ostrzeżenia i rozwój reguł własnych",
+                "Nowe możliwości i środowiska",
+                "lokalne OCR uruchamiane na żądanie",
+                "zgodność z kolejnymi dystrybucjami i systemami",
+                "Rozwijamy",
                 "Badamy",
-                "lokalne OCR",
                 "/ROADMAP.pl.md",
             ),
             "en": (
                 'id="roadmap"',
                 "What’s next for CopyPasteBin.",
-                "Planned · 1.3",
-                "Easier-to-scan menu actions",
-                "More ways to protect content",
+                "Everyday use and protection",
+                "a simpler interface and clearer visual layer",
+                "more accurate warnings and expanded custom rules",
+                "New capabilities and environments",
+                "local OCR started on demand",
+                "support for more distributions and systems",
+                "Improving",
                 "Exploring",
-                "on-demand local OCR",
                 "/ROADMAP.md",
             ),
         }
@@ -350,6 +358,26 @@ class StaticSiteTests(unittest.TestCase):
             self.assertNotIn("regular expressions", source)
             self.assertNotIn("Domknięcie wersji 1.1", source)
             self.assertNotIn("Finalize version 1.1", source)
+            roadmap = re.search(
+                r'<section[^>]+id="(?:roadmapa|roadmap)"[^>]*>(?P<body>.*?)</section>',
+                source,
+                re.DOTALL,
+            )
+            self.assertIsNotNone(roadmap)
+            self.assertEqual(roadmap.group("body").count('class="feature-card"'), 2, page)
+            self.assertEqual(roadmap.group("body").count('class="roadmap-list"'), 2, page)
+            self.assertEqual(roadmap.group("body").count("<li>"), 4, page)
+
+    def test_origin_story_keeps_two_column_positioning_on_wide_screens(self) -> None:
+        css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8")
+        why_rule = re.search(r"\.why-grid\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
+        self.assertIsNotNone(why_rule)
+        self.assertIn("display: grid", why_rule.group("body"))
+        self.assertIn("grid-template-columns:", why_rule.group("body"))
+        for page in PAGES:
+            source = page.read_text(encoding="utf-8")
+            self.assertIn('class="why-grid"', source)
+            self.assertIn('class="product-positioning"', source)
 
     def test_product_positioning_and_privacy_summary_are_bilingual(self) -> None:
         expected_by_language = {
@@ -379,20 +407,20 @@ class StaticSiteTests(unittest.TestCase):
             "pl": (
                 'id="zastosowania"',
                 'href="#zastosowania">Zastosowania</a>',
-                "Kiedy może się przydać CopyPasteBin?",
+                "Kiedy warto używać CopyPasteBin?",
                 "Gdy piszesz wiadomość",
-                "Gdy pracujesz z kodem lub terminalem",
                 "Gdy korzystasz z narzędzia AI",
+                "Gdy pracujesz z kodem lub terminalem",
                 "sprawdź kopiowany fragment dokumentu",
                 "Gdy udostępniasz obraz",
             ),
             "en": (
                 'id="use-cases"',
                 'href="#use-cases">Use cases</a>',
-                "When might CopyPasteBin help?",
+                "When should you use CopyPasteBin?",
                 "When writing a message",
-                "When working with code or a terminal",
                 "When using an AI tool",
+                "When working with code or a terminal",
                 "review copied text from a document",
                 "When sharing an image",
             ),
@@ -415,6 +443,9 @@ class StaticSiteTests(unittest.TestCase):
             self.assertEqual(body.count("<li>"), 4)
             self.assertNotIn("trust-strip", body)
             self.assertNotIn("trust-item", body)
+            ai_label = "Gdy korzystasz z narzędzia AI" if parser.html_lang == "pl" else "When using an AI tool"
+            code_label = "Gdy pracujesz z kodem lub terminalem" if parser.html_lang == "pl" else "When working with code or a terminal"
+            self.assertLess(body.index(ai_label), body.index(code_label), page)
 
     def test_clipboard_editor_is_presented_as_a_general_text_tool(self) -> None:
         expected_by_language = {
@@ -431,18 +462,20 @@ class StaticSiteTests(unittest.TestCase):
     def test_features_lead_with_the_owner_priorities(self) -> None:
         expected_by_language = {
             "pl": (
+                "Wykrywanie i cztery poziomy ryzyka",
                 "Podręczny edytor treści",
                 "Anonimizacja obrazów",
-                "Reguły i dokładne wykluczenia",
-                "Historia chroniona przed sekretami",
-                "Cztery poziomy ryzyka",
+                "Reguły własne i dokładne wykluczenia",
+                "Historia chroniona i pod Twoją kontrolą",
+                "Pauza i opcjonalne czyszczenie",
             ),
             "en": (
+                "Detection and four risk levels",
                 "Handy text editor",
                 "Image redaction",
-                "Rules and exact exceptions",
-                "History protected from secrets",
-                "Four risk levels",
+                "Custom rules and exact exceptions",
+                "Protected history under your control",
+                "Pause and optional clearing",
             ),
         }
         for page in PAGES:
@@ -497,6 +530,22 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("object-fit: contain", body)
         self.assertNotIn("aspect-ratio", body)
         self.assertNotIn("object-fit: cover", body)
+
+    def test_gallery_links_to_demo_without_loading_youtube_before_click(self) -> None:
+        poster = SITE / "assets" / "images" / "copypastebin-1-2-demo-poster.png"
+        self.assertTrue(poster.is_file())
+        self.assertGreater(poster.stat().st_size, 0)
+        for page in PAGES:
+            source = page.read_text(encoding="utf-8")
+            self.assertEqual(source.count('href="https://youtu.be/7JM_paADsN4"'), 1, page)
+            self.assertIn('class="demo-video-card"', source)
+            self.assertIn('target="_blank"', source)
+            self.assertIn('rel="noopener noreferrer"', source)
+            self.assertIn("copypastebin-1-2-demo-poster.png", source)
+            self.assertIn('width="1280" height="720"', source)
+            self.assertNotIn("<iframe", source.lower())
+            self.assertNotIn("youtube.com/embed", source.lower())
+            self.assertNotIn("youtube-nocookie.com", source.lower())
 
     def test_page_uses_plain_white_section_backgrounds(self) -> None:
         css = (SITE / "assets" / "css" / "styles.css").read_text(encoding="utf-8").lower()
@@ -553,7 +602,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertNotIn("Bez udawania, że ryzyko znika", source)
             self.assertNotIn("Without pretending risk disappears", source)
             self.assertNotIn('name="keywords"', source.lower())
-            self.assertIn("styles.css?v=20261101-2", source)
+            self.assertIn("styles.css?v=20261102-3", source)
             self.assertIn("site.js?v=20261019-6", source)
         stack_rule = re.search(r"\.risk-stack\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
         banner_rule = re.search(r"\.risk-banner\s*\{(?P<body>[^}]*)\}", css, re.DOTALL)
