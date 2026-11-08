@@ -29,7 +29,7 @@ class InstallationMigrationTests(unittest.TestCase):
             [str(ARCHIVE_BUILDER)], check=True, capture_output=True, text=True,
             env=environment,
         )
-        cls.archive = Path(cls._build_directory.name) / "CopyPasteBin-linux-1.2.tar.gz"
+        cls.archive = Path(cls._build_directory.name) / "CopyPasteBin-linux-1.2.1.tar.gz"
         environment["CPB_DEB_DIST_DIR"] = cls._build_directory.name
         completed = subprocess.run(
             [str(DEB_BUILDER)], check=True, capture_output=True, text=True,
@@ -60,7 +60,7 @@ class InstallationMigrationTests(unittest.TestCase):
 
             with tarfile.open(self.archive, "r:gz") as archive:
                 archive.extractall(root / "archive", filter="data")
-            bundle = root / "archive" / "CopyPasteBin-linux-1.2"
+            bundle = root / "archive" / "CopyPasteBin-linux-1.2.1"
             isolated_runtime = root / "run"
             isolated_runtime.mkdir(mode=0o700)
             environment = os.environ.copy()

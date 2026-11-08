@@ -8,7 +8,7 @@ import {languageFromArgs, translate} from './i18n.js';
 
 const LANGUAGE = languageFromArgs(ARGV);
 const t = (message, values = {}) => translate(LANGUAGE, message, values);
-const VERSION = '1.2';
+const VERSION = '1.2.1';
 const WEBSITE_URL = LANGUAGE === 'pl'
     ? 'https://kozlowska-anna.github.io/CopyPasteBin/'
     : 'https://kozlowska-anna.github.io/CopyPasteBin/en/';

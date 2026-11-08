@@ -44,12 +44,15 @@ class GnomeExtensionTests(unittest.TestCase):
             "this._recentClipboardItem.reactive = this._historyEnabled",
             source,
         )
-        self.assertIn("Enable history saving", source + catalog)
-        self.assertIn("Disable history saving", source + catalog)
+        self.assertIn("this._historySavingItem = new PopupMenu.PopupMenuItem", source)
+        self.assertIn("this._t('History saving — loading…')", source)
+        self.assertIn("this._historySavingItem.connect('activate'", source)
+        self.assertNotIn("PopupSwitchMenuItem", source)
         self.assertIn("Clipboard history — Disabled", source + catalog)
         self.assertIn("Clipboard history — unavailable", source + catalog)
-        self.assertNotIn("History saving — Enabled", source + catalog)
-        self.assertNotIn("History saving — Disabled", source + catalog)
+        self.assertIn("Enable history saving", source + catalog)
+        self.assertIn("Disable history saving", source + catalog)
+        self.assertIn("History saving — unavailable", source + catalog)
         history_menu = source[source.index(
             "this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());"
         ):source.index("this._filterStates = new Map();")]
@@ -71,6 +74,134 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("font-size: 0.9em", stylesheet)
         self.assertIn("padding-right: 8px", stylesheet)
         self.assertNotIn("padding-left:", stylesheet)
+
+    def test_history_action_confirms_only_destructive_nonempty_disable(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+
+        action = source[source.index("    _onHistorySavingActivated("):
+                        source.index("    _openHistoryDisableDialog(")]
+        self.assertIn("if (this._historySettingPending !== null)", action)
+        self.assertIn(
+            "const enabled = this._historySettingRetry ?? !this._historyEnabled",
+            action,
+        )
+        nonempty = action[action.index("if (!enabled && this._historyEnabled &&"):]
+        self.assertLess(
+            nonempty.index("this.menu.close()"),
+            nonempty.index("this._openHistoryDisableDialog()"),
+        )
+        self.assertNotIn("this._setHistorySaving(false)", nonempty)
+        self.assertIn("this._setHistorySaving(enabled)", action)
+
+        opening = source[source.index("    _openHistoryDisableDialog("):
+                         source.index("    _updateHistoryDisableDialog(")]
+        self.assertIn("this._historyDisableConfirmationPending ||", opening)
+        self.assertIn("this._historySettingPending !== null", opening)
+        self.assertIn("this._recentClipboardState.entries.length === 0", opening)
+        self.assertIn("this._setHistorySaving(false)", opening)
+        self.assertIn("new ModalDialog.ModalDialog({", opening)
+        self.assertIn("destroyOnClose: false", opening)
+        self.assertIn("new Dialog.MessageDialogContent", opening)
+        self.assertIn("title: this._t('Disable history saving?')", opening)
+        self.assertIn("label: this._t('Cancel')", opening)
+        self.assertIn("key: Clutter.KEY_Escape", opening)
+        self.assertIn("default: true", opening)
+        self.assertIn("focused: true", opening)
+        self.assertIn("label: this._t('Disable and remove')", opening)
+        self.assertIn("this._historyDisableDialog.connect('closed'", opening)
+
+        update = source[source.index("    _updateHistoryDisableDialog("):
+                        source.index("    _cancelHistoryDisableConfirmation(")]
+        self.assertIn("const count = this._recentClipboardState.entries.length", update)
+        self.assertIn("if (count === 0)", update)
+        self.assertIn("this._cancelHistoryDisableConfirmation()", update)
+        self.assertIn("{count}", update)
+        self.assertNotIn("entry.text", update)
+        self.assertIn("this._updateHistoryDisableDialog();", source[
+            source.index("    _updateRecentClipboardLabel("):
+            source.index("    _recentClipboardInput(")
+        ])
+
+        cancel = source[source.index("    _cancelHistoryDisableConfirmation("):
+                        source.index("    _confirmHistoryDisable(")]
+        self.assertIn("this._historyDisableConfirmationPending = false", cancel)
+        self.assertIn("this._historyDisableDialog?.close()", cancel)
+        self.assertNotIn("_setHistorySaving(", cancel)
+        self.assertNotIn("clearRecentClipboardState", cancel)
+
+        confirm = source[source.index("    _confirmHistoryDisable("):
+                         source.index("    _setHistorySaving(")]
+        self.assertIn("this._historyDisableConfirmationPending", confirm)
+        self.assertIn("this._historySettingPending !== null", confirm)
+        self.assertEqual(1, confirm.count("this._setHistorySaving(false)"))
+        self.assertNotIn("clearRecentClipboardState", confirm)
+
+        for english, polish in (
+            ("Disable history saving?", "Wyłączyć zapisywanie historii?"),
+            ("Disable and remove", "Wyłącz i usuń"),
+        ):
+            with self.subTest(english=english):
+                self.assertIn(f"['{english}', '{polish}']", catalog)
+        self.assertIn("session: {count}", catalog)
+        self.assertIn("elementów: {count}", catalog)
+
+    def test_history_action_state_and_confirmation_follow_lifecycle(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+
+        apply_setting = source[source.index("    _applyHistorySaving(enabled)"):
+                               source.index("    _showHistorySettingError(")]
+        self.assertIn(
+            "enabled ? 'Disable history saving' : 'Enable history saving'",
+            apply_setting,
+        )
+        set_setting = source[source.index("    _setHistorySaving(enabled)"):
+                             source.index("    _runHistorySettingCommand(")]
+        self.assertIn("this._historySavingItem.reactive = false", set_setting)
+        self.assertLess(
+            set_setting.index("this._historySettingPending = enabled"),
+            set_setting.index("this._runHistorySettingCommand(["),
+        )
+        run_setting = source[source.index("    _runHistorySettingCommand("):
+                             source.index("    _applyHistorySaving(enabled)")]
+        self.assertIn("if (sequence !== this._historySettingSequence)", run_setting)
+        self.assertIn("this._historySavingItem.reactive = true", run_setting)
+        self.assertLess(
+            run_setting.index("this._historySettingPending = null"),
+            run_setting.index("this._applyHistorySaving(payload.enabled)"),
+        )
+        error = source[source.index("    _showHistorySettingError("):
+                       source.index("    _setStateAccent(")]
+        self.assertIn("this._historySavingItem.reactive = true", error)
+        self.assertIn("this._t('History saving — unavailable')", error)
+        self.assertNotIn("_syncHistorySavingSwitch", source)
+
+        session = source[source.index("Main.sessionMode.connect('updated'"):
+                         source.index("this._menuSignalId", source.index(
+                             "Main.sessionMode.connect('updated'"))]
+        self.assertIn("this._cancelHistoryDisableConfirmation()", session)
+        self.assertIn("Main.sessionMode.isLocked || Main.sessionMode.isGreeter", session)
+
+        run = source[source.index("    _run(action, automaticCheck) {"):
+                     source.index("    _runPause(action, onSuccess) {")]
+        self.assertIn("if (action !== 'status')", run)
+        self.assertIn("this._cancelHistoryDisableConfirmation()", run)
+        apply_status = source[source.index("    _applyStatus(stdout, automaticCheck) {"):
+                              source.index("    _showError() {")]
+        self.assertGreaterEqual(
+            apply_status.count("this._cancelHistoryDisableConfirmation()"), 2
+        )
+
+        destroy = source[source.index("    destroy()"):
+                         source.index("        super.destroy();", source.index(
+                             "    destroy()"))]
+        self.assertIn("this._historyDisableConfirmationPending = false", destroy)
+        self.assertIn("this._historyDisableDialog?.close()", destroy)
+        self.assertIn("this._historyDisableDialog?.destroy()", destroy)
+
+        disable = source[source.index("    disable() {"):]
+        self.assertIn("this._indicator?.destroy()", disable)
+        self.assertIn("clearRecentClipboardState(this._recentClipboardState)", disable)
 
     def test_creator_note_remains_source_only(self):
         window = (EXTENSION / "about.js").read_text(encoding="utf-8")

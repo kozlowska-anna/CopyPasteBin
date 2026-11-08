@@ -163,6 +163,9 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._sessionModeSignalId = 0;
         this._bannerTimeoutId = 0;
         this._quitDialog = null;
+        this._historyDisableDialog = null;
+        this._historyDisableDialogContent = null;
+        this._historyDisableConfirmationPending = false;
         this._autoClearSeconds = 0;
         this._historyEnabled = false;
         this._historySettingPending = null;
@@ -194,11 +197,8 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._historySavingItem = new PopupMenu.PopupMenuItem(
             this._t('History saving — loading…')
         );
-        this._historySavingItem.connect('activate', () => {
-            this._setHistorySaving(
-                this._historySettingRetry ?? !this._historyEnabled
-            );
-        });
+        this._historySavingItem.connect('activate', () =>
+            this._onHistorySavingActivated());
         this.menu.addMenuItem(this._historySavingItem);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this._filterStates = new Map();
@@ -241,6 +241,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         );
         this._sessionModeSignalId = Main.sessionMode.connect('updated', () => {
             if (Main.sessionMode.isLocked || Main.sessionMode.isGreeter) {
+                this._cancelHistoryDisableConfirmation();
                 this._ownerChangeSequence++;
                 this._analysisSequence++;
                 this._eventSequence++;
@@ -740,6 +741,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
 
     _run(action, automaticCheck) {
         if (action !== 'status') {
+            this._cancelHistoryDisableConfirmation();
             this._bridgeWorker.stop();
             this._cancelAutoClear();
             this._mode = 'transition';
@@ -1004,6 +1006,90 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             this._historySettingRetry !== null)
             return;
         this._runHistorySettingCommand(['history-saving']);
+    }
+
+    _onHistorySavingActivated() {
+        if (this._historySettingPending !== null)
+            return;
+        const enabled = this._historySettingRetry ?? !this._historyEnabled;
+        if (!enabled && this._historyEnabled &&
+            this._recentClipboardState.entries.length > 0) {
+            this.menu.close();
+            this._openHistoryDisableDialog();
+            return;
+        }
+        this._setHistorySaving(enabled);
+    }
+
+    _openHistoryDisableDialog() {
+        if (this._historyDisableConfirmationPending ||
+            this._historySettingPending !== null || !this._historyEnabled)
+            return;
+        if (this._recentClipboardState.entries.length === 0) {
+            this._setHistorySaving(false);
+            return;
+        }
+        if (this._historyDisableDialog === null) {
+            this._historyDisableDialog = new ModalDialog.ModalDialog({
+                destroyOnClose: false,
+            });
+            this._historyDisableDialogContent = new Dialog.MessageDialogContent({
+                title: this._t('Disable history saving?'),
+            });
+            this._historyDisableDialog.contentLayout.add_child(
+                this._historyDisableDialogContent
+            );
+            this._historyDisableDialog.setButtons([
+                {
+                    label: this._t('Cancel'),
+                    action: () => this._cancelHistoryDisableConfirmation(),
+                    key: Clutter.KEY_Escape,
+                    default: true,
+                    focused: true,
+                },
+                {
+                    label: this._t('Disable and remove'),
+                    action: () => this._confirmHistoryDisable(),
+                },
+            ]);
+            this._historyDisableDialog.connect('closed', () => {
+                this._historyDisableConfirmationPending = false;
+            });
+        }
+        this._historyDisableConfirmationPending = true;
+        this._updateHistoryDisableDialog();
+        if (!this._historyDisableDialog.open())
+            this._cancelHistoryDisableConfirmation();
+    }
+
+    _updateHistoryDisableDialog() {
+        if (!this._historyDisableConfirmationPending)
+            return;
+        const count = this._recentClipboardState.entries.length;
+        if (count === 0) {
+            this._cancelHistoryDisableConfirmation();
+            return;
+        }
+        this._historyDisableDialogContent.description = this._t(
+            'Disabling history saving will remove this number of items stored in memory for this session: {count}. This cannot be undone.',
+            {count}
+        );
+    }
+
+    _cancelHistoryDisableConfirmation() {
+        if (!this._historyDisableConfirmationPending)
+            return;
+        this._historyDisableConfirmationPending = false;
+        this._historyDisableDialog?.close();
+    }
+
+    _confirmHistoryDisable() {
+        if (!this._historyDisableConfirmationPending ||
+            this._historySettingPending !== null || !this._historyEnabled)
+            return;
+        this._historyDisableConfirmationPending = false;
+        this._historyDisableDialog?.close();
+        this._setHistorySaving(false);
     }
 
     _setHistorySaving(enabled) {
@@ -1435,6 +1521,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             : this._t('Clipboard history — Disabled');
         this._setStateAccent(this._historyAccent,
             this._historyEnabled ? 'active' : 'inactive');
+        this._updateHistoryDisableDialog();
     }
 
     _recentClipboardInput() {
@@ -1828,6 +1915,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             return;
         }
         if (stdout === INDEFINITE) {
+            this._cancelHistoryDisableConfirmation();
             this._bridgeWorker.stop();
             this._mode = 'indefinite';
             this._resumeItem.visible = true;
@@ -1847,6 +1935,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
             return;
         }
         this._mode = 'timed';
+        this._cancelHistoryDisableConfirmation();
         this._bridgeWorker.stop();
         this._resumeItem.visible = true;
         this._setProtectionIcon(false);
@@ -1866,6 +1955,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
     }
 
     _showError() {
+        this._cancelHistoryDisableConfirmation();
         const showBanner = this._mode !== 'error';
         this._clearTimeout();
         this._mode = 'error';
@@ -1953,6 +2043,11 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._quitDialog?.close();
         this._quitDialog?.destroy();
         this._quitDialog = null;
+        this._historyDisableConfirmationPending = false;
+        this._historyDisableDialog?.close();
+        this._historyDisableDialog?.destroy();
+        this._historyDisableDialog = null;
+        this._historyDisableDialogContent = null;
         this._clearBannerTimeout();
         this._banner.remove_all_transitions();
         Main.layoutManager.removeChrome(this._banner);

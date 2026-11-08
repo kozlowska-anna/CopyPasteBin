@@ -41,7 +41,7 @@ EXPECTED_COMPATIBILITY = {
         "Sprawdzone przykłady",
         "Ubuntu 26.04 LTS",
         "Fedora Workstation 44, x86_64",
-        "wydanie 1.2 nie było tam osobno testowane",
+        "ukierunkowany test LIVE kandydata tar.gz 1.2.1",
         "KDE Plasma, Cinnamon, Xfce i sesje X11 pozostają poza potwierdzonym zakresem.",
     ),
     "en": (
@@ -49,7 +49,7 @@ EXPECTED_COMPATIBILITY = {
         "Confirmed examples",
         "Ubuntu 26.04 LTS",
         "Fedora Workstation 44, x86_64",
-        "release 1.2 was not separately tested there",
+        "focused LIVE testing with the 1.2.1 tar.gz candidate",
         "KDE Plasma, Cinnamon, Xfce, and X11 sessions remain outside the confirmed scope.",
     ),
 }
@@ -193,7 +193,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertEqual(data["@context"], "https://schema.org")
             self.assertEqual(data["@type"], "SoftwareApplication")
             self.assertEqual(data["name"], "CopyPasteBin")
-            self.assertEqual(data["softwareVersion"], "1.2")
+            self.assertEqual(data["softwareVersion"], "1.2.1")
             self.assertEqual(data["applicationCategory"], "SecurityApplication")
             self.assertEqual(data["mainEntityOfPage"], EXPECTED_CANONICALS[lang])
             self.assertEqual(data["description"], EXPECTED_METADATA[lang]["description"])
@@ -266,42 +266,42 @@ class StaticSiteTests(unittest.TestCase):
                 with self.subTest(page=page.relative_to(SITE), text=expected_text):
                     self.assertIn(expected_text, source)
 
-    def test_version_1_2_release_is_described_consistently(self) -> None:
+    def test_version_1_2_1_release_is_described_consistently(self) -> None:
         expected_by_language = {
             "pl": (
-                "Wydanie · 1.2",
+                "Wydanie · 1.2.1",
                 "Historia chroniona i pod Twoją kontrolą",
                 "Dwie główne drogi instalacji",
                 "Stabilne PPA Ubuntu",
                 "Archiwum tar.gz",
                 "Potrzebujesz ręcznej instalacji systemowej?",
-                "copypastebin-backend_1.2-2_all.deb",
-                "gnome-shell-extension-copypastebin_1.2-2_all.deb",
-                "copypastebin_1.2-2_all.deb",
-                "CopyPasteBin-linux-1.2.tar.gz",
-                "releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz",
-                "releases/download/v1.2/SHA256SUMS",
+                "copypastebin-backend_1.2.1-1_all.deb",
+                "gnome-shell-extension-copypastebin_1.2.1-1_all.deb",
+                "copypastebin_1.2.1-1_all.deb",
+                "CopyPasteBin-linux-1.2.1.tar.gz",
+                "releases/download/v1.2.1/CopyPasteBin-linux-1.2.1.tar.gz",
+                "releases/download/v1.2.1/SHA256SUMS",
                 "sha256sum --check --ignore-missing SHA256SUMS",
                 "Jak aktualizować",
-                "końcowy test LIVE",
+                "końcowy smoke test",
                 "Nie łącz instalacji PPA/DEB z lokalną instalacją tar.gz",
             ),
             "en": (
-                "Release · 1.2",
+                "Release · 1.2.1",
                 "Protected history under your control",
                 "Two primary installation paths",
                 "Stable Ubuntu PPA",
                 "tar.gz archive",
                 "Need a manual system installation?",
-                "copypastebin-backend_1.2-2_all.deb",
-                "gnome-shell-extension-copypastebin_1.2-2_all.deb",
-                "copypastebin_1.2-2_all.deb",
-                "CopyPasteBin-linux-1.2.tar.gz",
-                "releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz",
-                "releases/download/v1.2/SHA256SUMS",
+                "copypastebin-backend_1.2.1-1_all.deb",
+                "gnome-shell-extension-copypastebin_1.2.1-1_all.deb",
+                "copypastebin_1.2.1-1_all.deb",
+                "CopyPasteBin-linux-1.2.1.tar.gz",
+                "releases/download/v1.2.1/CopyPasteBin-linux-1.2.1.tar.gz",
+                "releases/download/v1.2.1/SHA256SUMS",
                 "sha256sum --check --ignore-missing SHA256SUMS",
                 "How to update",
-                "final LIVE testing",
+                "final smoke testing",
                 "Do not mix a PPA/DEB installation with the user-local tar.gz installation",
             ),
         }

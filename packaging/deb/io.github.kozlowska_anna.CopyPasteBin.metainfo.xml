@@ -26,6 +26,7 @@
     <binary>cpb</binary>
   </provides>
   <releases>
+    <release version="1.2.1" date="2026-11-08"/>
     <release version="1.2" date="2026-11-01"/>
     <release version="1.1" date="2026-10-20"/>
     <release version="1.0.0" date="2026-10-18"/>

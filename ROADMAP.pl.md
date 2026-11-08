@@ -29,16 +29,17 @@ rozbudowane, trwałe archiwum schowka.
 - **Nie planujemy** — świadoma granica produktu, dopóki właścicielka jawnie jej
   nie zmieni.
 
-## Aktualne wydanie publiczne
+## Przygotowane wydanie naprawcze
 
-CopyPasteBin 1.2 jest obecnym publicznym wydaniem stabilnym dla GNOME Shell 50
+CopyPasteBin 1.2.1 jest przygotowanym wydaniem naprawczym dla GNOME Shell 50
 na Waylandzie. Zapewnia lokalne wykrywanie danych wrażliwych, ostrzeżenia,
 anonimizację tekstu i obrazów, dokładne wykluczenia niskiego i średniego ryzyka
 oraz pauzę. Sesyjna historia tekstowa pomija rozpoznane sekrety i treści
 wysokiego ryzyka niezależnie od ustawień filtrów ostrzeżeń, a zapisywanie
-historii można wyłączyć bez zatrzymywania analizy ani edytora. Wersja 1.2 jest
-dostępna z PPA Ubuntu jako trzy zgodne pakiety Debiana oraz z GitHub Release
-jako te same pakiety albo lokalne dla użytkownika archiwum tar.gz.
+historii można wyłączyć bez zatrzymywania analizy ani edytora. Wersja 1.2.1 jest
+przygotowana do dystrybucji przez PPA Ubuntu jako trzy zgodne pakiety Debiana
+oraz przez GitHub Release jako te same pakiety albo lokalne dla użytkownika
+archiwum tar.gz.
 
 ## Planowane
 

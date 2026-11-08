@@ -4,7 +4,7 @@ CopyPasteBin Debian source package
 This directory prepares the existing upstream tree as a non-native Debian
 source package using the 3.0 (quilt) format and debhelper compatibility level
 13. It builds three binary packages: the backend, GNOME Shell extension and
-complete-installation metapackage. The final 1.2 source can be built locally
+complete-installation metapackage. The 1.2.1 source can be built locally
 for artifact verification before a separately approved stable upload.
 
 The binary packages deliberately contain no APT source configuration, signing

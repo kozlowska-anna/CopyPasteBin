@@ -24,12 +24,12 @@ override_dh_auto_install:
 		$(EXTENSION_ROOT)/usr/share/metainfo
 	install -m 0755 packaging/deb/cpb $(BACKEND_ROOT)/usr/bin/cpb
 	cp -a src/copypastebin/. $(PYTHON_PACKAGE_DIR)/
-	grep -Fqx '__version__ = "1.2"' $(PYTHON_PACKAGE_DIR)/__init__.py
+	grep -Fqx '__version__ = "1.2.1"' $(PYTHON_PACKAGE_DIR)/__init__.py
 	find $(PYTHON_PACKAGE_DIR) -type d -name __pycache__ -prune -exec rm -rf -- {} +
 	find $(PYTHON_PACKAGE_DIR) -type f -name '*.py[co]' -delete
 	cp -a gnome-extension/$(UUID)/. $(EXTENSION_DIR)/
-	grep -Fqx "const VERSION = '1.2';" $(EXTENSION_DIR)/about.js
-	grep -Fqx '  "version": 7' $(EXTENSION_DIR)/metadata.json
+	grep -Fqx "const VERSION = '1.2.1';" $(EXTENSION_DIR)/about.js
+	grep -Fqx '  "version": 8' $(EXTENSION_DIR)/metadata.json
 	install -m 0644 packaging/deb/copypastebin.desktop \
 		$(APPLICATIONS_DIR)/copypastebin.desktop
 	install -m 0644 debian/enable-extension.js \

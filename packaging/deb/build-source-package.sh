@@ -4,7 +4,7 @@ umask 022
 
 readonly ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd -P)"
 readonly PACKAGE="copypastebin"
-readonly UPSTREAM_VERSION="1.2"
+readonly UPSTREAM_VERSION="1.2.1"
 readonly SOURCE_REF="${CPB_DEB_SOURCE_REF:-HEAD}"
 readonly DIST_DIR="${CPB_DEB_SOURCE_DIST_DIR:-$ROOT/dist/source}"
 readonly WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/copypastebin-source.XXXXXX")"

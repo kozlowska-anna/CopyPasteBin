@@ -121,7 +121,8 @@ obcy właściciel albo złe prawa są odrzucane fail-closed.
 Rozszerzenie pobiera zamknięty JSON przez `cpb ui filters` i zmienia dokładnie
 jedną kategorię przez `cpb ui filter-set <CATEGORY> on|off`. Główne menu pokazuje
 tylko sumę aktywnych filtrów. Kliknięcie uruchamia na żądanie `filter-editor.js`:
-osobne przewijane okno 17 pól wyboru, które zapisuje każdą zmianę od razu.
+osobne przewijane okno zamkniętych kategorii, które zapisuje każdą zmianę od
+razu.
 Odpowiedź ma limit 2 KiB i ustaloną kolejność wszystkich kategorii.
 
 Wyłączone kategorie są usuwane przed rozstrzygnięciem nakładania detekcji.
@@ -276,8 +277,9 @@ dodatkowy komunikat wysokiego ryzyka, bez ścieżki trwałego wyjątku.
 
 ## Wyjście i launcher
 
-„Wyjdź z CopyPasteBin” wymaga drugiego kliknięcia w ciągu 8 sekund. Wywołuje
-stałe `/usr/bin/gnome-extensions disable <własny UUID>` bez shella i przechodzi
+„Wyjdź z CopyPasteBin” otwiera modalne potwierdzenie z bezpiecznie domyślnym
+przyciskiem „Anuluj”. Dopiero jawne potwierdzenie wywołuje stałe
+`/usr/bin/gnome-extensions disable <własny UUID>` bez shella i przechodzi
 przez normalne `disable()`, które sprząta transfery, sygnały, edytor, baner i
 timery.
 
@@ -285,8 +287,9 @@ Aktualny `packaging/copypastebin.desktop` wykonuje wyłącznie odwrotne
 `gnome-extensions enable copypastebin@kozlowska-anna.github.io`. Nie uruchamia
 terminala, starej usługi ani `watch start`.
 
-Pięć osobnych procesów GTK ma stabilne identyfikatory aplikacji dla edytora,
-filtrów, reguł, ostatnich wpisów i okna „O programie”. Paczka instaluje dla
+Sześć osobnych procesów GTK ma stabilne identyfikatory aplikacji dla edytora
+tekstu, edytora obrazów, filtrów, reguł, ostatnich wpisów i okna „O programie”.
+Paczka instaluje dla
 nich ukryte (`NoDisplay=true`) pliki desktop o nazwach zgodnych z tymi
 identyfikatorami. Wszystkie wskazują lokalną ikonę `copypastebin`, dzięki czemu
 GNOME/Wayland przypisuje otwarte okna do ikony produktu zamiast ogólnej ikony

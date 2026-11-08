@@ -257,9 +257,9 @@ class DebPackagingTests(unittest.TestCase):
             "EXTENSION_ROOT = debian/gnome-shell-extension-copypastebin", rules
         )
         self.assertNotIn("glib-compile-schemas", rules)
-        self.assertIn('__version__ = "1.2"', rules)
-        self.assertIn("const VERSION = '1.2';", rules)
-        self.assertIn('\"version\": 7', rules)
+        self.assertIn('__version__ = "1.2.1"', rules)
+        self.assertIn("const VERSION = '1.2.1';", rules)
+        self.assertIn('\"version\": 8', rules)
         self.assertNotIn("1.2.dev0", rules)
         self.assertNotIn("1.2-dev", rules)
         self.assertNotIn("--with python3", rules)
@@ -302,7 +302,7 @@ class DebPackagingTests(unittest.TestCase):
         self.assertIn("must never be stored in this source tree", readme)
 
         source_builder = SOURCE_BUILDER.read_text(encoding="utf-8")
-        self.assertIn('UPSTREAM_VERSION="1.2"', source_builder)
+        self.assertIn('UPSTREAM_VERSION="1.2.1"', source_builder)
         self.assertIn('SOURCE_REF="${CPB_DEB_SOURCE_REF:-HEAD}"', source_builder)
         self.assertIn('"$DIST_DIR" = /*', source_builder)
         self.assertIn("git -C \"$ROOT\" archive", source_builder)
@@ -435,7 +435,7 @@ class DebPackagingTests(unittest.TestCase):
         self.assertEqual("copypastebin", component.find("icon").text)
         self.assertEqual("Anna Kozłowska", component.find("developer/name").text)
         self.assertEqual(
-            "1.2",
+            "1.2.1",
             component.find("releases/release").attrib["version"],
         )
 
@@ -524,7 +524,7 @@ class DebPackagingTests(unittest.TestCase):
             )
             capability_document = json.loads(capabilities.stdout)
             self.assertEqual(2, capability_document["protocol_version"])
-            self.assertEqual("1.2", capability_document["product_version"])
+            self.assertEqual("1.2.1", capability_document["product_version"])
             analyzed = subprocess.run(
                 [
                     str(backend_root / "usr/bin/cpb"),
@@ -565,15 +565,15 @@ class DebPackagingTests(unittest.TestCase):
                 extension_file.with_name("bridge-worker.js").read_text(encoding="utf-8"),
             )
             self.assertIn(
-                "const VERSION = '1.2';",
+                "const VERSION = '1.2.1';",
                 extension_file.with_name("about.js").read_text(encoding="utf-8"),
             )
             metadata = json.loads(
                 extension_file.with_name("metadata.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(7, metadata["version"])
+            self.assertEqual(8, metadata["version"])
             self.assertIn(
-                '__version__ = "1.2"',
+                '__version__ = "1.2.1"',
                 (ROOT / "src" / "copypastebin" / "__init__.py").read_text(
                     encoding="utf-8"
                 ),

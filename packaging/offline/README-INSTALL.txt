@@ -1,4 +1,4 @@
-COPYPASTEBIN 1.2 - INSTALACJA OFFLINE
+COPYPASTEBIN 1.2.1 - INSTALACJA OFFLINE
 
 Autorka: Anna Kozłowska
 Rozwój wspierany przy użyciu ChatGPT i Codex od OpenAI.

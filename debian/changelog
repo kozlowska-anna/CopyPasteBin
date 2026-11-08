@@ -1,3 +1,16 @@
+copypastebin (1.2.1-1) resolute; urgency=medium
+
+  * Release the tested 1.2.1 maintenance update from 1.2.1-1~test2.
+  * Prevent an at sign from bypassing the clipboard-history secret heuristic
+    unless the complete text is a valid email address.
+  * Apply the history heuristic after removing exactly one trailing LF or
+    CRLF without modifying clipboard content.
+  * Add regression tests and a synthetic history-policy corpus.
+  * Require confirmation before disabling non-empty session history and
+    removing its in-memory text entries.
+
+ -- Anna Kozłowska <copypastebin@op.pl>  Sun, 08 Nov 2026 16:21:14 +0100
+
 copypastebin (1.2-2) resolute; urgency=medium
 
   * Promote the tested clipboard-history activation fix from 1.2-2~test2.

@@ -1,17 +1,56 @@
-# Installing CopyPasteBin 1.2
+# Installing CopyPasteBin 1.2.1
 
-CopyPasteBin 1.2 has two installation methods from the same source set:
+CopyPasteBin 1.2.1 has three installation methods from the same source set:
 
-- three exactly matching Debian packages from the [v1.2 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2)—`copypastebin-backend_1.2-2_all.deb`, `gnome-shell-extension-copypastebin_1.2-2_all.deb`, and `copypastebin_1.2-2_all.deb`—for a system installation managed by APT;
-- [archive `CopyPasteBin-linux-1.2.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz) for a user-local installation.
+- stable PPA `ppa:annakozlowska/copypastebin` for Ubuntu 26.04 (Resolute),
+  providing a system installation and updates managed by APT;
+- three exactly matching Debian packages from the [v1.2.1 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2.1)—`copypastebin-backend_1.2.1-1_all.deb`, `gnome-shell-extension-copypastebin_1.2.1-1_all.deb`, and `copypastebin_1.2.1-1_all.deb`—for a system installation managed by APT;
+- [archive `CopyPasteBin-linux-1.2.1.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/CopyPasteBin-linux-1.2.1.tar.gz) for a user-local installation.
 
-Also download [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/SHA256SUMS) and verify the selected files before opening them. Do not install both variants at the same time.
+Also download [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/SHA256SUMS) and verify the selected files before opening them. Do not mix a system PPA/DEB installation with the user-local tar.gz installation.
 
 The supported scope is GNOME Shell 50 on Wayland with Python 3.11 or newer.
 KDE Plasma, Cinnamon, and Xfce integration has not been verified. There is no
-The packages do not enroll an APT repository or add a signing key. Locally
+desktop adapter for those environments.
+
+Packages downloaded directly from GitHub Release do not enroll an APT
+repository or add a signing key. Locally
 downloaded DEBs do not receive automatic updates unless the user separately
-configures a published repository.
+configures the stable PPA.
+
+## Stable PPA for Ubuntu 26.04
+
+The PPA is currently published only for Ubuntu 26.04, code-named `resolute`.
+Add it and install the metapackage:
+
+```sh
+sudo add-apt-repository ppa:annakozlowska/copypastebin
+sudo apt update
+sudo apt install copypastebin
+```
+
+APT installs three matching packages: `copypastebin`, `copypastebin-backend`,
+and `gnome-shell-extension-copypastebin`. Log out, log back in to GNOME
+Wayland, and choose **CopyPasteBin** from the application menu. Later releases
+arrive through the normal APT update workflow.
+
+Remove the application-owned code with:
+
+```sh
+sudo apt remove \
+  copypastebin \
+  gnome-shell-extension-copypastebin \
+  copypastebin-backend
+```
+
+If the PPA is no longer needed, remove it separately:
+
+```sh
+sudo add-apt-repository --remove ppa:annakozlowska/copypastebin
+```
+
+Removing the packages and PPA preserves `~/.config/copypastebin` and
+`~/.local/state/copypastebin`.
 
 ## User-local tar.gz
 
@@ -25,14 +64,14 @@ sha256sum --check --ignore-missing SHA256SUMS
 Continue only if the command reports:
 
 ```text
-CopyPasteBin-linux-1.2.tar.gz: OK
+CopyPasteBin-linux-1.2.1.tar.gz: OK
 ```
 
 Extract the verified archive and enter its directory:
 
 ```sh
-tar -xzf CopyPasteBin-linux-1.2.tar.gz
-cd CopyPasteBin-linux-1.2
+tar -xzf CopyPasteBin-linux-1.2.1.tar.gz
+cd CopyPasteBin-linux-1.2.1
 ```
 
 ## Check compatibility and install
@@ -117,7 +156,7 @@ settings and history.
 
 ## Supported environment
 
-Version 1.2 supports GNOME Shell 50 on Wayland with Python 3.11 or newer,
+Version 1.2.1 supports GNOME Shell 50 on Wayland with Python 3.11 or newer,
 including `venv`, GJS, GTK 4, GioUnix, GNOME Extensions, and `sha256sum`.
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in this
 release. The installer stops safely when GNOME Shell is unavailable.
@@ -128,18 +167,18 @@ Verify the checksum and inspect the downloaded package:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
-dpkg-deb --info copypastebin-backend_1.2-2_all.deb
-dpkg-deb --info gnome-shell-extension-copypastebin_1.2-2_all.deb
-dpkg-deb --info copypastebin_1.2-2_all.deb
+dpkg-deb --info copypastebin-backend_1.2.1-1_all.deb
+dpkg-deb --info gnome-shell-extension-copypastebin_1.2.1-1_all.deb
+dpkg-deb --info copypastebin_1.2.1-1_all.deb
 ```
 
 Install it after explicitly approving administrative access:
 
 ```sh
 sudo apt install \
-  ./copypastebin-backend_1.2-2_all.deb \
-  ./gnome-shell-extension-copypastebin_1.2-2_all.deb \
-  ./copypastebin_1.2-2_all.deb
+  ./copypastebin-backend_1.2.1-1_all.deb \
+  ./gnome-shell-extension-copypastebin_1.2.1-1_all.deb \
+  ./copypastebin_1.2.1-1_all.deb
 ```
 
 The package does not start CopyPasteBin as root, has no maintainer scripts,
@@ -173,8 +212,9 @@ precedence over the system extension. The DEB activation helper refuses to
 proceed while that conflict exists; it never removes user files automatically.
 
 For DEB to tar.gz, first remove the DEB with `apt remove`, then run
-`./install.sh` from the archive. Do not keep both installation methods active
-at the same time. Reinstalling the same version does not remove private state.
+`./install.sh` from the archive. Do not keep system and user-local
+installations active at the same time. Reinstalling the same version does not
+remove private state.
 
 ## If CopyPasteBin does not start automatically
 

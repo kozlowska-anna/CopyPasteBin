@@ -7,7 +7,8 @@
 Oryginalny tekst, dane osobowe i finansowe, sekrety, wynik anonimizacji oraz
 klucz HMAC nie mogą trafić do trwałej historii, logów, błędów, `repr`, argv,
 env ani plików tymczasowych. Jawny wyjątek stanowi ograniczona sesyjna lista
-ostatnich tekstów przechowywana wyłącznie w RAM rozszerzenia. Podgląd
+ostatnich tekstów przechowywana wyłącznie w RAM rozszerzenia, gdy zapisywanie
+historii jest włączone. Podgląd
 terminalowy neutralizuje ANSI, C0/C1 i znaki bidi.
 
 Aktualną ścieżką pulpitu jest zdarzeniowe rozszerzenie GNOME Shell 50. Stary
@@ -27,6 +28,8 @@ pozostać nieaktywne.
 - historia używa HMAC-SHA-256, nie zwykłego skrótu treści;
 - ustawienia filtrów przechowują tylko zamknięte nazwy kategorii i wybrany
   czas automatycznego czyszczenia;
+- osobne ustawienie historii przechowuje tylko wersję i wartość logiczną
+  określającą, czy zapisywanie jest włączone;
 - treść jawnie utworzonej reguły własnej jest wyjątkiem: musi być lokalnie
   zapisana, dlatego interfejs ostrzega, aby nie wpisywać prawdziwego sekretu;
 - poziomy `high` i `critical` nie mają skrótu trwałego ani automatycznego wyjątku;
@@ -51,9 +54,10 @@ Ramka do `cpb bridge observe` przechodzi anonimowym stdin i zawiera tylko
 ograniczony identyfikator oraz tekst. Most odrzuca złą długość, niepełną ramkę,
 nadmiar, zły UTF-8, NUL i pusty tekst, a następnie ponownie sprawdza pauzę.
 
-Odpowiedź stdout ma najwyżej 2 KiB i zamknięty JSON: wersja, ryzyko oraz
-kategorie z licznikami. Nie zawiera treści, redakcji, pozycji dopasowań ani ID
-operacji. Rozszerzenie waliduje całość przed pokazaniem banera.
+Odpowiedź stdout ma najwyżej 2 KiB i zamknięty JSON: wersja, ryzyko, kategorie
+z licznikami oraz logiczną decyzję polityki historii. Nie zawiera treści,
+redakcji, pozycji dopasowań, przyczyny odrzucenia ani ID operacji. Rozszerzenie
+waliduje całość przed pokazaniem banera lub zachowaniem wpisu.
 
 Udany transfer tekstowego MIME o długości zero nie jest wysyłany do mostu i nie
 tworzy historii. Pokazuje wyłącznie niebieską informację o pustym schowku.
@@ -72,10 +76,28 @@ bezpiecznych magazynach. Klucz HMAC jest losowy i lokalny.
 Cel zwykłego kopiowania pozostaje `unknown`. Zmiana fokusu nie jest dowodem
 wklejenia i nie uzupełnia historii.
 
-Rozszerzenie przechowuje dodatkowo do 15 ostatnich tekstów, najwyżej 256 KiB na
-wpis i 2 MiB łącznie. Wpis powstaje dopiero po udanej walidacji odpowiedzi
-mostu, więc pauza, ekran blokady, pusty lub niepoprawny transfer i błąd analizy
-nie dodają treści. Tekst nie trafia do Pythona ponownie, bazy ani pliku stanu.
+Rozszerzenie przechowuje dodatkowo do 15 kwalifikujących się ostatnich tekstów,
+najwyżej 256 KiB na wpis i 2 MiB łącznie. Most uruchamia detektory raz, używa
+pełnego, nieprzefiltrowanego zestawu trafień do niezależnej polityki historii,
+a filtry ostrzeżeń stosuje osobno. Rozpoznane kategorie sekretów oraz wszystkie
+trafienia `high` i `critical` są wykluczane nawet wtedy, gdy odpowiadający im
+filtr ostrzeżeń jest wyłączony. Heurystyka używana wyłącznie dla historii
+wyklucza także samodzielne ciągi długości 12–128 znaków o wysokiej entropii,
+dużej różnorodności znaków i co najmniej trzech klasach znaków (wszystkich
+czterech poniżej 16 znaków). Przed użyciem tej heurystyki odrzucane są ciągi ze
+spacjami, URL-e, wartości o kształcie adresu e-mail i prefiksy ścieżek. Może to
+pominąć nieszkodliwe identyfikatory i nie oznacza wykrywania każdego hasła.
+Heurystyka nie tworzy dodatkowego ostrzeżenia.
+
+Wpis powstaje tylko wtedy, gdy zapisywanie historii jest włączone, i dopiero po
+udanej walidacji odpowiedzi mostu. Wyłączenie niepustej historii wymaga jawnego
+potwierdzenia usunięcia wpisów z RAM. Po potwierdzeniu lista jest czyszczona,
+jej okno zamykane, a opóźniony callback nie może dodać wpisu. Wyłączenie pustej
+historii nie pokazuje zbędnego pytania. Ponowne włączenie zaczyna od pustej
+listy. `history-settings.json` zapisuje w prywatnym katalogu stanu wyłącznie
+`version` i `enabled`; nigdy nie zapisuje treści wpisów. Pauza jest niezależna:
+zatrzymuje nową analizę, a więc również nowe wpisy, bez zmiany ustawienia
+historii. Tekst nie trafia ponownie do Pythona, bazy ani pliku stanu.
 
 Osobne okno GTK otrzymuje chwilową migawkę binarną przez stdin. Zwraca przez
 stdout wyłącznie zamkniętą akcję i nietreściowy identyfikator wpisu; błędy są
@@ -287,7 +309,8 @@ wymazywania pamięci ani kontroli kopii zapisanych przez inne clipboard managery
 
 ## Wyjście i launcher
 
-Wyjście wymaga drugiego kliknięcia w ciągu 8 sekund. Używa stałego
+Wyjście otwiera modalne okno potwierdzenia z bezpiecznie domyślnym przyciskiem
+**Anuluj**. Dopiero jawne potwierdzenie używa stałego
 `/usr/bin/gnome-extensions disable <własny UUID>` bez shella i danych
 użytkownika. Normalne `disable()` odłącza sygnały, anuluje transfer, kończy
 edytor i usuwa UI oraz timery.
@@ -330,10 +353,11 @@ stanowi alternatywnego trybu aktualnego produktu.
 ## Publikacja
 
 Rozszerzenie ma stabilny publiczny UUID oraz angielską bazę komunikatów z
-polskim tłumaczeniem. Wersja 1.2 jest dystrybuowana przez PPA Ubuntu i GitHub
-Release jako trzy zgodne pakiety Debiana, a alternatywą jest lokalne dla
-użytkownika archiwum tar.gz. Artefakty GitHub Release mają zewnętrzne sumy
-SHA-256. Publikacja w GNOME Extensions i osobne, izolowane pakowanie rdzenia
+polskim tłumaczeniem. Wersja 1.2.1 jest przygotowana do dystrybucji przez PPA
+Ubuntu i GitHub Release jako trzy zgodne pakiety Debiana, a alternatywą jest
+lokalne dla użytkownika archiwum tar.gz. Artefakty GitHub Release mają
+zewnętrzne sumy SHA-256. Publikacja w GNOME Extensions i osobne, izolowane
+pakowanie rdzenia
 wymagają późniejszego review i pozostają poza obsługiwanym zakresem. Projekt
 jest udostępniany na licencji `GPL-3.0-or-later`, a nota BSD-3-Clause dla danych
 BIP-39 jest zachowana w dystrybucji. Pozostałe prace nie mogą osłabić opisanych

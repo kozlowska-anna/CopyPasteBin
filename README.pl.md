@@ -4,7 +4,7 @@
 
 **[Otwórz stronę CopyPasteBin](https://kozlowska-anna.github.io/CopyPasteBin/)**
 
-[Pobierz wersję 1.2](#instalacja-wersji-12) · [Dokumentacja](#dokumentacja) · [Model bezpieczeństwa](docs/security.pl.md)
+[Pobierz wersję 1.2.1](#instalacja-wersji-121) · [Dokumentacja](#dokumentacja) · [Model bezpieczeństwa](docs/security.pl.md)
 
 ## Więcej kontroli zanim wkleisz
 
@@ -76,7 +76,7 @@ Po wykryciu aktywnego wzorca CopyPasteBin pokazuje banner w kolorze poziomu
 ryzyka. Widoczne są wyłącznie bezpieczne nazwy kategorii i liczba trafień,
 nigdy treść schowka. Przycisk otwiera edytor.
 
-<img width="594" height="140" alt="Ostrzeżenie CopyPasteBin o wysokim ryzyku po wykryciu demonstracyjnej karty płatniczej w schowku" src="docs/screenshots/02-copypastebin-1-1-ostrzezenie-przed-wklejeniem-danych-wrazliwych-PL.png" />
+<img width="594" height="140" alt="Ostrzeżenie CopyPasteBin 1.1 o wysokim ryzyku po wykryciu demonstracyjnej karty płatniczej w schowku" src="docs/screenshots/02-copypastebin-1-1-ostrzezenie-przed-wklejeniem-danych-wrazliwych-PL.png" />
 
 ### Edytor schowka
 
@@ -84,26 +84,25 @@ Edytor podświetla fragmenty znalezione przez lokalny detektor i przygotowuje
 propozycję anonimizacji. Schowek zmienia się dopiero po kliknięciu „Zastąp
 schowek”; anulowanie nie wprowadza zmian. Zrzut używa syntetycznych danych.
 
-<img width="1076" height="606" alt="Edytor schowka CopyPasteBin z podświetlonym demonstracyjnym adresem e-mail i hasłem przed anonimizacją" src="docs/screenshots/03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png" />
+<img width="1076" height="606" alt="Edytor schowka CopyPasteBin 1.1 z podświetlonym demonstracyjnym adresem e-mail i hasłem przed anonimizacją" src="docs/screenshots/03-copypastebin-1-1-edytor-schowka-podswietlanie-danych-wrazliwych-PL.png" />
 
 ### Lokalna anonimizacja obrazów
 
 Lokalny edytor pozwala ręcznie zakryć wybrane obszary i zapisać nową,
 bezpieczną kopię PNG bez modyfikowania oryginalnego obrazu.
 
-<img width="1128" height="789" alt="Edytor anonimizacji obrazów CopyPasteBin z czterema ręcznymi zakryciami syntetycznego odbiorcy, adresu, adresu e-mail i podpisu" src="docs/screenshots/06-copypastebin-1-1-lokalny-edytor-anonimizacji-obrazow-PL.png" />
+<img width="1128" height="789" alt="Edytor anonimizacji obrazów CopyPasteBin 1.1 z czterema ręcznymi zakryciami syntetycznego odbiorcy, adresu, adresu e-mail i podpisu" src="docs/screenshots/06-copypastebin-1-1-lokalny-edytor-anonimizacji-obrazow-PL.png" />
 
 <details>
 <summary><strong>Więcej zrzutów CopyPasteBin</strong></summary>
 
 ### Integracja z pulpitem GNOME
 
-Menu wersji 1.2 pokazuje stan monitorowania i historii schowka, osobną akcję
-włączania lub wyłączania zapisywania historii, filtry, reguły i wykluczenia,
-automatyczne czyszczenie, ustawienia języka, anonimizację tekstu i obrazów oraz
-ustawienia pauzy.
+Menu pokazuje stan monitorowania i daje dostęp do sesyjnej listy ostatnich
+tekstów, filtrów, reguł i wykluczeń, automatycznego czyszczenia, ustawień
+języka, edytora, pauzy oraz lokalnego okna „O programie”.
 
-<img width="480" height="660" alt="Polskie menu CopyPasteBin 1.2 w GNOME ze stanem historii schowka, osobnym sterowaniem zapisywaniem historii, filtrami wykrywania, regułami własnymi, anonimizacją tekstu i obrazów, automatycznym czyszczeniem, ustawieniami języka oraz pauzy" src="website/assets/images/01-copypastebin-1-2-menu-historii-schowka-gnome-PL.png" />
+<img width="411" height="613" alt="Menu CopyPasteBin 1.1 w GNOME z historią schowka, filtrami wykrywania, regułami własnymi, anonimizacją tekstu i obrazów oraz ustawieniami pauzy" src="docs/screenshots/01-copypastebin-1-1-menu-menedzera-schowka-gnome-PL.png" />
 
 ### Anonimizacja wybranego fragmentu
 
@@ -113,7 +112,7 @@ dokładne, rozróżniające wielkość liter wykluczenie dla tej wartości i
 kategorii. Trafienia wysokiego i krytycznego ryzyka można anonimizować, ale nie
 można ich wykluczać.
 
-<img width="1076" height="606" alt="Edytor CopyPasteBin z zaznaczonym adresem e-mail, otwartymi działaniami anonimizacji i wykluczenia oraz widocznymi narzędziami poprawiania tekstu" src="docs/screenshots/04-copypastebin-1-1-selektywna-anonimizacja-narzedzia-edycji-PL.png" />
+<img width="1076" height="606" alt="Edytor CopyPasteBin 1.1 z zaznaczonym adresem e-mail, otwartymi działaniami anonimizacji i wykluczenia oraz widocznymi narzędziami poprawiania tekstu" src="docs/screenshots/04-copypastebin-1-1-selektywna-anonimizacja-narzedzia-edycji-PL.png" />
 
 ### Reguły własne i wykluczenia
 
@@ -123,7 +122,7 @@ włączać i wyłączać. Dokładne wykluczenia działają tylko dla obsługiwan
 trafień niskiego i średniego ryzyka. Prawdziwych haseł, kluczy ani innych
 sekretów nie należy zapisywać jako reguł lub wykluczeń.
 
-<img width="1208" height="649" alt="Okno CopyPasteBin z syntetycznymi regułami wykrywania oraz dokładnymi wykluczeniami dla przykładowego adresu e-mail i dokumentacyjnego adresu IP" src="docs/screenshots/05-copypastebin-1-1-reguly-wlasne-dokladne-wykluczenia-PL.png" />
+<img width="1208" height="649" alt="Okno CopyPasteBin 1.1 z syntetycznymi regułami wykrywania oraz dokładnymi wykluczeniami dla przykładowego adresu e-mail i dokumentacyjnego adresu IP" src="docs/screenshots/05-copypastebin-1-1-reguly-wlasne-dokladne-wykluczenia-PL.png" />
 
 ### Ostatnie wpisy tylko w pamięci sesji
 
@@ -133,13 +132,13 @@ lub zatrzymaniu rozszerzenia, a przywrócenie wpisu wymaga jawnej akcji. Jest
 oddzielona od trwałej historii, która zapisuje ograniczone metadane i HMAC,
 lecz nie treść schowka.
 
-<img width="1048" height="721" alt="Historia schowka CopyPasteBin z ośmioma syntetycznymi wpisami tekstowymi przechowywanymi wyłącznie w pamięci podręcznej sesji" src="docs/screenshots/07-copypastebin-1-1-tymczasowa-historia-schowka-PL.png" />
+<img width="1048" height="721" alt="Historia schowka CopyPasteBin 1.1 z ośmioma syntetycznymi wpisami tekstowymi przechowywanymi wyłącznie w pamięci podręcznej sesji" src="docs/screenshots/07-copypastebin-1-1-tymczasowa-historia-schowka-PL.png" />
 
 </details>
 
 ## Zgodność
 
-Wersja 1.2 obsługuje następujące środowisko:
+Wersja 1.2.1 obsługuje następujące środowisko:
 
 | Element | Wymaganie |
 | --- | --- |
@@ -150,37 +149,39 @@ Wersja 1.2 obsługuje następujące środowisko:
 | Dodatkowe komponenty | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
 
 Integracje z pulpitami Cinnamon, KDE Plasma i Xfce nie są obsługiwane w wersji
-1.2. Instalator bezpiecznie zatrzymuje się, jeśli GNOME Shell nie jest
+1.2.1. Instalator bezpiecznie zatrzymuje się, jeśli GNOME Shell nie jest
 dostępny.
 
-## Instalacja wersji 1.2
+## Instalacja wersji 1.2.1
 
 Wybierz jeden sposób instalacji:
 
-- **Stabilne PPA Ubuntu:** instalacja systemowa wymagająca uprawnień
-  administratora. Dodaj `ppa:annakozlowska/copypastebin`; APT zainstaluje
-  CopyPasteBin i będzie dostarczać późniejsze aktualizacje. [Otwórz stabilne PPA na Launchpadzie](https://launchpad.net/~annakozlowska/+archive/ubuntu/copypastebin).
-- **Ręczna instalacja DEB:** pobierz `copypastebin-backend`,
-  `gnome-shell-extension-copypastebin` i `copypastebin` w dokładnie tej samej
-  wersji z [wydania v1.2](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2)
-  i zainstaluj je systemowo przez APT z uprawnieniami administratora. Bez PPA
-  kolejne wersje trzeba pobierać i instalować ręcznie.
-- **Lokalna instalacja tar.gz:** [pobierz archiwum](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/CopyPasteBin-linux-1.2.tar.gz)
-  dla bieżącego użytkownika bez `sudo`; aktualizacje wykonuje się ręcznie.
+- **Ubuntu 26.04 (Resolute):** użyj stabilnego PPA, aby otrzymywać aktualizacje
+  przez APT:
 
-[Pobierz `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2/SHA256SUMS) i sprawdź pobrane pliki wydania przed ich otwarciem:
+  ```sh
+  sudo add-apt-repository ppa:annakozlowska/copypastebin
+  sudo apt update
+  sudo apt install copypastebin
+  ```
+
+  [Otwórz stabilne PPA na Launchpadzie](https://launchpad.net/~annakozlowska/+archive/ubuntu/copypastebin).
+
+- Alternatywnie pobierz trzy pakiety Debiana w dokładnie tej samej wersji:
+  `copypastebin-backend`, `gnome-shell-extension-copypastebin` i
+  `copypastebin` z [wydania v1.2.1](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2.1),
+  aby wykonać instalację systemową zarządzaną przez APT.
+- [⬇ Pobierz archiwum tar.gz](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/CopyPasteBin-linux-1.2.1.tar.gz) do instalacji lokalnej bez `sudo`.
+- [Pobierz `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/SHA256SUMS) i sprawdź wybrane pliki przed ich otwarciem:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
 ```
 
-**Nie łącz instalacji systemowej PPA/DEB z lokalną instalacją tar.gz.** Pełną
-weryfikację, instalację, aktualizację, zmianę metody oraz odinstalowanie opisuje
+**Nie łącz instalacji systemowej z PPA/DEB z lokalną instalacją tar.gz.**
+Pełną weryfikację, instalację,
+aktualizację, zmianę metody oraz odinstalowanie opisuje
 [polska instrukcja instalacji](docs/offline-installation.md).
-
-Po instalacji systemowej z PPA lub pakietów DEB wyloguj się i zaloguj ponownie
-do sesji GNOME, a następnie uruchom CopyPasteBin z menu aplikacji, aby
-aktywować rozszerzenie dla bieżącego użytkownika.
 
 Po rozpakowaniu wariantu lokalnego uruchom kontrolę zgodności, która niczego
 nie zmienia:
@@ -196,16 +197,17 @@ bieżącego użytkownika:
 ./install.sh
 ```
 
-Instalacja tar.gz nie wymaga `sudo`, menedżera pakietów ani połączenia z siecią.
-Po jej wykonaniu wyloguj się i zaloguj ponownie; CopyPasteBin powinien
-uruchomić się automatycznie.
+Instalacja nie wymaga `sudo`, menedżera pakietów ani połączenia z siecią.
+Aby aktywować rozszerzenie GNOME Shell, wyloguj się i zaloguj ponownie.
+CopyPasteBin powinien uruchomić się automatycznie.
 
 Aby zaktualizować instalację archiwalną, uruchom `./install.sh` z nowej paczki.
-Ręcznie zainstalowane pakiety DEB aktualizuj przez APT z trzema nowymi,
-zgodnymi plikami. Aktualizacja i usuwanie zachowują prywatną konfigurację
-użytkownika oraz trwałe metadane historii wraz z technicznym HMAC, lecz nie
-sesyjną listę ostatnio skopiowanych tekstów. Lista ta istnieje wyłącznie w
-pamięci procesu i znika po zakończeniu procesu lub sesji.
+Instalacja z PPA otrzymuje aktualizacje przez zwykły mechanizm APT. Ręcznie
+zainstalowane pakiety DEB aktualizuj przez APT z trzema nowymi, zgodnymi
+plikami. Aktualizacja i usuwanie zachowują prywatną konfigurację użytkownika
+oraz trwałe metadane historii wraz z technicznym HMAC, lecz nie sesyjną listę
+ostatnio skopiowanych tekstów. Lista ta istnieje wyłącznie w pamięci procesu i
+znika po zakończeniu procesu lub sesji.
 
 ### Informacje o nowych wersjach
 
@@ -250,10 +252,15 @@ Przed użyciem CopyPasteBin w szczególnie wrażliwym procesie przeczytaj
 - [Image redaction — English](docs/image-redaction.md)
 - [Model bezpieczeństwa — polski](docs/security.pl.md)
 - [Security model — English](SECURITY.md)
+- [Kontrakt wersji 1 — polski](docs/v1-contract.md)
+- [Version 1 contract — English](docs/v1-contract.en.md)
+- [Testy wydania 1.2.1 — polski](docs/RELEASE_TESTS_1.2.1.md)
+- [Release 1.2.1 test evidence — English](docs/RELEASE_TESTS_1.2.1.en.md)
 - [Architektura](docs/architecture.md)
 - [Backend zdarzeniowy GNOME](docs/gnome-event-backend.md)
 - [Dane stron trzecich](docs/third-party-data.md)
-- [Historia zmian](CHANGELOG.md)
+- [Historia zmian — polski](CHANGELOG.md)
+- [Changelog — English](CHANGELOG.en.md)
 
 ## Rozwój i weryfikacja
 
@@ -279,24 +286,6 @@ sprawdza produkcyjny worker ze stanem syntetycznym w katalogu tymczasowym.
 Klient GNOME uruchamia worker leniwie, utrzymuje najwyżej jedno aktywne żądanie
 i kończy proces przy pauzie, blokadzie, wyłączeniu rozszerzenia, błędzie albo
 po 30 sekundach bezczynności.
-
-## Rozwój z pomocą AI
-
-CopyPasteBin powstaje przy znaczącym wsparciu generatywnej AI: ChatGPT i
-Codexa od OpenAI. Narzędzia te są szeroko wykorzystywane w implementacji kodu,
-analizie technicznej, rozwiązywaniu problemów, przygotowywaniu testów,
-dokumentacji i refaktoryzacji.
-
-Autorka projektu określa wymagania, wybiera priorytety, podejmuje decyzje
-projektowe i zatwierdza wydania. Powstałe zmiany są weryfikowane za pomocą
-testów automatycznych opartych na danych syntetycznych, analizy zmian w kodzie
-oraz praktycznych testów w rzeczywistych środowiskach GNOME/Wayland, między
-innymi Ubuntu i Fedora. Testy automatyczne pomagają wykrywać regresje, ale nie
-gwarantują poprawności ani bezpieczeństwa i nie zastępują testów w działającej
-sesji pulpitu.
-
-Odpowiedzialność za decyzje dotyczące rozwoju, utrzymania i publikacji
-CopyPasteBin pozostaje po stronie autorki projektu.
 
 ## Licencja i autorstwo
 

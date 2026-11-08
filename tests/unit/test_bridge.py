@@ -106,6 +106,20 @@ class BridgeTests(unittest.TestCase):
         self.assertIsNone(result.notification)
         self.assertFalse(result.history_eligible)
 
+    def test_at_sign_entropy_rejection_is_history_only(self):
+        result = self.observe(frame("app.synthetic", b"Kx9#mP42@qT7&vL"))
+        self.assertIsNone(result.notification)
+        self.assertFalse(result.history_eligible)
+
+    def test_trailing_line_ending_entropy_rejection_is_history_only(self):
+        for line_ending in (b"\n", b"\r\n"):
+            with self.subTest(line_ending=line_ending):
+                result = self.observe(
+                    frame("app.synthetic", b"Kx9#mP42!qT7&vL" + line_ending)
+                )
+                self.assertIsNone(result.notification)
+                self.assertFalse(result.history_eligible)
+
     def test_disabled_text_history_does_not_disable_analysis_or_warning(self):
         HistorySettingsStore(self.state).set_enabled(False)
         result = self.observe(frame("app.synthetic", b"1234 PLN"))

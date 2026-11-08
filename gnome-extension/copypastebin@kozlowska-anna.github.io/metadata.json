@@ -3,5 +3,5 @@
   "name": "CopyPasteBin",
   "description": "Local clipboard protection by Anna Kozłowska, developed with support from ChatGPT and Codex",
   "shell-version": ["50"],
-  "version": 7
+  "version": 8
 }

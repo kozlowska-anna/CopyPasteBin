@@ -65,7 +65,7 @@ class OfflineInstallerTests(unittest.TestCase):
             page = (ROOT / filename).read_text(encoding="utf-8")
             self.assertIn(f"<code>{readme}</code>", page)
             self.assertIn(f"<code>{install}</code>", page)
-            self.assertIn("https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.1/", page)
+            self.assertIn("https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/", page)
 
 
     def test_installer_is_user_local_offline_and_fail_closed(self):
@@ -208,7 +208,7 @@ class OfflineInstallerTests(unittest.TestCase):
                 self.assertNotIn(forbidden, source)
 
     def test_release_version_is_consistent(self):
-        expected = "1.2"
+        expected = "1.2.1"
         self.assertIn(f'version = "{expected}"', PYPROJECT.read_text(encoding="utf-8"))
         self.assertIn(
             f'__version__ = "{expected}"',
@@ -269,14 +269,14 @@ class OfflineInstallerTests(unittest.TestCase):
                     prefix + "copypastebin@kozlowska-anna.github.io/metadata.json"
                 ).read().decode("utf-8")
                 self.assertIn("const VERSION = '1.3-dev';", about)
-                self.assertIn('"version": 8', metadata)
+                self.assertIn('"version": 9', metadata)
 
     def test_release_archive_has_normalized_metadata_and_no_silent_overwrite(self):
         source = BUILDER.read_text(encoding="utf-8")
 
         for expected in (
             "umask 022",
-            'readonly SOURCE_DATE_EPOCH="1793491200"',
+            'readonly SOURCE_DATE_EPOCH="1793836800"',
             'readonly BUILD_SOURCE_DIR="$WORK_DIR/source"',
             'cp -a -- "$ROOT/src/." "$BUILD_SOURCE_DIR/src/"',
             'find "$BUILD_SOURCE_DIR" -type f -exec chmod 0644',

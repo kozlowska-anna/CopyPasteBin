@@ -1,6 +1,6 @@
 # Szczegółowy opis techniczny CopyPasteBin
 
-Ten dokument zachowuje techniczną warstwę opisu CopyPasteBin 1.0.0. Jest
+Ten dokument opisuje techniczną warstwę aktualnej linii CopyPasteBin 1.x. Jest
 uzupełnieniem krótkiej [polskiej strony produktu](../README.pl.md), a nie
 instrukcją pierwszego uruchomienia.
 
@@ -131,12 +131,14 @@ Skrót jest obecnie stały i ograniczony do jednego ustawienia GSettings
 rozszerzenia. Rzeczywisty test działania wymaga GNOME Shell 50 po instalacji i
 ponownym zalogowaniu; testy automatyczne nie stanowią LIVE PASS.
 
-## Instalacja offline na komputerze
+## Instalacja na komputerze
 
-Archiwum `CopyPasteBin-linux-1.2.tar.gz` instaluje wydanie 1.2 lokalnie dla
-jednego użytkownika. Nie wymaga `sudo`, nie korzysta z sieci i nie przenosi
-konfiguracji, historii ani zawartości schowka z komputera, na którym zostało
-zbudowane.
+Wersję 1.2.1 można zainstalować ze stabilnego PPA dla Ubuntu 26.04, z trzech
+zgodnych pakietów DEB wydania GitHub albo lokalnie dla jednego użytkownika z
+`CopyPasteBin-linux-1.2.1.tar.gz`. Wariant tar.gz nie wymaga `sudo`, nie
+korzysta z sieci i nie przenosi konfiguracji, historii ani zawartości schowka
+z komputera, na którym został zbudowany. Pełne procedury i granice metod
+instalacji opisuje [instrukcja instalacji](offline-installation.md).
 
 Obsługiwany komputer musi mieć GNOME Shell 50 na Waylandzie, Python 3.11 lub
 nowszy z modułem `venv`, `gjs`, GTK 4, GdkPixbuf, GioUnix i narzędzie
@@ -269,12 +271,16 @@ reguł, przedział rozmiaru, HMAC, relację duplikatu, kategorie, liczniki,
 poziom i status. Nie przechowuje oryginału, redakcji ani „niewinnego” wycinka.
 
 Niezależnie od tej technicznej historii rozszerzenie trzyma podręcznie najwyżej
-15 ostatnich skopiowanych tekstów wyłącznie w RAM. Limit jednego wpisu wynosi
-256 KiB, a całości 2 MiB; większe teksty nadal są analizowane, lecz nie trafiają
-na listę.
+15 kwalifikujących się ostatnich tekstów wyłącznie w RAM. Limit jednego wpisu
+wynosi 256 KiB, a całości 2 MiB; większe teksty nadal są analizowane, lecz nie
+trafiają na listę. Polityka listy korzysta z pełnych trafień przed filtrami
+ostrzeżeń i dodatkowej heurystyki wysokiej entropii, dlatego rozpoznane sekrety
+oraz ryzyko `high` i `critical` są pomijane niezależnie od ustawień bannera.
 Pozycja „Historia schowka” otwiera osobne okno GTK z bezpiecznym
 podglądem, przywróceniem wybranej treści i potwierdzanym czyszczeniem całej
-listy. Okno dostaje chwilową migawkę przez anonimowe stdin i zwraca tylko
+listy. Zapisywanie można niezależnie wyłączyć; przy niepustej liście wymaga to
+potwierdzenia liczby usuwanych wpisów, a plik ustawień przechowuje wyłącznie
+wersję i wartość `enabled`. Okno dostaje chwilową migawkę przez anonimowe stdin i zwraca tylko
 zamknięty identyfikator akcji przez stdout. Treść nie trafia do pliku, argv,
 env ani logu. Zablokowanie ekranu wyłącza rozszerzenie i usuwa listę z jego
 pamięci; to samo następuje po wyłączeniu programu, jego awarii, wylogowaniu lub
@@ -354,7 +360,7 @@ Stan pauzy oraz pozostały czas muszą być stale widoczne; wznowienie czasowe
 publikuje neutralne powiadomienie bez danych schowka.
 
 Pozycja „Filtry wykrywania” pokazuje liczbę aktywnych ustawień i otwiera
-osobne, przewijane okno wszystkich 17 kategorii. Włączone pozycje mają ptaszek,
+osobne, przewijane okno wszystkich zamkniętych kategorii. Włączone pozycje mają ptaszek,
 a każda zmiana zapisuje się od razu.
 Na świeżej instalacji wyłączone są „Token”, „Ścieżka domowa” i „Fraza seed”;
 pozostałe filtry, w tym klucze konkretnych usług, są aktywne. Zmiana jest

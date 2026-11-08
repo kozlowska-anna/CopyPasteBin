@@ -2,6 +2,32 @@
 
 Wszystkie istotne zmiany CopyPasteBin są zapisywane w tym pliku.
 
+**Polski** | [English](CHANGELOG.en.md)
+
+## [1.2.1] - 2026-11-08
+
+### Bezpieczeństwo
+
+- znak `@` nie wyłącza już heurystyki historii, chyba że cały tekst jest
+  poprawnym adresem e-mail;
+- dokładnie jeden końcowy `LF` lub `CRLF` nie omija już heurystyki historii;
+  oryginalna treść schowka nie jest przy tym modyfikowana;
+- dodano testy regresyjne i deterministyczny, syntetyczny korpus polityki
+  historii, bez zmiany detektorów, progów entropii ani ustawień użytkownika.
+
+### Użyteczność
+
+- wyłączenie zapisywania historii przy niepustej liście wymaga teraz
+  potwierdzenia w oknie podającym liczbę wpisów, które zostaną usunięte;
+  anulowanie zachowuje ustawienie i wpisy, a pusta lista nie powoduje
+  zbędnego pytania.
+
+### Granice
+
+- jest to wydanie naprawcze bez nowych uprawnień i bez migracji konfiguracji;
+- heurystyka nadal ma udokumentowane ograniczenia i nie gwarantuje wykrycia
+  każdego sekretu.
+
 ## [1.2] - 2026-11-01
 
 ### Zmieniono

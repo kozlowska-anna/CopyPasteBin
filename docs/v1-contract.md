@@ -1,5 +1,7 @@
 # CopyPasteBin V1 — zatwierdzony kontrakt
 
+**Polski** | [English](v1-contract.en.md)
+
 ## Produkt
 
 CopyPasteBin V1 składa się z lokalnego rdzenia analizy oraz lekkiego interfejsu
@@ -110,7 +112,8 @@ blokady ani dla własnej zmiany wykonanej przez edytor.
 
 Treść przechodzi anonimowym stdin do stałego `cpb bridge observe`. Rdzeń
 ponownie sprawdza pauzę, analizuje i zapisuje metadane. Odpowiedź ma najwyżej
-2 KiB JSON i zawiera tylko wersję, ryzyko oraz kategorie z licznikami.
+2 KiB JSON i zawiera tylko wersję, ryzyko, kategorie z licznikami oraz logiczną
+decyzję niezależnej polityki historii.
 
 Zmiana właściciela z treścią identyczną jak ostatnio obsłużona lub właśnie
 analizowana jest technicznym duplikatem. Rozszerzenie rozpoznaje ją po skrócie
@@ -144,7 +147,7 @@ otwartego edytora blokuje późniejszą sugestię lub zapis.
 
 ## Ustawienia filtrów
 
-Każda z 17 zamkniętych kategorii może zostać osobno włączona lub wyłączona.
+Każda zamknięta kategoria ostrzeżeń może zostać osobno włączona lub wyłączona.
 Przy braku wcześniejszego pliku ustawień wyłączone są `TOKEN`, `HOME_PATH` i
 `POSSIBLE_SEED_PHRASE`; pozostałe filtry, w tym kategorie kluczy konkretnych
 usług, są włączone. Krótka pozycja menu pokazuje liczbę aktywnych filtrów i
@@ -152,10 +155,13 @@ otwiera osobne przewijane okno z ptaszkiem przy każdej kategorii.
 Zmiana zapisuje się od razu, a lista pozostaje czytelna niezależnie od
 wysokości panelu i menu.
 
-Wyłączona kategoria nie tworzy detekcji, ostrzeżenia ani licznika w nowym
-wpisie i nie jest zastępowana przez sugestię anonimizacji. Pozostałe kategorie
-w tym samym tekście nadal działają. Zmiana obejmuje kolejne zdarzenia i jawne
-analizy, ale nie przepisuje historii.
+Wyłączona kategoria nie tworzy ostrzeżenia ani licznika w trwałej historii i
+nie jest zastępowana przez sugestię anonimizacji. Pozostałe kategorie w tym
+samym tekście nadal działają. Niezależna polityka 15 ostatnich tekstów używa
+pełnych trafień przed filtrami, dlatego rozpoznany sekret oraz ryzyko `high`
+lub `critical` nie trafiają do tej listy nawet po wyłączeniu odpowiadającego
+filtra. Zmiana obejmuje kolejne zdarzenia i jawne analizy, ale nie przepisuje
+historii.
 
 Stan zawiera wyłącznie wersję, posortowane nazwy wyłączonych `Category` oraz
 zamknięty czas automatycznego czyszczenia.
@@ -224,20 +230,23 @@ menu, banery, edytor schowka, filtry, ostatnie wpisy oraz okno reguł i
 wykluczeń; jest trwały, lokalny i nie zmienia formatu danych ani wyniku
 detekcji.
 
-Rozszerzenie może przechować wyłącznie w RAM do 15 ostatnich tekstów, po
-256 KiB i najwyżej 2 MiB łącznie. Większy tekst jest analizowany bez dodania do
-listy. Osobne okno pokazuje bezpieczny podgląd, pozwala przywrócić wpis po
-ponownej kontroli pauzy albo potwierdzonym drugim kliknięciem wyczyścić całą
-listę. Nie istnieje zapis treści na dysk ani przywrócenie po zablokowaniu
-ekranu, wyłączeniu rozszerzenia, wylogowaniu lub końcu sesji. Rozszerzenie nie
-działa w trybie `unlock-dialog`; po odblokowaniu tworzy nową pustą listę.
+Rozszerzenie może przechować wyłącznie w RAM do 15 kwalifikujących się
+ostatnich tekstów, po 256 KiB i najwyżej 2 MiB łącznie. Większy tekst jest
+analizowany bez dodania do listy. Zapisywanie listy można niezależnie wyłączyć;
+wyłączenie niepustej listy wymaga potwierdzenia jej usunięcia, a ustawienie
+`history-settings.json` przechowuje tylko wersję i wartość `enabled`. Osobne
+okno pokazuje bezpieczny podgląd, pozwala przywrócić wpis po ponownej kontroli
+pauzy albo potwierdzonym drugim kliknięciem wyczyścić całą listę. Nie istnieje
+zapis treści na dysk ani przywrócenie po zablokowaniu ekranu, wyłączeniu
+rozszerzenia, wylogowaniu lub końcu sesji. Rozszerzenie nie działa w trybie
+`unlock-dialog`; po odblokowaniu tworzy nową pustą listę.
 
 ## Wyjście i ponowne uruchomienie
 
-„Wyjdź z CopyPasteBin” wymaga drugiego kliknięcia w ciągu 8 sekund. Wyłącza
-wyłącznie własny UUID przez stałe argv i normalnie sprząta sygnały, transfer,
-proces edytora, baner oraz timery. Nie odinstalowuje programu ani nie usuwa
-historii.
+„Wyjdź z CopyPasteBin” otwiera modalne okno potwierdzenia z bezpiecznie
+domyślnym przyciskiem „Anuluj”. Dopiero jawne potwierdzenie wyłącza własny UUID
+przez stałe argv i normalnie sprząta sygnały, transfer, proces edytora, baner
+oraz timery. Nie odinstalowuje programu ani nie usuwa trwałej historii.
 
 Launcher aplikacji wykonuje wyłącznie
 `/usr/bin/gnome-extensions enable copypastebin@kozlowska-anna.github.io`, bez terminala, shella,
@@ -270,11 +279,13 @@ produktu.
 
 ## Poza V1
 
-Chmura, synchronizacja urządzeń, OCR, obrazy i pliki binarne, rozszerzenie
-przeglądarkowe, automatyczne modyfikowanie każdego kopiowania, auto-paste,
-auto-send, globalny hook klawiatury oraz gwarancja wykrycia wszystkich danych.
+Chmura, synchronizacja urządzeń, OCR, automatyczne przetwarzanie obrazów ze
+schowka, rozszerzenie przeglądarkowe, automatyczne modyfikowanie każdego
+kopiowania, auto-paste, auto-send, globalny hook klawiatury oraz gwarancja
+wykrycia wszystkich danych. Ręczny edytor lokalnych plików PNG i JPEG jest
+częścią V1, ale uruchamia się wyłącznie na polecenie i nie monitoruje schowka.
 
-Publiczne wydanie 1.0 korzysta z lokalnego archiwum offline. Snap rdzenia i
-publikacja w GNOME Extensions są późniejszym etapem, nie częścią tego kanału
-dystrybucji. Rozszerzenie ma stabilny publiczny UUID i angielski interfejs
-bazowy z polskim tłumaczeniem.
+Wersja 1.2.1 jest przygotowana do dystrybucji przez stabilne PPA dla Ubuntu
+26.04 i GitHub Release, z lokalnym archiwum tar.gz jako alternatywą. Publikacja
+w GNOME Extensions oraz Snap rdzenia są późniejszym etapem. Rozszerzenie ma
+stabilny publiczny UUID i angielski interfejs bazowy z polskim tłumaczeniem.

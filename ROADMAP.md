@@ -28,16 +28,16 @@ into a large, persistent clipboard archive.
 - **Not planned** — a deliberate product boundary unless the owner explicitly
   revisits it.
 
-## Current public release
+## Prepared maintenance release
 
-CopyPasteBin 1.2 is the current public stable release for GNOME Shell 50 on
+CopyPasteBin 1.2.1 is the prepared maintenance release for GNOME Shell 50 on
 Wayland. It provides local sensitive-data detection, warnings, text and image
 redaction, exact low- and medium-risk exceptions, and pause controls. Its
 session-only text history keeps recognized secrets and high-risk content out
 of the list independently of warning-filter settings, and history saving can
-be disabled without stopping analysis or the editor. Version 1.2 is available
-from an Ubuntu PPA as three matching Debian packages and from GitHub Release as
-the same packages or a user-local tar.gz archive.
+be disabled without stopping analysis or the editor. Version 1.2.1 is prepared
+for distribution through an Ubuntu PPA as three matching Debian packages and
+through GitHub Release as the same packages or a user-local tar.gz archive.
 
 ## Planned
 

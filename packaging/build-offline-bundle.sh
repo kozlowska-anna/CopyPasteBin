@@ -6,14 +6,14 @@ readonly ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)"
 readonly CHANNEL="${CPB_BUNDLE_CHANNEL:-release}"
 case "$CHANNEL" in
     release)
-        VERSION="1.2"
-        PYTHON_PROJECT_VERSION="1.2"
-        EXTENSION_VERSION="7"
+        VERSION="1.2.1"
+        PYTHON_PROJECT_VERSION="1.2.1"
+        EXTENSION_VERSION="8"
         ;;
     development)
         VERSION="1.3-dev"
         PYTHON_PROJECT_VERSION="1.3.dev0"
-        EXTENSION_VERSION="8"
+        EXTENSION_VERSION="9"
         ;;
     *)
         printf 'Nieobsługiwany kanał budowy: %s\n' "$CHANNEL" >&2
@@ -21,7 +21,7 @@ case "$CHANNEL" in
         ;;
 esac
 readonly VERSION PYTHON_PROJECT_VERSION EXTENSION_VERSION
-readonly SOURCE_DATE_EPOCH="1793491200"
+readonly SOURCE_DATE_EPOCH="1793836800"
 readonly UUID="copypastebin@kozlowska-anna.github.io"
 readonly WINDOW_APPLICATION_IDS=(
     "io.github.copypastebin.Editor"
@@ -74,8 +74,8 @@ package_init = Path(sys.argv[2])
 version = sys.argv[3]
 
 for path, old, new in (
-    (pyproject, 'version = "1.2"', f'version = "{version}"'),
-    (package_init, '__version__ = "1.2"', f'__version__ = "{version}"'),
+    (pyproject, 'version = "1.2.1"', f'version = "{version}"'),
+    (package_init, '__version__ = "1.2.1"', f'__version__ = "{version}"'),
 ):
     source = path.read_text(encoding="utf-8")
     if source.count(old) != 1:
@@ -105,7 +105,7 @@ display_version = sys.argv[3]
 extension_version = int(sys.argv[4])
 
 about = about_path.read_text(encoding="utf-8")
-old = "const VERSION = '1.2';"
+old = "const VERSION = '1.2.1';"
 if about.count(old) != 1:
     raise SystemExit("unexpected About version marker")
 about_path.write_text(
@@ -114,7 +114,7 @@ about_path.write_text(
 )
 
 metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-if metadata.get("version") != 7:
+if metadata.get("version") != 8:
     raise SystemExit("unexpected extension version marker")
 metadata["version"] = extension_version
 metadata_path.write_text(

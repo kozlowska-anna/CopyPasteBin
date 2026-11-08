@@ -93,8 +93,11 @@ omit harmless identifiers and does not claim to detect every password. It does
 not create an additional warning.
 
 An entry is created only when history saving is enabled and after the bridge
-response has been validated. Disabling history saving immediately clears the
-list, closes its window, and prevents a delayed callback from adding an entry.
+response has been validated. Disabling non-empty history requires explicit
+confirmation that the in-memory entries will be removed; after confirmation,
+the action clears the list, closes its window, and prevents a delayed callback
+from adding an entry. Disabling an empty history does not show a redundant
+confirmation.
 Re-enabling starts with an empty list. `history-settings.json` persists only
 `version` and `enabled` in the private state directory; it never stores entry
 content. Pause is independent: it stops new analysis and therefore new entries
@@ -324,7 +327,8 @@ memory erasure or control over copies saved by other clipboard managers.
 
 ## Exit and launcher
 
-Exit requires a second click within 8 seconds. It uses the fixed
+Exit opens a modal confirmation dialog whose safe default is **Cancel**. Only
+an explicit confirmation uses the fixed
 `/usr/bin/gnome-extensions disable <own UUID>` command without a shell or user
 data. Normal `disable()` disconnects signals, cancels transfer, terminates the
 editor, and removes UI and timers.
@@ -367,9 +371,9 @@ alternative mode of the current product.
 ## Publication
 
 The extension has a stable public UUID and English base messages with a Polish
-translation. Version 1.2 is distributed through an Ubuntu PPA and GitHub
-Release as three matching Debian packages, with a user-local tar.gz archive as
-an alternative. GitHub Release assets have external SHA-256 checksums.
+translation. Version 1.2.1 is prepared for distribution through an Ubuntu PPA
+and GitHub Release as three matching Debian packages, with a user-local tar.gz
+archive as an alternative. GitHub Release assets have external SHA-256 checksums.
 Publication on GNOME Extensions and separate confined packaging of the core
 require later review and remain outside the supported scope. The project is
 licensed under `GPL-3.0-or-later`, and the BSD-3-Clause notice for BIP-39 data
