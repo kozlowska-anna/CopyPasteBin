@@ -33,6 +33,7 @@ const MAX_RECENT_CLIPBOARD_ENTRIES = 15;
 const MAX_RECENT_CLIPBOARD_ITEM_BYTES = 256 * 1024;
 const MAX_RECENT_CLIPBOARD_TOTAL_BYTES = 2 * 1024 * 1024;
 const CLIPBOARD_FLASH_MILLISECONDS = 200;
+const EDITOR_ACTIVATION_CHECK_MILLISECONDS = 200;
 const BANNER_WIDTH = 400;
 const BANNER_MARGIN = 12;
 const BANNER_PADDING = 12;
@@ -154,6 +155,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._recentClipboardSequence = 0;
         this._transferCancellable = null;
         this._editorProcess = null;
+        this._editorActivationTimeoutId = 0;
         this._imageRedactorProcess = null;
         this._filterEditorProcess = null;
         this._rulesProcess = null;
@@ -1749,20 +1751,8 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
 
     _openEditor() {
         this._cancelAutoClear();
-        if (this._editorProcess !== null) {
-            try {
-                // The editor owns the GTK window. Ask it to present/focus it.
-                this._editorProcess.send_signal(10);
-                this._showBanner(
-                    'info',
-                    'CopyPasteBin',
-                    this._t('The clipboard editor is already open and has been restored.')
-                );
-                return;
-            } catch (_error) {
-                this._editorProcess = null;
-            }
-        }
+        if (this._editorProcess !== null && this._presentOpenEditor())
+            return;
         if (Main.sessionMode.isLocked || Main.sessionMode.isGreeter)
             return;
         this._runPause('status', stdout => {
@@ -1796,6 +1786,81 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
                 }
             });
         });
+    }
+
+    _isEditorWindow(window) {
+        if (window === null)
+            return false;
+        return window.get_gtk_application_id?.() === EDITOR_APPLICATION_ID;
+    }
+
+    _findEditorWindow() {
+        const app = Shell.AppSystem.get_default().lookup_app(
+            `${EDITOR_APPLICATION_ID}.desktop`
+        );
+        for (const window of app?.get_windows() ?? []) {
+            if (this._isEditorWindow(window))
+                return window;
+        }
+        for (const actor of global.get_window_actors()) {
+            if (this._isEditorWindow(actor.meta_window))
+                return actor.meta_window;
+        }
+        return null;
+    }
+
+    _showEditorActivationResult(activated) {
+        this._showBanner(
+            activated ? 'info' : 'warning',
+            'CopyPasteBin',
+            this._t(activated
+                ? 'The clipboard editor is already open and has been restored.'
+                : 'The clipboard editor is already open, but could not be brought to the front.')
+        );
+    }
+
+    _presentOpenEditor() {
+        try {
+            // Keep the GTK-side request for window state maintained by the app.
+            this._editorProcess.send_signal(10);
+        } catch (_error) {
+            this._editorProcess = null;
+            return false;
+        }
+
+        const editorWindow = this._findEditorWindow();
+        if (editorWindow === null) {
+            this._showEditorActivationResult(false);
+            return true;
+        }
+        try {
+            // This invocation comes directly from the user's menu or shortcut.
+            Main.activateWindow(editorWindow, global.get_current_time());
+        } catch (_error) {
+            this._showEditorActivationResult(false);
+            return true;
+        }
+
+        this._clearEditorActivationTimeout();
+        this._editorActivationTimeoutId = GLib.timeout_add(
+            GLib.PRIORITY_DEFAULT,
+            EDITOR_ACTIVATION_CHECK_MILLISECONDS,
+            () => {
+                this._editorActivationTimeoutId = 0;
+                this._showEditorActivationResult(
+                    this._isEditorWindow(global.display.get_focus_window())
+                );
+                return GLib.SOURCE_REMOVE;
+            }
+        );
+        return true;
+    }
+
+    _clearEditorActivationTimeout() {
+        if (this._editorActivationTimeoutId !== 0) {
+            GLib.source_remove(this._editorActivationTimeoutId);
+            this._editorActivationTimeoutId = 0;
+        }
     }
 
     _launchEditor(input) {
@@ -2053,6 +2118,7 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
         this._transferCancellable = null;
         this._editorProcess?.force_exit();
         this._editorProcess = null;
+        this._clearEditorActivationTimeout();
         this._bridgeWorker.destroy();
         const imageRedactorProcess = this._imageRedactorProcess;
         this._imageRedactorProcess = null;

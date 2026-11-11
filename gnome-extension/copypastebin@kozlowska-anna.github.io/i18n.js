@@ -279,6 +279,7 @@ const POLISH = new Map([
     ['none', 'brak'],
     ['no categories', 'brak kategorii'],
     ['The clipboard editor is already open and has been restored.', 'Edytor schowka jest już otwarty i został przywrócony.'],
+    ['The clipboard editor is already open, but could not be brought to the front.', 'Edytor schowka jest już otwarty, ale nie udało się przenieść go na pierwszy plan.'],
     ['CopyPasteBin: pause active', 'CopyPasteBin: aktywna pauza'],
     ['Resume protection before opening the editor.', 'Wznów ochronę przed otwarciem edytora.'],
     ['CopyPasteBin: no text', 'CopyPasteBin: brak tekstu'],

@@ -866,6 +866,37 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("this._window.grab_focus()", editor)
         self.assertIn("if (this._window === null)", editor)
 
+    def test_existing_editor_is_activated_by_shell_and_result_is_truthful(self):
+        extension = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+        present = extension[
+            extension.index("    _isEditorWindow(window) {"):
+            extension.index("    _launchEditor(input) {")
+        ]
+        self.assertIn("Shell.AppSystem.get_default().lookup_app", present)
+        self.assertIn("global.get_window_actors()", present)
+        self.assertIn("window.get_gtk_application_id?.() === EDITOR_APPLICATION_ID", present)
+        self.assertIn(
+            "Main.activateWindow(editorWindow, global.get_current_time())",
+            present,
+        )
+        self.assertIn("global.display.get_focus_window()", present)
+        self.assertIn("this._editorProcess.send_signal(10)", present)
+        self.assertIn("this._clearEditorActivationTimeout()", present)
+        self.assertIn("this._clearEditorActivationTimeout();", extension[
+            extension.index("    destroy() {"):
+            extension.index("        super.destroy();")
+        ])
+        self.assertIn(
+            "The clipboard editor is already open and has been restored.",
+            present + catalog,
+        )
+        self.assertIn(
+            "The clipboard editor is already open, but could not be brought to the front.",
+            present + catalog,
+        )
+        self.assertNotIn("get_title", present)
+
     def test_editor_lifecycle_errors_never_leak_clipboard_text(self):
         extension = (EXTENSION / "extension.js").read_text(encoding="utf-8")
         start = extension.index("    _launchEditor(input) {")
