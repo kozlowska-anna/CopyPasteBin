@@ -23,7 +23,8 @@ confirmation button.
   as one undoable action at a moving mark. A new partial replaces the previous
   preview and does not alter manually corrected text.
 - Closing the editor cancels the session and removes scheduled simulation
-  results. Clipboard save is disabled while a session is active.
+  results. Clipboard save, clearing, and asynchronous backend operations are
+  disabled while a session is active; manual editing and Undo remain available.
 
 ## Worker result protocol
 

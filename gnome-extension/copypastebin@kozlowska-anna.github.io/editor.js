@@ -548,14 +548,17 @@ class EditorApplication extends Gtk.Application {
             this._dictationButton.remove_css_class('suggested-action');
         if (['idle', 'unavailable', 'error'].includes(state))
             this._deleteDictationMark();
-        this._syncSaveSensitivity();
+        this._syncActionSensitivity();
     }
 
-    _syncSaveSensitivity() {
+    _syncActionSensitivity() {
         if (this._save === undefined)
             return;
         const dictating = this._dictationSession !== null &&
             ['starting', 'recording', 'stopping'].includes(this._dictationSession.state);
+        this._anonymize.sensitive = !this._busy && !dictating;
+        this._inspect.sensitive = !this._busy && !dictating;
+        this._clear.sensitive = !this._busy && !dictating;
         this._save.sensitive = !this._busy && !dictating;
     }
 
@@ -602,10 +605,7 @@ class EditorApplication extends Gtk.Application {
 
     _setBusy(busy) {
         this._busy = busy;
-        this._anonymize.sensitive = !busy;
-        this._inspect.sensitive = !busy;
-        this._clear.sensitive = !busy;
-        this._syncSaveSensitivity();
+        this._syncActionSensitivity();
     }
 
     _clearDetectionMarks() {

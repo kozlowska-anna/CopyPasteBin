@@ -22,7 +22,8 @@ nie zmienia schowka bez dotychczasowego przycisku zatwierdzenia.
   Nowy częściowy wynik zastępuje poprzedni podgląd i nie zmienia ręcznie
   poprawionego tekstu.
 - Zamknięcie edytora anuluje sesję i usuwa zaplanowane wyniki symulacji.
-  Zapis do schowka jest wyłączony w stanach aktywnej sesji.
+  Zapis do schowka, czyszczenie i asynchroniczne operacje backendu są wyłączone
+  w stanach aktywnej sesji; ręczna edycja i Undo pozostają dostępne.
 
 ## Protokół wyników workera
 

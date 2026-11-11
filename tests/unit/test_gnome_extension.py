@@ -474,6 +474,8 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("Simulation only — the microphone is not used.", editor + catalog)
         self.assertIn("this._stopDictation(true);", editor)
         self.assertIn("insertDictationFinal", editor + session)
+        self.assertIn("this._anonymize.sensitive = !this._busy && !dictating", editor)
+        self.assertIn("this._save.sensitive = !this._busy && !dictating", editor)
         for forbidden in (
             "Gst", "PipeWire", "PulseAudio", "parec", "pw-record",
             "arecord", "MediaRecorder", "getUserMedia",
