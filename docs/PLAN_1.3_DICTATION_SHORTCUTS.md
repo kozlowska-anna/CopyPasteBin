@@ -1,6 +1,7 @@
 # CopyPasteBin 1.3 — plan skrótów i lokalnego dyktowania
 
-Status: etap A zatwierdzony; etap B po pierwszym teście LIVE i lokalnych poprawkach
+Status: etapy C1–C3 mają lokalny prototyp bez dostępu do mikrofonu; test LIVE
+pozostaje do wykonania
 Data: 2026-11-11
 Baza: publiczny `main`, commit `d23d4804ba0d264ada9f212dfb4923a8896ff02c`
 (`Release CopyPasteBin 1.2.1`)
@@ -190,8 +191,9 @@ nie rozpoznawaniu.
    `Super+Shift+V` jako aktywny.
 2. Dodać konfigurowalny, domyślnie pusty skrót otwierania edytora wraz z
    preferencją proponującą `Super+Shift+E`, pełnym cleanupem i testami pakietów.
-3. Dodać neutralną akcję okna `dictation.toggle` oraz prezentację
-   `Super+Shift+R`, początkowo nieaktywną bez backendu dyktowania.
+3. Dodać neutralny kontroler sesji okna oraz `Super+Shift+R`, początkowo
+   nieaktywne bez backendu dyktowania. Zaimplementowano lokalnie: jawna flaga
+   deweloperska uruchamia tylko symulowane wyniki i nie otwiera mikrofonu.
 4. Zbudować niezależny harness Vosk/whisper.cpp i wykonać benchmark sprzętowy.
 5. Dopiero po wyborze silnika zatwierdzić zależności, protokół workera i
    integrację mikrofonu.
@@ -210,6 +212,10 @@ na profilu zawierającym stabilne CopyPasteBin 1.2.1.
 Neutralny harness punktu 4 znajduje się w
 `experiments/dictation-benchmark/`. Oblicza metryki wyłącznie z dostarczonych
 transkrypcji syntetycznych; nie uruchamia silnika, mikrofonu, modelu ani sieci.
+
+Zaimplementowany protokół, zachowanie tekstu częściowego i końcowego, propozycja
+wskaźnika panelu oraz zgodna wersja angielska znajdują się w
+`docs/DICTATION_1.3_PROTOCOL.pl.md` i `docs/DICTATION_1.3_PROTOCOL.en.md`.
 
 ## Źródła zewnętrzne sprawdzone w etapie A
 
