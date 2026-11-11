@@ -43,6 +43,29 @@ archiwum tar.gz.
 
 ## Planowane
 
+### Kompatybilność z Ubuntu 24.04 LTS (GNOME 46, Wayland)
+
+**Status: Planowane. Priorytet: wysoki, po zakończeniu bieżących prac nad
+wersją 1.3 i lokalnym dyktowaniem.** Nie deklarujemy terminu wydania przed
+audytem.
+
+Przyszłe zadanie obejmuje:
+
+1. audyt zgodności obecnego CopyPasteBin z Ubuntu 24.04 LTS i GNOME 46;
+2. sprawdzenie wymaganych zmian rozszerzenia GNOME, backendu, zależności oraz
+   pakietów DEB/PPA;
+3. przygotowanie możliwości obsługi Ubuntu 24.04 LTS bez utraty zgodności z
+   Ubuntu 26.04 LTS;
+4. zaplanowanie testów funkcjonalnych i bezpieczeństwa, ze szczególnym
+   uwzględnieniem monitorowania schowka, historii, wykluczania sekretów i
+   blokowania sesji;
+5. decyzję o implementacji, środowisku testowym i ewentualnej osobnej gałęzi
+   dopiero po zakończeniu audytu.
+
+Zakres nie obejmuje Ubuntu 22.04 ani starszych wydań. Zgodność nie może być
+osiągana przez osłabienie istniejących zabezpieczeń ani dodanie uprawnień lub
+zależności bez konkretnego uzasadnienia.
+
 ### Czytelniejsze akcje menu w wersji 1.3
 
 W menu GNOME planowane są neutralne ikony symboliczne wyrównane w jednej

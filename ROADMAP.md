@@ -41,6 +41,29 @@ through GitHub Release as the same packages or a user-local tar.gz archive.
 
 ## Planned
 
+### Ubuntu 24.04 LTS compatibility (GNOME 46, Wayland)
+
+**Status: Planned. Priority: high, after the current version 1.3 and local
+dictation work is complete.** No release date will be announced before the
+audit.
+
+This future task covers:
+
+1. auditing the current CopyPasteBin implementation on Ubuntu 24.04 LTS and
+   GNOME 46;
+2. identifying required changes to the GNOME extension, backend, dependencies,
+   and DEB/PPA packages;
+3. preparing Ubuntu 24.04 LTS support without losing Ubuntu 26.04 LTS
+   compatibility;
+4. planning functional and security tests, especially for clipboard
+   monitoring, history, secret exclusion, and session locking;
+5. deciding on implementation, the test environment, and a possible separate
+   branch only after the audit is complete.
+
+The scope excludes Ubuntu 22.04 and older releases. Compatibility must not be
+achieved by weakening existing safeguards or adding permissions or
+dependencies without a concrete justification.
+
 ### Easier-to-scan menu actions in version 1.3
 
 The GNOME menu is planned to use neutral symbolic icons aligned in one left
