@@ -1,6 +1,6 @@
 # CopyPasteBin 1.3 — plan skrótów i lokalnego dyktowania
 
-Status: etap A zatwierdzony; etap B zaimplementowany lokalnie, przed testami LIVE
+Status: etap A zatwierdzony; etap B po pierwszym teście LIVE i lokalnych poprawkach
 Data: 2026-11-11
 Baza: publiczny `main`, commit `d23d4804ba0d264ada9f212dfb4923a8896ff02c`
 (`Release CopyPasteBin 1.2.1`)
