@@ -29,3 +29,21 @@ python3 experiments/dictation-benchmark/score.py \
 Raport stdout zawiera wyłącznie zagregowane metryki, bez transkrypcji i zdań
 referencyjnych. Sam plik wejściowy może zawierać tylko transkrypcje podanych
 syntetycznych zdań; nagrania nie są potrzebne ani zapisywane przez harness.
+
+## Rzeczywiste przebiegi C4
+
+`artifacts.json` przypina źródła, wersje, rozmiary i opublikowane sumy.
+`adapters/vosk_ctypes.py` potrafi po zatwierdzonej instalacji zasilać protokół
+C1–C3 z pliku PCM WAV, bez mikrofonu. `run_adapter.py` mierzy czas ramek,
+CPU, RSS oraz rozmiar plików i dopisuje wynik do prywatnego pliku o trybie
+`0600`; nie wypisuje transkrypcji do terminala. `analyze_runs.py` oblicza WER,
+CER, interpunkcję, inicjalizację, RTF, opóźnienie końcowe i stabilność wyników
+częściowych.
+
+`validate_audio_manifest.py` akceptuje wyłącznie zwykłe, przypięte sumą
+SHA-256 pliki mono 16-bit PCM WAV 16 kHz w jednym izolowanym katalogu.
+Rozpoznawanie `batch`, okienkowe `windowed` i rzeczywiste `streaming` są
+raportowane osobno. Kod nie pobiera artefaktów i nie uruchamia mikrofonu.
+
+Kompletna metodologia i niewykonane polecenia instalacyjne znajdują się w
+`docs/DICTATION_C4_BENCHMARK.pl.md` oraz wersji angielskiej `.en.md`.

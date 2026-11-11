@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+"""Feed a PCM WAV file to libvosk and emit the CopyPasteBin frame protocol."""
+
+from __future__ import annotations
+
+import argparse
+import ctypes
+import json
+import re
+import wave
+from pathlib import Path
+
+
+def emit(session: str, sequence: int, kind: str, **extra: object) -> None:
+    print(json.dumps({"version": 1, "session_id": session, "sequence": sequence,
+                      "kind": kind, **extra}, ensure_ascii=False), flush=True)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--library", required=True, type=Path)
+    parser.add_argument("--model", required=True, type=Path)
+    parser.add_argument("--audio", required=True, type=Path)
+    parser.add_argument("--session", required=True)
+    parser.add_argument("--chunk-ms", type=int, default=100)
+    args = parser.parse_args()
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]{0,63}", args.session):
+        parser.error("invalid session identifier")
+    if not 20 <= args.chunk_ms <= 1000:
+        parser.error("chunk size is outside the safe range")
+
+    library = ctypes.CDLL(str(args.library.resolve()))
+    library.vosk_set_log_level.argtypes = [ctypes.c_int]
+    library.vosk_model_new.argtypes = [ctypes.c_char_p]
+    library.vosk_model_new.restype = ctypes.c_void_p
+    library.vosk_model_free.argtypes = [ctypes.c_void_p]
+    library.vosk_recognizer_new.argtypes = [ctypes.c_void_p, ctypes.c_float]
+    library.vosk_recognizer_new.restype = ctypes.c_void_p
+    library.vosk_recognizer_free.argtypes = [ctypes.c_void_p]
+    library.vosk_recognizer_accept_waveform.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
+    library.vosk_recognizer_accept_waveform.restype = ctypes.c_int
+    for name in ("vosk_recognizer_partial_result", "vosk_recognizer_result",
+                 "vosk_recognizer_final_result"):
+        function = getattr(library, name)
+        function.argtypes = [ctypes.c_void_p]
+        function.restype = ctypes.c_char_p
+    library.vosk_set_log_level(-1)
+
+    model = library.vosk_model_new(str(args.model.resolve()).encode())
+    if not model:
+        raise RuntimeError("model initialization failed")
+    recognizer = None
+    sequence, segment = 1, 0
+    last_partial = ""
+    try:
+        recognizer = library.vosk_recognizer_new(model, 16000.0)
+        if not recognizer:
+            raise RuntimeError("recognizer initialization failed")
+        emit(args.session, sequence, "ready")
+        with wave.open(str(args.audio), "rb") as audio:
+            if (audio.getnchannels(), audio.getsampwidth(), audio.getframerate(),
+                    audio.getcomptype()) != (1, 2, 16000, "NONE"):
+                raise RuntimeError("audio must be mono 16-bit PCM WAV at 16 kHz")
+            frames_per_chunk = 16000 * args.chunk_ms // 1000
+            while data := audio.readframes(frames_per_chunk):
+                accepted = library.vosk_recognizer_accept_waveform(
+                    recognizer, data, len(data))
+                payload_name = "vosk_recognizer_result" if accepted else "vosk_recognizer_partial_result"
+                payload = json.loads(getattr(library, payload_name)(recognizer).decode("utf-8"))
+                text = payload.get("text" if accepted else "partial", "").strip()
+                if accepted and text:
+                    sequence += 1
+                    emit(args.session, sequence, "final", segment=segment, text=text)
+                    segment += 1
+                    last_partial = ""
+                elif not accepted and text != last_partial:
+                    sequence += 1
+                    emit(args.session, sequence, "partial", segment=segment, text=text)
+                    last_partial = text
+        payload = json.loads(library.vosk_recognizer_final_result(recognizer).decode("utf-8"))
+        text = payload.get("text", "").strip()
+        if text:
+            sequence += 1
+            emit(args.session, sequence, "final", segment=segment, text=text)
+        sequence += 1
+        emit(args.session, sequence, "stopped")
+    finally:
+        if recognizer:
+            library.vosk_recognizer_free(recognizer)
+        library.vosk_model_free(model)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

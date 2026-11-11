@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "platform": "linux-x86_64",
+  "artifacts": [
+    {
+      "id": "cmake-4.4.4-local-build-tool",
+      "url": "https://files.pythonhosted.org/packages/7e/d5/664ea06d01864f25d6067f09fa218404e4d588edd5e495135ac91429fecb/cmake-4.4.4-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "bytes": 30245729,
+      "sha256": "f773a0544c66370408f451acd487c2c643b0dfebb48c5d64f3638bc1bb820238",
+      "license": "BSD-3-Clause and Apache-2.0",
+      "purpose": "Extract into the experiment directory; do not install into Python"
+    },
+    {
+      "id": "vosk-python-wheel-0.3.45",
+      "url": "https://files.pythonhosted.org/packages/fc/ca/83398cfcd557360a3d7b2d732aee1c5f6999f68618d1645f38d53e14c9ff/vosk-0.3.45-py3-none-manylinux_2_12_x86_64.manylinux2010_x86_64.whl",
+      "bytes": 7173758,
+      "sha256": "25e025093c4399d7278f543568ed8cc5460ac3a4bf48c23673ace1e25d26619f",
+      "license": "Apache-2.0",
+      "purpose": "Extract libvosk.so only; do not install the wheel"
+    },
+    {
+      "id": "vosk-model-small-pl-0.22",
+      "url": "https://alphacephei.com/vosk/models/vosk-model-small-pl-0.22.zip",
+      "bytes": null,
+      "sha256": null,
+      "license": "Apache-2.0",
+      "integrity_note": "The official model list publishes about 50 MB and the license, but no SHA-256. A locally observed hash is not independent provenance."
+    },
+    {
+      "id": "whisper.cpp-v1.9.5",
+      "git_url": "https://github.com/ggml-org/whisper.cpp.git",
+      "tag": "v1.9.5",
+      "commit": "d1be6fde11ac6e0407606b4e42fe72d34add8037",
+      "license": "MIT"
+    },
+    {
+      "id": "whisper.cpp-tiny",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-tiny.bin",
+      "bytes": 77691713,
+      "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+      "license": "MIT"
+    },
+    {
+      "id": "whisper.cpp-base",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-base.bin",
+      "bytes": 147951465,
+      "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+      "license": "MIT"
+    },
+    {
+      "id": "whisper.cpp-small",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-small.bin",
+      "bytes": 487601967,
+      "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+      "license": "MIT"
+    }
+  ]
+}
