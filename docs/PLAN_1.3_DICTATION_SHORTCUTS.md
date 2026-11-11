@@ -207,6 +207,10 @@ Procedury testów LIVE dla odizolowanych systemów Ubuntu i Fedora znajdują si�
 w `docs/TEST_1.3_EDITOR_SHORTCUT.md`. Nie wolno wykonywać instalacji testowej
 na profilu zawierającym stabilne CopyPasteBin 1.2.1.
 
+Neutralny harness punktu 4 znajduje się w
+`experiments/dictation-benchmark/`. Oblicza metryki wyłącznie z dostarczonych
+transkrypcji syntetycznych; nie uruchamia silnika, mikrofonu, modelu ani sieci.
+
 ## Źródła zewnętrzne sprawdzone w etapie A
 
 - GNOME Shell Extensions Review Guidelines:

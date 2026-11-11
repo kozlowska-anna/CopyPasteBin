@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "language": "pl",
+  "cases": [
+    {"id": "pl-01", "text": "To jest syntetyczna próba lokalnego dyktowania."},
+    {"id": "pl-02", "text": "Za siedem minut rozpocznie się krótkie spotkanie."},
+    {"id": "pl-03", "text": "Żółty notes leży obok niebieskiego kubka."},
+    {"id": "pl-04", "text": "Proszę dodać przecinek, a potem zakończyć zdanie."},
+    {"id": "pl-05", "text": "Liczba testowa wynosi tysiąc dwieście trzydzieści cztery."},
+    {"id": "pl-06", "text": "W środę ćwiczymy płynność, dokładność i polskie znaki."},
+    {"id": "pl-07", "text": "Otwórz edytor i pozostaw schowek bez zmian."},
+    {"id": "pl-08", "text": "Czy lokalny model odpowiada wystarczająco szybko?"},
+    {"id": "pl-09", "text": "Gdańsk, Łódź i Wrocław są nazwami testowymi."},
+    {"id": "pl-10", "text": "Zatrzymaj nagrywanie po ostatnim wyraźnym słowie."}
+  ]
+}
