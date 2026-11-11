@@ -1,6 +1,6 @@
 # CopyPasteBin 1.3 — plan skrótów i lokalnego dyktowania
 
-Status: etap A, audyt i projekt techniczny
+Status: etap A zatwierdzony; etap B zaimplementowany lokalnie, przed testami LIVE
 Data: 2026-11-11
 Baza: publiczny `main`, commit `d23d4804ba0d264ada9f212dfb4923a8896ff02c`
 (`Release CopyPasteBin 1.2.1`)
@@ -49,8 +49,10 @@ Minimalny projekt:
 
 1. jeden klucz GSettings typu `as`, domyślnie `[]`;
 2. preferencja „Otwórz edytor” z proponowaną wartością `Super+Shift+E`;
-3. dokładnie jeden `Main.wm.addKeybinding` z
-   `Meta.KeyBindingFlags.IGNORE_AUTOREPEAT` i `Shell.ActionMode.NORMAL`;
+3. dokładnie jeden standardowy keybinding Meta z
+   `Meta.KeyBindingFlags.IGNORE_AUTOREPEAT`; handler jest ograniczony przez
+   `Main.wm.setCustomKeybindingHandler` do `Shell.ActionMode.NORMAL`, a wynik
+   rejestracji pozwala wykryć konflikt;
 4. `removeKeybinding` w każdym cyklu `disable()`;
 5. czytelny stan konfliktu lub nieudanej rejestracji, bez przejmowania
    systemowego skrótu;
@@ -194,9 +196,16 @@ nie rozpoznawaniu.
 5. Dopiero po wyborze silnika zatwierdzić zależności, protokół workera i
    integrację mikrofonu.
 
-Pierwszym małym zadaniem implementacyjnym jest punkt 2. Nie dodaje dostępu do
-mikrofonu, sieci ani nowej zależności wykonawczej, a przywraca skrót w formie
-zgodnej z aktualnym modelem dystrybucji i zasadą świadomej zgody.
+Punkt 2 został zaimplementowany lokalnie. Schemat ma domyślną wartość `[]`, a
+preferencje pozwalają jawnie wybrać `Super+Shift+E` albo stan wyłączony. Menu
+pokazuje skrót dopiero po udanej rejestracji; konflikt jest oznaczany jako
+„skrót niedostępny”. Zmiana nie dodaje dostępu do mikrofonu, sieci ani nowej
+zależności wykonawczej. `glib-compile-schemas` jest wyłącznie narzędziem czasu
+budowy, a skompilowany schemat trafia do paczki.
+
+Procedury testów LIVE dla odizolowanych systemów Ubuntu i Fedora znajdują się
+w `docs/TEST_1.3_EDITOR_SHORTCUT.md`. Nie wolno wykonywać instalacji testowej
+na profilu zawierającym stabilne CopyPasteBin 1.2.1.
 
 ## Źródła zewnętrzne sprawdzone w etapie A
 
