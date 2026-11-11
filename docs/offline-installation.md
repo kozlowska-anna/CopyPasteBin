@@ -72,7 +72,7 @@ treści schowka ani innych danych z komputera, na którym został zbudowany.
 Instalator nie używa `sudo`, menedżera pakietów ani sieci. Zapisuje wyłącznie
 do stałych katalogów bieżącego użytkownika pod `~/.local/share`. Przed zapisem
 sprawdza integralność pakietu, wersję Python, GNOME Shell, dostępność `venv`,
-`gjs`, GTK 4 i wymaganych bibliotek GObject. Dowiązania symboliczne w miejscach
+`gjs`, GTK 4, Libadwaita i wymaganych bibliotek GObject. Dowiązania symboliczne w miejscach
 docelowych są odrzucane.
 
 Aktualizacja zachowuje prywatne katalogi `~/.config/copypastebin` oraz

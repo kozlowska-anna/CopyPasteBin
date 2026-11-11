@@ -116,7 +116,7 @@ key, clipboard content, or other data from the computer where it was built.
 
 The installer writes only to fixed locations for the current user under
 `~/.local/share`. Before writing, it verifies package integrity, the Python
-version, GNOME Shell, `venv`, `gjs`, GTK 4, and the required GObject libraries.
+version, GNOME Shell, `venv`, `gjs`, GTK 4, Libadwaita, and the required GObject libraries.
 Symbolic links at installation targets are rejected.
 
 An update preserves `~/.config/copypastebin` and
@@ -157,7 +157,7 @@ settings and history.
 ## Supported environment
 
 Version 1.2.1 supports GNOME Shell 50 on Wayland with Python 3.11 or newer,
-including `venv`, GJS, GTK 4, GioUnix, GNOME Extensions, and `sha256sum`.
+including `venv`, GJS, GTK 4, Libadwaita, GioUnix, GNOME Extensions, and `sha256sum`.
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in this
 release. The installer stops safely when GNOME Shell is unavailable.
 

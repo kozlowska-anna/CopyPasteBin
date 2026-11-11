@@ -58,6 +58,7 @@ class OfflineInstallerTests(unittest.TestCase):
                 self.assertIn(command, files[name])
             for private_path in ("~/.config/copypastebin", "~/.local/state/copypastebin"):
                 self.assertIn(private_path, files[name])
+            self.assertIn("Libadwaita", files[name])
         for language, filename, readme, install in (
             ("en", "website/en/index.html", "README.md", "INSTALL.md"),
             ("pl", "website/index.html", "README.pl.md", "INSTALL.pl.md"),
@@ -78,6 +79,8 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("lista sum nie obejmuje całego payloadu", source)
         self.assertIn("pip install --no-index --no-deps", source)
         self.assertIn("python3 -m venv", source)
+        self.assertIn("imports.gi.versions.Adw = '1'", source)
+        self.assertIn("imports.gi.Adw", source)
         self.assertIn("$HOME/.local/share/copypastebin", source)
         self.assertIn("schemas/gschemas.compiled", source)
         self.assertIn("schemas/org.gnome.shell.extensions.copypastebin.gschema.xml", source)

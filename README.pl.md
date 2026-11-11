@@ -146,7 +146,7 @@ Wersja 1.2.1 obsługuje następujące środowisko:
 | Pulpit | GNOME Shell 50 |
 | Serwer wyświetlania | Wayland |
 | Python | 3.11 lub nowszy, z modułem `venv` |
-| Dodatkowe komponenty | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
+| Dodatkowe komponenty | GJS, GTK 4, Libadwaita, GioUnix, GNOME Extensions, `sha256sum` |
 
 Integracje z pulpitami Cinnamon, KDE Plasma i Xfce nie są obsługiwane w wersji
 1.2.1. Instalator bezpiecznie zatrzymuje się, jeśli GNOME Shell nie jest

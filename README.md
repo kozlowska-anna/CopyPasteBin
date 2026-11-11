@@ -145,7 +145,7 @@ Version 1.2.1 supports the following environment:
 | Desktop | GNOME Shell 50 |
 | Display server | Wayland |
 | Python | 3.11 or newer, with `venv` |
-| Additional components | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
+| Additional components | GJS, GTK 4, Libadwaita, GioUnix, GNOME Extensions, `sha256sum` |
 
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in
 version 1.2.1. The installer stops safely when GNOME Shell is unavailable.

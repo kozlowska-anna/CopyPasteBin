@@ -154,6 +154,7 @@ class DebPackagingTests(unittest.TestCase):
         installed = {
             "copypastebin": OLD_VERSION,
             "python3": "3.14.0-1",
+            "gir1.2-adw-1": "1.9.1-1",
             "gir1.2-gdkpixbuf-2.0": "2.44.0-1",
             "gir1.2-glib-2.0": "2.86.0-1",
             "gir1.2-gtk-4.0": "4.20.0-1",
@@ -242,6 +243,7 @@ class DebPackagingTests(unittest.TestCase):
         self.assertNotIn("gnome-shell", backend)
         self.assertNotIn("gir1.2-", backend)
         self.assertIn("copypastebin-backend (= ${binary:Version})", extension)
+        self.assertIn("gir1.2-adw-1", extension)
         self.assertIn("gnome-shell (>= 50~)", extension)
         self.assertIn("gnome-shell (<< 51~)", extension)
         self.assertIn("copypastebin-backend (= ${binary:Version})", complete)

@@ -172,8 +172,8 @@ shell_major="$(printf '%s\n' "$shell_version" | sed -nE 's/.* ([0-9]+)(\.[0-9]+)
 [[ "$shell_major" == "$REQUIRED_SHELL_MAJOR" ]] || fail \
     "wymagany jest GNOME Shell $REQUIRED_SHELL_MAJOR; wykryto: ${shell_version:-nieznaną wersję}"
 
-/usr/bin/gjs -c "imports.gi.versions.Gtk = '4.0'; imports.gi.Gtk; imports.gi.GioUnix; imports.gi.GdkPixbuf" \
-    >/dev/null 2>&1 || fail "brakuje GTK 4 lub bibliotek GObject wymaganych przez edytor"
+/usr/bin/gjs -c "imports.gi.versions.Gtk = '4.0'; imports.gi.versions.Adw = '1'; imports.gi.Gtk; imports.gi.Adw; imports.gi.GioUnix; imports.gi.GdkPixbuf" \
+    >/dev/null 2>&1 || fail "brakuje GTK 4, Libadwaita lub bibliotek GObject wymaganych przez interfejs"
 
 if [[ -n "${XDG_SESSION_TYPE:-}" && "${XDG_SESSION_TYPE,,}" != "wayland" ]]; then
     fail "CopyPasteBin wymaga sesji GNOME na Waylandzie; bieżąca sesja to $XDG_SESSION_TYPE"

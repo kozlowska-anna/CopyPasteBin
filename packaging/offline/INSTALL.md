@@ -3,7 +3,7 @@
 **English** | [Polski](INSTALL.pl.md) | [Overview](README.md)
 
 Requirements: Linux, GNOME Shell 50, Wayland, Python 3.11+ with venv,
-/usr/bin/gnome-extensions, /usr/bin/gjs, GTK 4, GioUnix, and sha256sum.
+/usr/bin/gnome-extensions, /usr/bin/gjs, GTK 4, Libadwaita, GioUnix, and sha256sum.
 KDE Plasma, Cinnamon, and Xfce are not supported.
 
 ## Install
