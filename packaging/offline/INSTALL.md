@@ -18,6 +18,8 @@ Extract the archive and open a terminal in the extracted folder. Run:
 ```
 
 The first command only checks compatibility; run the second only after success.
+If GNOME has `disable-user-extensions=true`, the check reports it but does not
+change this global block on user extensions.
 Log out and back in to GNOME Wayland.
 The installer is user-local, offline, and requires no sudo. It installs code under
 ~/.local/share and includes no private data from the build computer.

@@ -18,6 +18,8 @@ Rozpakuj archiwum i otwórz terminal w rozpakowanym folderze. Uruchom:
 ```
 
 Pierwsze polecenie tylko sprawdza zgodność; drugie uruchom po udanej kontroli.
+Jeśli GNOME ma ustawienie `disable-user-extensions=true`, kontrola wyświetli
+ostrzeżenie, ale nie zmieni tej globalnej blokady innych rozszerzeń.
 Wyloguj się i zaloguj ponownie do GNOME Wayland.
 Instalator jest lokalny dla użytkownika, offline i bez sudo. Zapisuje kod pod
 ~/.local/share; nie zawiera prywatnych danych z komputera budującego paczkę.

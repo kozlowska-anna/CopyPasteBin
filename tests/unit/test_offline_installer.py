@@ -81,6 +81,15 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("python3 -m venv", source)
         self.assertIn("imports.gi.versions.Adw = '1'", source)
         self.assertIn("imports.gi.Adw", source)
+        self.assertIn(
+            "gsettings get org.gnome.shell disable-user-extensions",
+            source,
+        )
+        self.assertIn("instalator nie zmienia tego ustawienia", source)
+        self.assertNotIn(
+            "gsettings set org.gnome.shell disable-user-extensions",
+            source,
+        )
         self.assertIn("$HOME/.local/share/copypastebin", source)
         self.assertIn("schemas/gschemas.compiled", source)
         self.assertIn("schemas/org.gnome.shell.extensions.copypastebin.gschema.xml", source)

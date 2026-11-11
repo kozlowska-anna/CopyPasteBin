@@ -179,6 +179,17 @@ if [[ -n "${XDG_SESSION_TYPE:-}" && "${XDG_SESSION_TYPE,,}" != "wayland" ]]; the
     fail "CopyPasteBin wymaga sesji GNOME na Waylandzie; bieżąca sesja to $XDG_SESSION_TYPE"
 fi
 
+if [[ -x /usr/bin/gsettings ]]; then
+    disable_user_extensions="$(
+        LC_ALL=C /usr/bin/gsettings get org.gnome.shell disable-user-extensions \
+            2>/dev/null || true
+    )"
+    if [[ "$disable_user_extensions" == "true" ]]; then
+        note "UWAGA: GNOME ma włączone disable-user-extensions=true."
+        note "Wszystkie rozszerzenia użytkownika są globalnie zablokowane; instalator nie zmienia tego ustawienia."
+    fi
+fi
+
 note "Kontrola zgodności: OK"
 note "GNOME Shell: $shell_version"
 note "Python: $(python3 -c 'import platform; print(platform.python_version())')"
