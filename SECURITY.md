@@ -20,8 +20,8 @@ must remain inactive.
 - no network, cloud service, automatic sending, or automatic pasting;
 - no `shell=True`, `eval`, `exec`, execution of input, or opening URLs;
 - no global keyboard hook and no interception of `Ctrl+V`;
-- one `Super+Shift+V` shortcut registered through the standard
-  `Main.wm.addKeybinding`, active only in `Shell.ActionMode.NORMAL`;
+- release 1.2.1 has no registered keyboard shortcut; explicit pre-paste review
+  remains available through the existing editor action in the GNOME menu;
 - UTF-8 input, a 10 MiB limit, and rejection of NUL and excess data;
 - ordinary input files opened with `O_NOFOLLOW`;
 - stdin/stdout instead of text in argv, environment variables, or temporary
@@ -213,23 +213,21 @@ code.
 
 No match is not a declaration of safety.
 
-## Safe Paste
+## Safe Paste and explicit pre-paste review
 
-`Super+V` remains GNOME's shortcut for the message tray, so CopyPasteBin's
-explicit action uses `Super+Shift+V`. The extension registers one keybinding
-name from its own closed GSettings schema. It does not use a global hook,
-`grab_accelerator`, key emulation, or interception of `Ctrl+V`. `disable()`
-always removes the keybinding, cancels active analysis, and releases its
-process.
+The dedicated `Super+Shift+V` keybinding and its GSettings schema were removed
+in 1.2.1. The Safe Paste workflow itself remains available through the
+existing “Edit / anonymize clipboard” action in the GNOME menu. Release 1.2.1
+does not use a global hook, `grab_accelerator`, key emulation, or interception
+of `Ctrl+V`.
 
-The action checks lock/greeter and pause state before reading and again before
-showing a result. Text travels only through stdin to `cpb ui detections`; the
-response contains only bounded positions, categories, and levels. `none`
-does not change the clipboard. Other levels open the existing editor, which
-locally requests a redaction suggestion; the result exists in its memory and
-returns to the extension only after an explicit save. `high` and `critical`
-have no exclusion in this path. Canceling, an error, a pause, or screen lock
-does not write to the clipboard.
+The menu action checks lock/greeter and pause state before reading. It passes
+bounded clipboard text to the existing editor through stdin. The editor asks
+`cpb ui detections` for bounded positions, categories, and levels and can
+request a local redaction suggestion. No result changes the clipboard until
+the user explicitly selects “Replace clipboard”. `high` and `critical` have no
+exclusion in this path. Canceling, an error, a pause, or screen lock does not
+write to the clipboard.
 
 The feature does not paste and does not determine the destination application,
 window title, document name, or URL. It does not increase the limit of 15

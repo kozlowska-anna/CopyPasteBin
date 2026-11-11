@@ -120,7 +120,8 @@ analizowana jest technicznym duplikatem. Rozszerzenie rozpoznaje ją po skrócie
 SHA-256 przechowywanym wyłącznie w RAM i nie wysyła jej ponownie do mostu, nie
 pokazuje drugiego bannera, nie dubluje historii ani listy ostatnich i nie
 przesuwa automatycznego czyszczenia. Skrót znika przy blokadzie, wylogowaniu
-lub wyłączeniu rozszerzenia. Jawne Bezpieczne wklejenie omija tę deduplikację.
+lub wyłączeniu rozszerzenia. Jawne otwarcie edytora pozostaje niezależną akcją
+na żądanie i nie jest blokowane przez tę deduplikację zdarzeń.
 
 `none` nie tworzy ostrzeżenia. `low`, `medium`, `high` i `critical` tworzą
 własny baner bez treści, z kolorem zależnym od poziomu. Baner znika po 6 sekundach, może zostać

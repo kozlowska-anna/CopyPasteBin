@@ -19,8 +19,9 @@ bieżącego etapu.
 - Otwarte okno edytora jest śledzone przez rozszerzenie. Ponowne otwarcie wysyła
   do procesu sygnał prezentacji, a `disable()` kończy proces.
 - Kod 1.2.1 nie ma schematu GSettings ani keybindingu. Test
-  `test_safe_paste_and_keyboard_hooks_are_absent` wymusza brak mechanizmu
-  usuniętego w 1.2.
+  `test_safe_paste_and_keyboard_hooks_are_absent` wymusza brak dedykowanego
+  mechanizmu skrótu usuniętego w 1.2; sam jawny przepływ sprawdzania w
+  istniejącym edytorze pozostał dostępny z menu.
 - Dokumenty `docs/architecture.md`, `docs/gnome-event-backend.md`, `SECURITY.md`
   i `docs/security.pl.md` nadal opisują usunięty `Super+Shift+V`. Jest to
   rozbieżność dokumentacji z kodem, którą trzeba poprawić przed opisaniem
@@ -42,7 +43,7 @@ Ważne ograniczenie dystrybucyjne: wytyczne przeglądu GNOME Extensions zabrania
 dostarczania domyślnego skrótu współdziałającego ze schowkiem. Dlatego wspólny
 artefakt rozszerzenia powinien mieć pustą wartość domyślną, a ustawienie
 `Super+Shift+E` musi być jawną akcją użytkownika w preferencjach. Nie należy
-przywracać dawnego `Safe Paste` ani globalnego hooka klawiatury.
+przywracać dawnego keybindingu `Super+Shift+V` ani globalnego hooka klawiatury.
 
 Minimalny projekt:
 
@@ -183,7 +184,8 @@ nie rozpoznawaniu.
 
 ## 7. Kolejność małych zmian
 
-1. Skorygować dokumenty 1.2.1, które nadal opisują usunięty `Safe Paste`.
+1. Skorygować dokumenty 1.2.1, które nadal opisują usunięty keybinding
+   `Super+Shift+V` jako aktywny.
 2. Dodać konfigurowalny, domyślnie pusty skrót otwierania edytora wraz z
    preferencją proponującą `Super+Shift+E`, pełnym cleanupem i testami pakietów.
 3. Dodać neutralną akcję okna `dictation.toggle` oraz prezentację

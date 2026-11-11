@@ -56,11 +56,11 @@ z rozszerzeniem i nie powinien być instalowany jako produkt GNOME.
 hooka klawiatury. Timer minutowy służy wyłącznie odświeżaniu widocznego licznika
 pauzy.
 
-Jedynym skrótem rozszerzenia jest `safe-paste` z własnego schematu GSettings,
-domyślnie `Super+Shift+V`. Rejestracja używa `Main.wm.addKeybinding` w
-`Shell.ActionMode.NORMAL`, a wyłączenie symetrycznie wywołuje
-`removeKeybinding`. Jest to jawna akcja, nie globalny hook: nie przechwytuje
-`Ctrl+V`, nie emuluje wklejenia i nie obserwuje innych klawiszy.
+Wydanie 1.2.1 nie rejestruje keybindingu i nie zawiera schematu GSettings.
+Usunięcie dawnego `Super+Shift+V` nie usunęło jawnego przepływu sprawdzania
+przed wklejeniem: istniejąca pozycja „Edytuj / anonimizuj schowek” otwiera ten
+sam lokalny edytor. Akcja nie przechwytuje `Ctrl+V`, nie emuluje wklejenia i
+nie obserwuje innych klawiszy.
 
 Przed transferem rozszerzenie:
 

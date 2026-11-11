@@ -20,8 +20,8 @@ pozostać nieaktywne.
 - brak sieci, chmury, auto-send i auto-paste;
 - brak `shell=True`, `eval`, `exec`, wykonywania wejścia i otwierania URL;
 - brak globalnego hooka klawiatury i przejmowania `Ctrl+V`;
-- pojedynczy skrót `Super+Shift+V` rejestrowany przez standardowe
-  `Main.wm.addKeybinding`, aktywny tylko w `Shell.ActionMode.NORMAL`;
+- wydanie 1.2.1 nie rejestruje skrótu klawiszowego; jawne sprawdzenie przed
+  wklejeniem pozostaje dostępne przez istniejącą akcję edytora w menu GNOME;
 - UTF-8, limit 10 MiB, odrzucenie NUL i nadmiaru;
 - zwykły plik wejściowy otwierany z `O_NOFOLLOW`;
 - stdin/stdout zamiast tekstu w argv, env i pliku tymczasowym;
@@ -199,22 +199,21 @@ pliki stanu. Do procesów okien trafia wyłącznie efektywny kod `pl` albo `en`.
 
 Brak dopasowania nie jest deklaracją bezpieczeństwa.
 
-## Bezpieczne wklejenie
+## Bezpieczne wklejenie i jawne sprawdzenie przed wklejeniem
 
-`Super+V` pozostaje skrótem GNOME do zasobnika wiadomości, dlatego jawna akcja
-CopyPasteBin używa `Super+Shift+V`. Rozszerzenie rejestruje jedną nazwę
-keybindingu z własnego, zamkniętego schematu GSettings. Nie korzysta z
+Dedykowany keybinding `Super+Shift+V` i jego schemat GSettings usunięto w
+1.2.1. Sam przepływ Bezpiecznego wklejenia pozostaje dostępny przez istniejącą
+akcję „Edytuj / anonimizuj schowek” w menu GNOME. Wydanie 1.2.1 nie korzysta z
 globalnego hooka, `grab_accelerator`, emulacji klawiszy ani przechwytywania
-`Ctrl+V`. `disable()` zawsze usuwa keybinding, anuluje aktywną analizę i zwalnia
-jej proces.
+`Ctrl+V`.
 
-Akcja sprawdza lock/greeter i pauzę przed odczytem oraz ponownie przed
-pokazaniem wyniku. Tekst trafia tylko przez stdin do `cpb ui detections`, a
-odpowiedź zawiera wyłącznie ograniczone pozycje, kategorie i poziomy. `none`
-nie zmienia schowka. Pozostałe poziomy otwierają istniejący edytor, który
-lokalnie prosi o propozycję redakcji; wynik istnieje w jego pamięci i wraca do
-rozszerzenia dopiero po jawnym zapisie. `high` i `critical` nie mają w tej
-ścieżce wykluczenia. Anulowanie, błąd, pauza lub blokada nie zapisują schowka.
+Akcja menu sprawdza lock/greeter i pauzę przed odczytem, po czym przekazuje
+ograniczony tekst schowka do istniejącego edytora przez stdin. Edytor pobiera z
+`cpb ui detections` ograniczone pozycje, kategorie i poziomy oraz może lokalnie
+poprosić o propozycję anonimizacji. Wynik nie zmienia schowka, dopóki
+użytkowniczka jawnie nie wybierze „Zastąp schowek”. `high` i `critical` nie
+mają w tej ścieżce wykluczenia. Anulowanie, błąd, pauza lub blokada nie zapisują
+schowka.
 
 Funkcja nie wykonuje wklejenia i nie ustala aplikacji docelowej, tytułu okna,
 nazwy dokumentu ani URL. Nie zwiększa limitu 15 ostatnich wpisów w RAM i nie

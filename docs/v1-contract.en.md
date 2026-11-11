@@ -121,7 +121,8 @@ analyzed content is a technical duplicate. The extension recognizes it using
 a SHA-256 digest held only in RAM and does not resend it to the bridge, display
 a second banner, duplicate history or recent entries, or move the automatic
 clearing timer. The digest is dropped on lock, logout, or extension disable.
-Explicit Safe Paste intentionally bypasses this deduplication.
+Explicitly opening the editor remains an independent on-demand action and is
+not blocked by this event deduplication.
 
 `none` creates no warning. `low`, `medium`, `high`, and `critical`
 create content-free banners colored by level. A banner disappears after six

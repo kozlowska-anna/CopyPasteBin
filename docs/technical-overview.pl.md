@@ -33,8 +33,8 @@ Gotowy zakres lokalnej wersji obejmuje:
 - wybór języka systemowego, polskiego albo angielskiego dla całego GUI;
 - opcjonalne czyszczenie ostrzegającego schowka po 1, 5 albo 15 minutach;
 - jawny edytor i narzędzia poprawiania tekstu uruchamiane tylko na żądanie;
-- jawny skrót `Super+Shift+V` („Bezpieczne wklejenie”), który sprawdza bieżący
-  tekst i przygotowuje propozycję redakcji bez automatycznego wklejania;
+- jawny przepływ „Edytuj / anonimizuj schowek”, który sprawdza bieżący tekst
+  i przygotowuje propozycję redakcji bez automatycznego wklejania;
 - potwierdzane czyszczenie schowka i wyjście z aplikacji;
 - ikonę stanu: zielona tylna kartka oznacza aktywną ochronę, czerwona pauzę,
   przejście albo błąd;
@@ -113,23 +113,19 @@ Nie uruchamia terminala, usługi systemd ani watchera `wl-paste`.
 
 ## Bezpieczne wklejenie
 
-Skrót `Super+Shift+V` jest rejestrowany przez rozszerzenie standardowym API
-GNOME Shell. Wybrano go zamiast `Super+V`, ponieważ GNOME 50 domyślnie używa
-`Super+V` dla zasobnika wiadomości. CopyPasteBin nie przechwytuje zwykłego
-`Ctrl+V`, nie obserwuje całej klawiatury i nie emuluje naciśnięć klawiszy.
+Dedykowany skrót `Super+Shift+V` i jego schemat GSettings usunięto w 1.2.1.
+Nie usunęło to samego przepływu Bezpiecznego wklejenia: pozycja „Edytuj /
+anonimizuj schowek” w menu rozszerzenia nadal otwiera lokalny edytor.
+CopyPasteBin nie przechwytuje zwykłego `Ctrl+V`, nie obserwuje całej klawiatury
+i nie emuluje naciśnięć klawiszy.
 
-Po użyciu skrótu rozszerzenie sprawdza blokadę ekranu i pauzę, pobiera
-ograniczony tekst schowka oraz uruchamia tę samą lokalną detekcję przez stdin.
-Brak trafienia pokazuje krótkie potwierdzenie i nie zmienia schowka. Dla
-`low`, `medium`, `high` i `critical` otwiera istniejący edytor z przygotowaną
-propozycją redakcji; `high` i `critical` dostają dodatkowo wyraźny czerwony
-komunikat i nigdy nie otrzymują trwałego wyjątku. Dopiero kliknięcie „Zastąp
-schowek” zapisuje wynik. Anulowanie pozostawia schowek bez zmian. Funkcja nie
-wkleja tekstu do aktywnej aplikacji i nie zna jej tytułu, dokumentu ani URL.
-
-Skrót jest obecnie stały i ograniczony do jednego ustawienia GSettings
-rozszerzenia. Rzeczywisty test działania wymaga GNOME Shell 50 po instalacji i
-ponownym zalogowaniu; testy automatyczne nie stanowią LIVE PASS.
+Po wybraniu pozycji menu rozszerzenie sprawdza blokadę ekranu i pauzę, pobiera
+ograniczony tekst schowka i przekazuje go do edytora przez stdin. Edytor
+uruchamia lokalną detekcję, pokazuje trafienia i pozwala przygotować propozycję
+anonimizacji. `high` i `critical` nigdy nie otrzymują trwałego wyjątku. Dopiero
+kliknięcie „Zastąp schowek” zapisuje wynik. Anulowanie pozostawia schowek bez
+zmian. Funkcja nie wkleja tekstu do aktywnej aplikacji i nie zna jej tytułu,
+dokumentu ani URL.
 
 ## Instalacja na komputerze
 

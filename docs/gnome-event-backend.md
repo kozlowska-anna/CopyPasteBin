@@ -27,11 +27,11 @@ Komponent GNOME Shell:
 - nie analizuje, nie redaguje, nie zapisuje historii i nie loguje treści;
 - po wyłączeniu anuluje transfery i odłącza wszystkie sygnały.
 
-Osobna jawna akcja `Super+Shift+V` jest jednym keybindingiem GNOME, nie częścią
-subskrypcji `owner-changed`. Sprawdza lock/greeter i pauzę, pobiera tekst tylko
-po naciśnięciu, wywołuje `ui detections` przez stdin i nie generuje zdarzenia
-wklejenia. `Super+V` pozostaje przypisany do zasobnika wiadomości GNOME;
-zwykły `Ctrl+V` nie jest przechwytywany.
+Osobna jawna akcja „Edytuj / anonimizuj schowek” nie jest częścią subskrypcji
+`owner-changed`. Sprawdza lock/greeter i pauzę, pobiera tekst dopiero po wyborze
+pozycji menu, przekazuje go do edytora przez stdin i nie generuje zdarzenia
+wklejenia. Dedykowany `Super+Shift+V` został usunięty w 1.2.1; zwykły `Ctrl+V`
+nie jest przechwytywany.
 
 Rdzeń CopyPasteBin:
 
@@ -120,12 +120,12 @@ aplikacji i danych schowka.
    takie samo jak po wznowieniu z pauzy.
 10. Treść testowego canary nie pojawia się w journalu, historii, błędach,
     repr, argv, env ani plikach stanu.
-11. `Super+Shift+V` nie zmienia schowka dla `none` ani po anulowaniu edytora,
-    a wyłączenie rozszerzenia usuwa skrót i kończy aktywną kontrolę.
+11. Jawne otwarcie edytora nie zmienia schowka przed wybraniem „Zastąp
+    schowek”, a anulowanie pozostawia bieżącą treść bez zmian.
 12. Techniczna zmiana właściciela z identyczną treścią nie tworzy drugiego
     bannera, wpisu historii ani wpisu listy ostatnich i nie przesuwa czasu
-    automatycznego czyszczenia; jawne Bezpieczne wklejenie nadal analizuje ją
-    na żądanie.
+    automatycznego czyszczenia; jawne otwarcie edytora nadal sprawdza ją na
+    żądanie.
 
 Stan 2026-09-21: punkty 1–6 przeszły live test, w tym stabilne menu
 kontekstowe, ostrzeżenia, historia, pauza, brak analizy wstecz i ponowne
