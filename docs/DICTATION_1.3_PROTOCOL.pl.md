@@ -111,9 +111,11 @@ i rozmiaru modelu, lecz nie uruchamia silnika ani mikrofonu.
 
 ## Dalsze uprawnienia i zabezpieczenia
 
-Następny etap wymaga osobnej zgody na pobranie kodu silnika i modeli. Plan
-powinien wskazać dokładne URL-e, sumy SHA-256, rozmiary, licencje, katalog
-docelowy i polecenia instalacyjne bez `sudo`. Model pozostaje opcjonalny.
+Artefakty Vosk i Whisper tiny zostały przygotowane lokalnie wyłącznie dla C4.
+Nie są częścią instalacji CPB ani dowodem gotowości produkcyjnego downloadera.
+Zatwierdzona architektura jawnego pobierania modeli, format manifestu i polityka
+integralności znajdują się w `docs/STT_MODEL_MANAGER.pl.md`. Model pozostaje
+opcjonalny, a nowy mechanizm nie wykonał żadnego rzeczywistego pobrania.
 
 Rzeczywista integracja wymaga dostępu tylko do wejścia audio podczas jawnej
 sesji. Musi zatrzymywać worker przy zamknięciu, blokadzie sesji, uśpieniu,
@@ -127,3 +129,7 @@ silnik, język, wersję, rozmiar, URL HTTPS, SHA-256 i licencję. Pobieranie jes
 jawne, plik częściowy ma prywatne uprawnienia i limit rozmiaru, a instalacja
 następuje atomowo po weryfikacji. Usuwanie nie podąża za symlinkami i dotyczy
 wyłącznie wpisu z allowlisty w katalogu danych użytkownika.
+
+Wbudowany manifest i jego bezsieciowy parser są już przygotowane. Whisper tiny
+ma komplet danych integralności; pobieranie Vosk pozostaje zablokowane z powodu
+braku niezależnie wiarygodnej sumy upstream.

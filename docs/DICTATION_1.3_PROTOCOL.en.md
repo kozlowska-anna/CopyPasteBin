@@ -110,9 +110,11 @@ Sources: [Vosk models](https://alphacephei.com/vosk/models),
 
 ## Further permissions and safeguards
 
-The next stage needs separate approval to download engine code and models. Its
-plan should list exact URLs, SHA-256 hashes, sizes, licenses, destination, and
-installation commands without `sudo`. A model remains optional.
+Vosk and Whisper tiny artifacts were prepared locally for C4 only. They are
+not part of the CPB installation and do not make a production downloader ready.
+The approved on-demand architecture, manifest format, and integrity policy are
+documented in `docs/STT_MODEL_MANAGER.en.md`. Models remain optional, and the
+new mechanism has not performed any real download.
 
 Real integration needs access only to audio input during an explicit session.
 It must stop the worker on editor close, session lock, suspend, device loss,
@@ -126,3 +128,7 @@ language, version, size, HTTPS URL, SHA-256, and license. Downloads are
 explicit, partial files have private permissions and a size limit, and
 installation is atomic after verification. Removal does not follow symlinks
 and affects only an allowlisted entry inside the user's data directory.
+
+The bundled manifest and its no-network parser are now prepared. Whisper tiny
+has complete integrity metadata; Vosk download remains disabled because no
+independently trustworthy upstream digest is available.

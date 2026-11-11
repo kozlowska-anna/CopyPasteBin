@@ -1,7 +1,8 @@
 # CopyPasteBin 1.3 — C4 real STT benchmark plan
 
-Status: measurement tooling prepared; no engine, model, or audio downloaded.
-Date: 2026-11-11.
+Status: Vosk 0.3.45, Vosk `small-pl-0.22`, whisper.cpp 1.9.5, and Whisper tiny
+are prepared locally; approved audio and a `whisper-cli` adapter are missing.
+Updated: 2026-11-12.
 
 Every candidate receives the same mono 16-bit PCM WAV at 16 kHz, three times.
 Final-quality metrics are WER, CER, punctuation accuracy, model initialization,
@@ -41,25 +42,28 @@ after the first download can make later local runs repeatable, but is not
 independent evidence for the first download.
 
 The current host is x86_64 with 8 logical CPUs and about 16 GB RAM. GCC/G++,
-`make`, `bwrap`, and `unshare` are available; CMake, FFmpeg, SoX, and Ninja are
-not. The pinned CMake wheel can be extracted locally without modifying system
-Python. The Vosk wheel is likewise extracted only for `libvosk.so`; it is not
-installed. FFmpeg/SoX are unnecessary when audio is prepared in the required
-WAV format.
+`make`, `bwrap`, and `unshare` are available. Pinned CMake was extracted
+locally without modifying system Python. The Vosk wheel was likewise extracted
+only for `libvosk.so`; it was not installed. FFmpeg/SoX remain unnecessary
+when audio is prepared in the required WAV format.
 
 Native code execution, opaque model files, voice data, and result files are
 the new risks. Mitigations are pinned sources, published hashes where
 available, source review, size limits, a separate user directory, a network
 namespace for inference, read-only inputs, private `0600` results, public
 licensed audio only, no microphone, and no clipboard or CPB-history access.
-The prepared `bwrap --unshare-net` example still exposes a broad read-only `/`;
-its binds must be narrowed before real execution. The `--offline` metadata flag
-alone is not proof of isolation.
+The original `bwrap --unshare-net` example exposed a broad read-only `/` and is
+retained only as a historical draft. Verified Vosk and Whisper profiles use
+separate network/PID/IPC/UTS namespaces and mount only `/usr`, `/lib`, `/lib64`,
+the loader cache, the specific harness, engine, model, and read-only audio plus
+writable results. They expose no `/home`, `/etc/passwd`, or `/dev/snd`. The
+`--offline` metadata flag alone is not proof of isolation.
 
-Recommended order: approve and pin audio; test Vosk and Whisper tiny final
-quality; test native Vosk streaming; add base and then small only if resource
-results justify them; decide about a Whisper `windowed` adapter only after
-those measurements. Microphone and editor integration remain outside C4.
+Recommended order: add the `whisper-cli` adapter, approve and pin audio, then
+with separate approval test Vosk and Whisper tiny final quality and native
+Vosk streaming. Add base and then small only if resource results justify them;
+decide about a Whisper `windowed` adapter only after those measurements.
+Microphone and editor integration remain outside C4.
 
 Exact download, extraction, build, run, report, and recoverable removal
 commands are in the Polish version above; both documents describe the same

@@ -1,7 +1,8 @@
 # CopyPasteBin 1.3 — C4: plan rzeczywistego benchmarku STT
 
-Status: środowisko pomiarowe przygotowane; brak pobranych silników, modeli i
-audio. Data: 2026-11-11.
+Status: Vosk 0.3.45, Vosk `small-pl-0.22`, whisper.cpp 1.9.5 i Whisper tiny
+przygotowane lokalnie; brak zatwierdzonego audio i adaptera `whisper-cli`.
+Data aktualizacji: 2026-11-12.
 
 ## Metodologia
 
@@ -88,7 +89,11 @@ Proces dostaje tylko odczyt kodu, modelu i jednego klipu, prywatny katalog
 wyników oraz pusty `/tmp`. Nie ma mikrofonu, urządzeń audio, schowka ani
 historii CPB. Rozpoznawanie działa po zakończeniu pobierania bez sieci.
 
-## Polecenia do oceny — niewykonane
+## Stan przygotowania i polecenia referencyjne
+
+Artefakty przygotowano w izolowanym katalogu C4. Poniższe polecenia dokumentują
+przypięcia i sposób odtworzenia środowiska; nie są skryptem do automatycznego
+uruchomienia w całości.
 
 Katalog eksperymentu:
 
@@ -113,7 +118,9 @@ Przypięcie whisper.cpp:
 ```bash
 git clone --filter=blob:none --no-checkout https://github.com/ggml-org/whisper.cpp.git /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp
 git -C /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp checkout --detach d1be6fde11ac6e0407606b4e42fe72d34add8037
-/home/anna/.local/share/copypastebin-stt-c4/tools/cmake/cmake/data/bin/cmake -S /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp -B /home/anna/.local/share/copypastebin-stt-c4/build/whisper.cpp -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=ON -DWHISPER_BUILD_TESTS=OFF
+mkdir /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp-work
+git -C /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp archive d1be6fde11ac6e0407606b4e42fe72d34add8037 | tar -xf - -C /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp-work
+/home/anna/.local/share/copypastebin-stt-c4/tools/cmake/cmake/data/bin/cmake -S /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp-work -B /home/anna/.local/share/copypastebin-stt-c4/build/whisper.cpp -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=ON -DGGML_CCACHE=OFF -DWHISPER_BUILD_IS_DEV=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=ON
 /home/anna/.local/share/copypastebin-stt-c4/tools/cmake/cmake/data/bin/cmake --build /home/anna/.local/share/copypastebin-stt-c4/build/whisper.cpp --target whisper-cli -j 8
 ```
 
@@ -123,10 +130,13 @@ Przykładowy Vosk po zatwierdzeniu modelu i manifestu audio:
 bwrap --unshare-net --die-with-parent --ro-bind / / --bind /home/anna/.local/share/copypastebin-stt-c4/results /home/anna/.local/share/copypastebin-stt-c4/results --tmpfs /tmp --dev /dev --proc /proc python3 experiments/dictation-benchmark/run_adapter.py --case-id pl-01 --engine vosk-small-pl-0.22 --run 1 --mode streaming --session c4-vosk-pl01-r1 --audio /home/anna/.local/share/copypastebin-stt-c4/audio/pl-01.wav --engine-path /home/anna/.local/share/copypastebin-stt-c4/tools/vosk/vosk/libvosk.so --model-path /home/anna/.local/share/copypastebin-stt-c4/models/vosk-model-small-pl-0.22 --results /home/anna/.local/share/copypastebin-stt-c4/results/results.json --offline -- python3 experiments/dictation-benchmark/adapters/vosk_ctypes.py --library /home/anna/.local/share/copypastebin-stt-c4/tools/vosk/vosk/libvosk.so --model /home/anna/.local/share/copypastebin-stt-c4/models/vosk-model-small-pl-0.22 --audio /home/anna/.local/share/copypastebin-stt-c4/audio/pl-01.wav --session c4-vosk-pl01-r1
 ```
 
-Ta pierwsza wersja `bwrap` odcina sieć, ale ma szeroki odczyt `/`; przed
-rzeczywistym uruchomieniem należy zawęzić bindy do bibliotek systemowych,
-repozytorium i katalogu eksperymentu. Nie należy przedstawiać samej flagi
-`--offline` jako dowodu izolacji.
+Pierwszy zapis polecenia `bwrap` powyżej jest historycznym szkicem i nie wolno
+go użyć do benchmarku, ponieważ binduje szerokie `/`. Sprawdzone profile Vosk i
+Whisper używają osobnych przestrzeni sieciowej/PID/IPC/UTS, montują tylko
+`/usr`, `/lib`, `/lib64`, cache loadera, konkretny harness, silnik, model i audio
+do odczytu oraz wyniki do zapisu. Nie udostępniają `/home`, `/etc/passwd` ani
+`/dev/snd`. Nie należy przedstawiać samej flagi `--offline` jako dowodu
+izolacji.
 
 Raport:
 
@@ -142,11 +152,12 @@ gio trash /home/anna/.local/share/copypastebin-stt-c4
 
 ## Kolejność
 
-1. Zatwierdzić źródło małego korpusu audio i utworzyć jego manifest.
-2. Pobrać lokalny CMake, libvosk, model Vosk i Whisper tiny; zweryfikować
-   artefakty i przejrzeć rozpakowaną zawartość.
-3. Uruchomić Vosk oraz Whisper tiny w torze jakości końcowej; Vosk dodatkowo w
-   `streaming`.
+1. Dodać adapter `whisper-cli`, zatwierdzić źródło małego korpusu audio i
+   utworzyć jego manifest.
+2. Wykonano: pobrać lokalny CMake, libvosk, model Vosk i Whisper tiny;
+   zweryfikować artefakty i przejrzeć rozpakowaną zawartość.
+3. Po osobnej zgodzie uruchomić Vosk oraz Whisper tiny w torze jakości
+   końcowej; Vosk dodatkowo w `streaming`.
 4. Jeśli tiny mieści się w budżecie czasu, pobrać base, potem small.
 5. Dopiero po wynikach zdecydować, czy warto budować adapter `windowed` dla
    Whisper. Nie podłączać mikrofonu ani edytora CPB w C4.

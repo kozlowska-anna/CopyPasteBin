@@ -21,4 +21,4 @@ cpb = "copypastebin.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"copypastebin.data" = ["bip39_english.txt"]
+"copypastebin.data" = ["bip39_english.txt", "stt-models-v1.json"]
