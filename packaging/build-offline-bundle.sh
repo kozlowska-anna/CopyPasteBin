@@ -54,6 +54,10 @@ trap cleanup EXIT
 import sys
 raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
 PY
+command -v glib-compile-schemas >/dev/null 2>&1 || {
+    printf 'Brakuje programu glib-compile-schemas.\n' >&2
+    exit 1
+}
 
 mkdir -p -- "$BUILD_SOURCE_DIR/src" "$PAYLOAD_DIR" "$DIST_DIR"
 export SOURCE_DATE_EPOCH
@@ -123,6 +127,7 @@ metadata_path.write_text(
 )
 PY
 fi
+glib-compile-schemas --strict "$PAYLOAD_DIR/$UUID/schemas"
 cp -- "$ROOT/packaging/copypastebin.desktop" "$PAYLOAD_DIR/copypastebin.desktop"
 cp -- "$ROOT/packaging/persist-extension-enablement.js" \
     "$PAYLOAD_DIR/persist-extension-enablement.js"

@@ -43,6 +43,10 @@ const TEXT_MIMES = ['text/plain;charset=utf-8', 'text/plain'];
 const APPLICATION_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const RISKS = new Set(['none', 'low', 'medium', 'high', 'critical']);
 const EDITOR_APPLICATION_ID = 'io.github.copypastebin.Editor';
+const EDITOR_SHORTCUT_KEY = 'open-editor';
+const EDITOR_SHORTCUT_LABELS = new Map([
+    ['<Super><Shift>e', 'Super+Shift+E'],
+]);
 const CATEGORY_LABELS = new Map([
     ['EMAIL', 'email address'],
     ['PHONE', 'phone number'],
@@ -399,9 +403,30 @@ class CopyPasteBinIndicator extends PanelMenu.Button {
     }
 
     _addEditorAction() {
-        const item = new PopupMenu.PopupMenuItem(this._t('Edit / anonymize clipboard'));
-        item.connect('activate', () => this._openEditor());
-        this.menu.addMenuItem(item);
+        this._editorItem = new PopupMenu.PopupMenuItem(
+            this._t('Edit / anonymize clipboard')
+        );
+        this._editorItem.connect('activate', () => this._openEditor());
+        this.menu.addMenuItem(this._editorItem);
+    }
+
+    setEditorShortcutState(label, active) {
+        if (label === null) {
+            this._editorItem.label.text = this._t('Edit / anonymize clipboard');
+        } else if (active) {
+            this._editorItem.label.text = this._t(
+                'Edit / anonymize clipboard — {shortcut}',
+                {shortcut: label}
+            );
+        } else {
+            this._editorItem.label.text = this._t(
+                'Edit / anonymize clipboard — shortcut unavailable'
+            );
+        }
+    }
+
+    openEditor() {
+        this._openEditor();
     }
 
     _addImageRedactorAction() {
@@ -2081,6 +2106,14 @@ export default class CopyPasteBinExtension extends Extension {
         this._backendProbe = null;
         this._backendCompatible = false;
         this._indicator = null;
+        this._settings = this.getSettings();
+        this._shortcutChangedId = this._settings.connect(
+            `changed::${EDITOR_SHORTCUT_KEY}`,
+            () => this._configureEditorShortcut()
+        );
+        this._shortcutRegistered = false;
+        this._shortcutLabel = null;
+        this._shortcutActive = false;
         this._paths = {
             entryPoint: null,
             editorPath: GLib.build_filenamev([this.path, 'editor.js']),
@@ -2126,6 +2159,7 @@ export default class CopyPasteBinExtension extends Extension {
         this._indicator?.destroy();
         this._indicator = null;
         this._createIndicator({choice: 'system', effective: systemLanguage()});
+        this._configureEditorShortcut();
     }
 
     _showBackendStatus(status, result = null) {
@@ -2215,6 +2249,67 @@ export default class CopyPasteBinExtension extends Extension {
             status => this._replaceIndicator(status)
         );
         Main.panel.addToStatusArea(this.uuid, this._indicator);
+        this._syncEditorShortcutLabel();
+    }
+
+    _configuredEditorShortcut() {
+        const shortcuts = this._settings?.get_strv(EDITOR_SHORTCUT_KEY) ?? [];
+        if (shortcuts.length !== 1 || !EDITOR_SHORTCUT_LABELS.has(shortcuts[0]))
+            return null;
+        return shortcuts[0];
+    }
+
+    _configureEditorShortcut() {
+        this._removeEditorShortcut();
+        const shortcut = this._configuredEditorShortcut();
+        this._shortcutLabel = shortcut === null
+            ? null
+            : EDITOR_SHORTCUT_LABELS.get(shortcut);
+        this._shortcutActive = false;
+        if (shortcut === null || !this._backendCompatible) {
+            this._syncEditorShortcutLabel();
+            return;
+        }
+
+        let actionAdded = false;
+        try {
+            const action = global.display.add_keybinding(
+                EDITOR_SHORTCUT_KEY,
+                this._settings,
+                Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+                () => this._indicator?.openEditor()
+            );
+            if (action !== Meta.KeyBindingAction.NONE) {
+                actionAdded = true;
+                Main.wm.setCustomKeybindingHandler(
+                    EDITOR_SHORTCUT_KEY,
+                    Shell.ActionMode.NORMAL,
+                    () => this._indicator?.openEditor()
+                );
+                this._shortcutRegistered = true;
+                this._shortcutActive = true;
+            }
+        } catch (_error) {
+            if (actionAdded)
+                global.display.remove_keybinding(EDITOR_SHORTCUT_KEY);
+            this._shortcutRegistered = false;
+        }
+        this._syncEditorShortcutLabel();
+    }
+
+    _removeEditorShortcut() {
+        if (!this._shortcutRegistered)
+            return;
+        Main.wm.removeKeybinding(EDITOR_SHORTCUT_KEY);
+        this._shortcutRegistered = false;
+    }
+
+    _syncEditorShortcutLabel() {
+        if (this._indicator instanceof CopyPasteBinIndicator)
+            this._indicator.setEditorShortcutState(
+                this._shortcutLabel,
+                this._shortcutActive
+            );
     }
 
     _replaceIndicator(languageStatus) {
@@ -2232,6 +2327,13 @@ export default class CopyPasteBinExtension extends Extension {
 
     disable() {
         this._lifecycleGeneration = (this._lifecycleGeneration ?? 0) + 1;
+        this._removeEditorShortcut();
+        if (this._shortcutChangedId !== 0)
+            this._settings?.disconnect(this._shortcutChangedId);
+        this._shortcutChangedId = 0;
+        this._settings = null;
+        this._shortcutLabel = null;
+        this._shortcutActive = false;
         this._backendProbe?.destroy();
         this._backendProbe = null;
         this._backendCompatible = false;

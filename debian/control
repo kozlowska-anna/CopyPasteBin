@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Anna Kozłowska <copypastebin@op.pl>
 Build-Depends:
  debhelper-compat (= 13),
+ libglib2.0-bin,
 Standards-Version: 4.7.3
 Rules-Requires-Root: no
 Homepage: https://github.com/kozlowska-anna/CopyPasteBin

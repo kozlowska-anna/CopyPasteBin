@@ -79,7 +79,9 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("pip install --no-index --no-deps", source)
         self.assertIn("python3 -m venv", source)
         self.assertIn("$HOME/.local/share/copypastebin", source)
-        self.assertNotIn("schemas/gschemas.compiled", source)
+        self.assertIn("schemas/gschemas.compiled", source)
+        self.assertIn("schemas/org.gnome.shell.extensions.copypastebin.gschema.xml", source)
+        self.assertIn('$PAYLOAD_DIR/$UUID/prefs.js', source)
         self.assertIn("$HOME/.local/share/gnome-shell/extensions", source)
         self.assertIn("XDG_SESSION_TYPE", source)
         self.assertIn("trap rollback EXIT", source)
@@ -123,7 +125,7 @@ class OfflineInstallerTests(unittest.TestCase):
         self.assertIn("pip wheel --no-deps --no-build-isolation", source)
         self.assertIn('UUID="copypastebin@kozlowska-anna.github.io"', source)
         self.assertIn('gnome-extension/$UUID', source)
-        self.assertNotIn("glib-compile-schemas", source)
+        self.assertIn("glib-compile-schemas --strict", source)
         self.assertIn("SHA256SUMS", source)
         self.assertIn('cp -- "$ROOT/LICENSE" "$STAGE_DIR/LICENSE"', source)
         self.assertIn('cp -- "$ROOT/NOTICE" "$STAGE_DIR/NOTICE"', source)
@@ -270,6 +272,14 @@ class OfflineInstallerTests(unittest.TestCase):
                 ).read().decode("utf-8")
                 self.assertIn("const VERSION = '1.3-dev';", about)
                 self.assertIn('"version": 9', metadata)
+                self.assertIn(
+                    prefix + "copypastebin@kozlowska-anna.github.io/prefs.js",
+                    names,
+                )
+                self.assertIn(
+                    prefix + "copypastebin@kozlowska-anna.github.io/schemas/gschemas.compiled",
+                    names,
+                )
 
     def test_release_archive_has_normalized_metadata_and_no_silent_overwrite(self):
         source = BUILDER.read_text(encoding="utf-8")

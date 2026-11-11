@@ -256,7 +256,8 @@ class DebPackagingTests(unittest.TestCase):
         self.assertIn(
             "EXTENSION_ROOT = debian/gnome-shell-extension-copypastebin", rules
         )
-        self.assertNotIn("glib-compile-schemas", rules)
+        self.assertIn("glib-compile-schemas --strict", rules)
+        self.assertIn("libglib2.0-bin", control)
         self.assertIn('__version__ = "1.2.1"', rules)
         self.assertIn("const VERSION = '1.2.1';", rules)
         self.assertIn('\"version\": 8', rules)
@@ -572,6 +573,14 @@ class DebPackagingTests(unittest.TestCase):
                 extension_file.with_name("metadata.json").read_text(encoding="utf-8")
             )
             self.assertEqual(8, metadata["version"])
+            self.assertEqual(
+                "org.gnome.shell.extensions.copypastebin",
+                metadata["settings-schema"],
+            )
+            self.assertTrue(extension_file.with_name("prefs.js").is_file())
+            self.assertTrue(
+                (extension_file.parent / "schemas" / "gschemas.compiled").is_file()
+            )
             self.assertIn(
                 '__version__ = "1.2.1"',
                 (ROOT / "src" / "copypastebin" / "__init__.py").read_text(

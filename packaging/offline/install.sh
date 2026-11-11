@@ -120,6 +120,9 @@ done
 
 required_files=("$CHECKSUM_FILE" "$PAYLOAD_DIR/copypastebin.desktop" \
     "$PAYLOAD_DIR/copypastebin.svg" "$PAYLOAD_DIR/$UUID/metadata.json" \
+    "$PAYLOAD_DIR/$UUID/prefs.js" \
+    "$PAYLOAD_DIR/$UUID/schemas/org.gnome.shell.extensions.copypastebin.gschema.xml" \
+    "$PAYLOAD_DIR/$UUID/schemas/gschemas.compiled" \
     "$PAYLOAD_DIR/persist-extension-enablement.js")
 for application_id in "${WINDOW_APPLICATION_IDS[@]}"; do
     required_files+=("$PAYLOAD_DIR/$application_id.desktop")

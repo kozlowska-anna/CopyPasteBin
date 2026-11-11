@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.copypastebin"
+          path="/org/gnome/shell/extensions/copypastebin/">
+    <key name="open-editor" type="as">
+      <default>[]</default>
+      <summary>Open the clipboard editor</summary>
+      <description>
+        An explicitly enabled keyboard shortcut for opening the local clipboard
+        editor. An empty array disables the shortcut.
+      </description>
+    </key>
+  </schema>
+</schemalist>

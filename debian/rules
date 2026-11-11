@@ -28,6 +28,7 @@ override_dh_auto_install:
 	find $(PYTHON_PACKAGE_DIR) -type d -name __pycache__ -prune -exec rm -rf -- {} +
 	find $(PYTHON_PACKAGE_DIR) -type f -name '*.py[co]' -delete
 	cp -a gnome-extension/$(UUID)/. $(EXTENSION_DIR)/
+	glib-compile-schemas --strict $(EXTENSION_DIR)/schemas
 	grep -Fqx "const VERSION = '1.2.1';" $(EXTENSION_DIR)/about.js
 	grep -Fqx '  "version": 8' $(EXTENSION_DIR)/metadata.json
 	install -m 0644 packaging/deb/copypastebin.desktop \

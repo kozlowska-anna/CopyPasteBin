@@ -408,23 +408,41 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("transfer_async", source)
         self.assertNotIn("set_owner", source)
 
-    def test_safe_paste_and_keyboard_hooks_are_absent(self):
+    def test_editor_shortcut_is_explicit_bounded_and_cleaned_up(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
         editor = (EXTENSION / "editor.js").read_text(encoding="utf-8")
         metadata = json.loads((EXTENSION / "metadata.json").read_text(encoding="utf-8"))
         catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
-        self.assertNotIn("settings-schema", metadata)
-        self.assertFalse((
+        prefs = (EXTENSION / "prefs.js").read_text(encoding="utf-8")
+        schema = (
             EXTENSION / "schemas" /
             "org.gnome.shell.extensions.copypastebin.gschema.xml"
-        ).exists())
+        )
+        self.assertEqual(
+            "org.gnome.shell.extensions.copypastebin",
+            metadata["settings-schema"],
+        )
+        self.assertTrue(schema.is_file())
+        schema_source = schema.read_text(encoding="utf-8")
+        self.assertIn('<key name="open-editor" type="as">', schema_source)
+        self.assertIn("<default>[]</default>", schema_source)
+        self.assertIn("['<Super><Shift>e']", prefs)
+        self.assertNotIn("['<Super><Shift>r']", prefs)
+        self.assertIn("settings.set_strv(EDITOR_SHORTCUT_KEY, selected)", prefs)
         self.assertIn("Edit / anonymize clipboard", source)
+        self.assertIn("Meta.KeyBindingFlags.IGNORE_AUTOREPEAT", source)
+        self.assertIn("Shell.ActionMode.NORMAL", source)
+        self.assertIn("action !== Meta.KeyBindingAction.NONE", source)
+        self.assertIn("Main.wm.removeKeybinding(EDITOR_SHORTCUT_KEY)", source)
+        self.assertIn("this._settings?.disconnect(this._shortcutChangedId)", source)
+        self.assertIn("() => this._indicator?.openEditor()", source)
+        self.assertIn("openEditor() {\n        this._openEditor();", source)
+        self.assertIn("shortcut unavailable", source + catalog)
         self.assertIn("this._suggestRedaction()", editor)
         for forbidden in (
             "Safe Paste", "safePaste", "safe-paste", "_safePaste",
             "--suggest-redaction", "SUGGEST_REDACTION",
-            "Main.wm.addKeybinding", "Main.wm.removeKeybinding",
-            "getSettings()", "Ctrl+V", "<Control>v", "grab_accelerator",
+            "Ctrl+V", "<Control>v", "grab_accelerator",
             "fake_key", "notify_keyval", "Clutter.Event", "xdotool", "ydotool",
         ):
             with self.subTest(forbidden=forbidden):
