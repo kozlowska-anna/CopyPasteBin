@@ -56,6 +56,21 @@ export function parseDictationFrame(encoded) {
     return Object.freeze({...frame});
 }
 
+export function insertDictationFinal(buffer, mark, text) {
+    const insertion = buffer.get_iter_at_mark(mark);
+    const offset = insertion.get_offset();
+    let prefix = '';
+    if (offset > 0) {
+        const previous = buffer.get_iter_at_offset(offset - 1);
+        const before = buffer.get_text(previous, insertion, true);
+        if (!/\s/u.test(before) && !/^[,.;:!?)]/u.test(text))
+            prefix = ' ';
+    }
+    buffer.begin_user_action();
+    buffer.insert(insertion, `${prefix}${text}`, -1);
+    buffer.end_user_action();
+}
+
 export class DictationSession {
     constructor({available = false, onState, onPartial, onFinal} = {}) {
         this._available = available === true;

@@ -1,8 +1,10 @@
 import System from 'system';
+import Gtk from 'gi://Gtk?version=4.0';
 
 import {
     DictationProtocolError,
     DictationSession,
+    insertDictationFinal,
     parseDictationFrame,
 } from '../../gnome-extension/copypastebin@kozlowska-anna.github.io/dictation-session.js';
 
@@ -67,6 +69,14 @@ try {
                 throw error;
             print(error.message);
         }
+    } else if (action === 'gtk-manual') {
+        const buffer = new Gtk.TextBuffer({enable_undo: true});
+        buffer.set_text('Początek.', -1);
+        const mark = buffer.create_mark(null, buffer.get_end_iter(), false);
+        buffer.insert(buffer.get_iter_at_mark(mark), ' [ręczna korekta]', -1);
+        insertDictationFinal(buffer, mark, 'Tekst końcowy.');
+        const [start, end] = buffer.get_bounds();
+        print(buffer.get_text(start, end, true));
     } else {
         throw new Error('unknown action');
     }

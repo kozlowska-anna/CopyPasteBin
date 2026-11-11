@@ -57,6 +57,13 @@ class DictationSessionGjsTests(unittest.TestCase):
         self.assertEqual("Invalid dictation worker response.\n", completed.stdout)
         self.assertNotIn("private canary", completed.stdout + completed.stderr)
 
+    def test_gtk_mark_keeps_manual_edit_before_final_segment(self):
+        completed = self.run_driver("gtk-manual")
+        self.assertEqual(
+            "Początek. [ręczna korekta] Tekst końcowy.\n",
+            completed.stdout,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

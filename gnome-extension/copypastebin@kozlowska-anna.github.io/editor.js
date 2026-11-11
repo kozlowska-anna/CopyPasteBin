@@ -7,11 +7,14 @@ import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import System from 'system';
 import {backendCommand} from './backend-path.js';
+import {DictationSession, insertDictationFinal} from './dictation-session.js';
 import {languageFromArgs, translate} from './i18n.js';
 
 if (ARGV.some(argument =>
-    argument !== '--language=pl' && argument !== '--language=en'))
+    argument !== '--language=pl' && argument !== '--language=en' &&
+    argument !== '--dictation-simulation'))
     System.exit(1);
+const DICTATION_SIMULATION = ARGV.includes('--dictation-simulation');
 const LANGUAGE = languageFromArgs(ARGV.filter(argument =>
     argument === '--language=pl' || argument === '--language=en'
 ));
@@ -113,6 +116,12 @@ class EditorApplication extends Gtk.Application {
         this._currentDetections = [];
         this._selectionPopover = null;
         this._clickStart = null;
+        this._busy = false;
+        this._dictationSession = null;
+        this._dictationMark = null;
+        this._dictationTimeouts = [];
+        this._simulationSequence = 0;
+        this._simulationCounter = 0;
         this._presentSignalId = GLibUnix.signal_add(
             GLib.PRIORITY_DEFAULT,
             10,
@@ -245,6 +254,41 @@ class EditorApplication extends Gtk.Application {
         });
         layout.append(scroller);
 
+        const dictationRow = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 8,
+        });
+        const microphoneContent = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 6,
+        });
+        microphoneContent.append(new Gtk.Image({
+            icon_name: 'audio-input-microphone-symbolic',
+        }));
+        this._dictationButtonLabel = new Gtk.Label({label: ''});
+        microphoneContent.append(this._dictationButtonLabel);
+        this._dictationButton = new Gtk.Button({child: microphoneContent});
+        this._dictationButton.connect('clicked', () => this._toggleDictation());
+        dictationRow.append(this._dictationButton);
+        this._dictationState = new Gtk.Label({
+            label: '',
+            wrap: true,
+            xalign: 0,
+            hexpand: true,
+        });
+        dictationRow.append(this._dictationState);
+        layout.append(dictationRow);
+
+        this._dictationPreview = new Gtk.Label({
+            label: '',
+            wrap: true,
+            xalign: 0,
+            visible: false,
+            selectable: false,
+        });
+        this._dictationPreview.add_css_class('accent');
+        layout.append(this._dictationPreview);
+
         const tools = new Gtk.Expander({
             label: t('Quick text tools'),
             expanded: false,
@@ -349,8 +393,24 @@ class EditorApplication extends Gtk.Application {
         actions.append(this._save);
         layout.append(actions);
 
+        this._dictationSession = new DictationSession({
+            available: DICTATION_SIMULATION,
+            onState: () => this._syncDictationUi(),
+            onPartial: text => this._showDictationPreview(text),
+            onFinal: text => this._commitDictationText(text),
+        });
+        this._syncDictationUi();
+
+        const dictationShortcuts = new Gtk.ShortcutController();
+        dictationShortcuts.add_shortcut(new Gtk.Shortcut({
+            trigger: Gtk.ShortcutTrigger.parse_string('<Super><Shift>r'),
+            action: Gtk.CallbackAction.new(() => this._toggleDictation()),
+        }));
+        window.add_controller(dictationShortcuts);
+
         window.set_child(layout);
         window.connect('close-request', () => {
+            this._stopDictation(true);
             this._window = null;
             this._closeSelectionPopover();
             this._process?.force_exit();
@@ -363,6 +423,140 @@ class EditorApplication extends Gtk.Application {
             this._inspectDetections(true);
             return GLib.SOURCE_REMOVE;
         });
+    }
+
+    _toggleDictation() {
+        if (this._dictationSession === null ||
+            ['unavailable', 'stopping'].includes(this._dictationSession.state))
+            return false;
+        if (['starting', 'recording'].includes(this._dictationSession.state)) {
+            this._stopDictation(false);
+            return true;
+        }
+        this._startSimulatedDictation();
+        return true;
+    }
+
+    _startSimulatedDictation() {
+        if (!DICTATION_SIMULATION ||
+            !['idle', 'error'].includes(this._dictationSession.state))
+            return;
+        const insertion = this._buffer.get_iter_at_mark(this._buffer.get_insert());
+        this._deleteDictationMark();
+        this._dictationMark = this._buffer.create_mark(null, insertion, false);
+        const sessionId = `simulation-${++this._simulationCounter}`;
+        if (!this._dictationSession.start(sessionId)) {
+            this._deleteDictationMark();
+            return;
+        }
+        this._simulationSequence = 0;
+        const frames = [
+            [120, 1, 'ready', {}],
+            [360, 2, 'partial', {segment: 0, text: t('This is a local')}],
+            [680, 3, 'partial', {segment: 0, text: t('This is a local dictation simulation.')}],
+            [940, 4, 'final', {segment: 0, text: t('This is a local dictation simulation.')}],
+            [1220, 5, 'partial', {segment: 1, text: t('The partial text may change.')}],
+            [1510, 6, 'final', {segment: 1, text: t('The partial text may change.')}],
+            [1740, 7, 'stopped', {}],
+        ];
+        for (const [delay, sequence, kind, extra] of frames) {
+            let sourceId = 0;
+            sourceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
+                this._dictationTimeouts = this._dictationTimeouts.filter(
+                    id => id !== sourceId
+                );
+                this._simulationSequence = sequence;
+                this._dictationSession.accept(JSON.stringify({
+                    version: 1,
+                    session_id: sessionId,
+                    sequence,
+                    kind,
+                    ...extra,
+                }));
+                return GLib.SOURCE_REMOVE;
+            });
+            this._dictationTimeouts.push(sourceId);
+        }
+    }
+
+    _stopDictation(closing) {
+        for (const sourceId of this._dictationTimeouts)
+            GLib.source_remove(sourceId);
+        this._dictationTimeouts = [];
+        if (this._dictationSession === null)
+            return;
+        if (closing) {
+            this._dictationSession.cancel();
+            this._deleteDictationMark();
+            return;
+        }
+        if (!this._dictationSession.stop())
+            return;
+        this._dictationSession.accept(JSON.stringify({
+            version: 1,
+            session_id: `simulation-${this._simulationCounter}`,
+            sequence: this._simulationSequence + 1,
+            kind: 'stopped',
+        }));
+    }
+
+    _showDictationPreview(text) {
+        this._dictationPreview.label = text.length === 0
+            ? ''
+            : `${t('Live preview')}: ${text}`;
+        this._dictationPreview.visible = text.length > 0;
+    }
+
+    _commitDictationText(text) {
+        if (this._dictationMark === null)
+            return;
+        insertDictationFinal(this._buffer, this._dictationMark, text);
+    }
+
+    _deleteDictationMark() {
+        if (this._dictationMark === null || this._buffer === undefined)
+            return;
+        this._buffer.delete_mark(this._dictationMark);
+        this._dictationMark = null;
+    }
+
+    _syncDictationUi() {
+        if (this._dictationSession === null)
+            return;
+        const state = this._dictationSession.state;
+        const labels = {
+            unavailable: 'Local dictation unavailable',
+            idle: 'Start local dictation',
+            starting: 'Starting local dictation…',
+            recording: 'Stop local dictation',
+            stopping: 'Finishing local dictation…',
+            error: 'Local dictation error',
+        };
+        this._dictationButtonLabel.label = t(labels[state]);
+        this._dictationButton.sensitive = !['unavailable', 'stopping'].includes(state);
+        this._dictationButton.tooltip_text = state === 'unavailable'
+            ? t('No local speech engine and model are configured.')
+            : t('Local shortcut: Super+Shift+R');
+        this._dictationState.label = state === 'unavailable'
+            ? t('The optional local speech engine and model are not installed.')
+            : (DICTATION_SIMULATION
+                ? t('Simulation only — the microphone is not used.')
+                : '');
+        if (state === 'recording')
+            this._dictationButton.add_css_class('suggested-action');
+        else
+            this._dictationButton.remove_css_class('suggested-action');
+        if (['idle', 'unavailable', 'error'].includes(state))
+            this._deleteDictationMark();
+        this._syncSaveSensitivity();
+    }
+
+    _syncSaveSensitivity() {
+        if (this._save === undefined)
+            return;
+        const dictating = this._dictationSession !== null &&
+            ['starting', 'recording', 'stopping'].includes(this._dictationSession.state);
+        this._save.sensitive = !this._busy && !dictating;
     }
 
     _appendTool(container, label, action) {
@@ -407,10 +601,11 @@ class EditorApplication extends Gtk.Application {
     }
 
     _setBusy(busy) {
+        this._busy = busy;
         this._anonymize.sensitive = !busy;
         this._inspect.sensitive = !busy;
         this._clear.sensitive = !busy;
-        this._save.sensitive = !busy;
+        this._syncSaveSensitivity();
     }
 
     _clearDetectionMarks() {

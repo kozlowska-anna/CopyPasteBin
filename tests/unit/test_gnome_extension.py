@@ -457,6 +457,40 @@ class GnomeExtensionTests(unittest.TestCase):
         self.assertIn("this._mode === 'transition'", source)
         self.assertIn("this._mode === 'indefinite'", source)
 
+    def test_dictation_prototype_is_local_explicit_and_has_no_audio_access(self):
+        source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
+        editor = (EXTENSION / "editor.js").read_text(encoding="utf-8")
+        session = (EXTENSION / "dictation-session.js").read_text(encoding="utf-8")
+        catalog = (EXTENSION / "i18n.js").read_text(encoding="utf-8")
+
+        self.assertIn("new Gtk.ShortcutController()", editor)
+        self.assertIn("Gtk.ShortcutTrigger.parse_string('<Super><Shift>r')", editor)
+        self.assertIn("audio-input-microphone-symbolic", editor)
+        self.assertIn("this._dictationButton.add_css_class('suggested-action')", editor)
+        self.assertIn("--dictation-simulation", editor)
+        self.assertNotIn("--dictation-simulation", source)
+        self.assertNotIn("<Super><Shift>r", source)
+        self.assertNotIn("dictation", source.lower())
+        self.assertIn("Simulation only — the microphone is not used.", editor + catalog)
+        self.assertIn("this._stopDictation(true);", editor)
+        self.assertIn("insertDictationFinal", editor + session)
+        for forbidden in (
+            "Gst", "PipeWire", "PulseAudio", "parec", "pw-record",
+            "arecord", "MediaRecorder", "getUserMedia",
+        ):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, editor + session)
+
+    def test_dictation_protocol_separates_partial_and_final_text(self):
+        session = (EXTENSION / "dictation-session.js").read_text(encoding="utf-8")
+        self.assertIn("frame.kind === 'partial'", session)
+        self.assertIn("frame.kind === 'final'", session)
+        self.assertIn("frame.sequence <= this._lastSequence", session)
+        self.assertIn("frame.segment <= this._lastFinalSegment", session)
+        self.assertIn("this._setPartial(frame.text)", session)
+        self.assertIn("this._onFinal(frame.text, frame.segment)", session)
+        self.assertIn("Invalid dictation worker response.", session)
+
     def test_locked_or_greeter_session_never_starts_a_transfer(self):
         source = (EXTENSION / "extension.js").read_text(encoding="utf-8")
         lock_gate = source.index("Main.sessionMode.isLocked")
