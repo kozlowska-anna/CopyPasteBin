@@ -17,11 +17,15 @@ from urllib.parse import urlsplit
 from .models import AnalysisResult, Category, Detection, RiskLevel
 
 
-RULESET_VERSION = "10"
+RULESET_VERSION = "11"
 BIP39_RESOURCE_VERSION = "english-bip39-from-python-passlib-1.9.3-1ubuntu1"
 BIP39_RESOURCE_SHA256 = "2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda"
 
-_EMAIL = re.compile(r"(?<![\w.+-])[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,63}(?![\w.-])", re.I)
+_EMAIL = re.compile(
+    r"(?<![\w.+-])[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,63}"
+    r"(?![\w-]|\.[\w-])",
+    re.I,
+)
 _HOME_PATH = re.compile(r"(?<![\w])(?:file:///home/|/home/|~/)[^\s\x00]+")
 _URL = re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s\x00]+", re.I)
 _AUTH = re.compile(r"(?im)\b(?:authorization\s*:\s*(?:basic|bearer)|bearer)\s+[A-Za-z0-9._~+/=-]{8,}")

@@ -110,6 +110,39 @@ class DetectionTests(unittest.TestCase):
             with self.subTest(expected=expected):
                 self.assertIn(expected, self.categories(value))
 
+    def test_email_before_sentence_punctuation_has_exact_range(self):
+        email = "test@example.invalid"
+        cases = (
+            f"{email}.",
+            f"{email},",
+            f"{email};",
+            f"{email}:",
+            f"{email}!",
+            f"{email}?",
+            f"({email})",
+            f'"{email}"',
+            f"Kontakt: {email}.",
+            f"Pierwszy wiersz.\nKontakt: {email}.\nOstatni wiersz.",
+        )
+        for text in cases:
+            with self.subTest(text=text):
+                detections = [
+                    item for item in analyze_text(text).detections
+                    if item.category is Category.EMAIL
+                ]
+                self.assertEqual(1, len(detections))
+                detection = detections[0]
+                self.assertEqual(email, text[detection.start:detection.end])
+                self.assertNotIn(email, analyze_text(text).redacted_text)
+
+    def test_email_boundary_does_not_accept_domain_continuation(self):
+        for text in (
+            "test@example.invalid._suffix",
+            "test@example.invalid.-suffix",
+        ):
+            with self.subTest(text=text):
+                self.assertNotIn(Category.EMAIL, self.categories(text))
+
     def test_provider_secret_library_uses_distinct_high_risk_categories(self):
         cases = {
             "sk-proj-CPBINSYNTHETIC0123456789abcdef": Category.OPENAI_API_KEY,

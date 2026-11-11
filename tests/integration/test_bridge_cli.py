@@ -111,6 +111,14 @@ class BridgeCliTests(unittest.TestCase):
         self.assertNotIn("1234", stdout)
         notifier_type.assert_not_called()
 
+    def test_sentence_final_email_returns_bounded_warning_metadata(self):
+        synthetic = "Kontakt: test@example.invalid."
+        code, stdout, stderr = self.run_cli(frame("app.one", synthetic))
+        self.assertEqual((0, ""), (code, stderr))
+        self.assertIn('"risk":"medium"', stdout)
+        self.assertIn('"EMAIL"', stdout)
+        self.assertNotIn("test@example.invalid", stdout)
+
     def test_long_numeric_identifier_does_not_create_phone_warning(self):
         code, stdout, stderr = self.run_cli(
             frame("app.one", "1234-5678-9012-3456-7890-1234")
