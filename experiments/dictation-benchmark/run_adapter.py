@@ -8,6 +8,7 @@ import json
 import os
 import queue
 import resource
+import socket
 import subprocess
 import threading
 import time
@@ -18,6 +19,7 @@ from score import ALLOWED_ENGINES, InputError, _read_json
 
 MAX_EVENTS = 10_000
 MAX_RESULTS = 500
+ISOLATION_PROFILE = "bwrap-v1"
 
 
 def _tree_size(path: Path) -> int:
@@ -46,19 +48,28 @@ def _frame(raw: str, session: str, last_sequence: int) -> dict:
         frame = json.loads(raw)
     except json.JSONDecodeError as error:
         raise InputError("adapter emitted invalid JSON") from error
-    if not isinstance(frame, dict) or frame.get("version") != 1 or \
+    if not isinstance(frame, dict) or type(frame.get("version")) is not int or \
+            frame.get("version") != 1 or \
             frame.get("session_id") != session or \
-            not isinstance(frame.get("sequence"), int) or \
+            type(frame.get("sequence")) is not int or \
             frame["sequence"] <= last_sequence or \
             frame.get("kind") not in {"ready", "partial", "final", "stopped", "error"}:
         raise InputError("adapter emitted an invalid frame")
     expected = {"version", "session_id", "sequence", "kind"}
     if frame["kind"] in {"partial", "final"}:
-        expected |= {"segment", "text"}
-        if not isinstance(frame.get("segment"), int) or frame["segment"] < 0 or \
+        expected |= {"segment", "text", "audio_position_ms"}
+        position = frame.get("audio_position_ms")
+        if type(frame.get("segment")) is not int or frame["segment"] < 0 or \
                 not isinstance(frame.get("text"), str) or len(frame["text"]) > 4096 or \
-                "\0" in frame["text"] or (frame["kind"] == "final" and not frame["text"]):
+                "\0" in frame["text"] or (frame["kind"] == "final" and not frame["text"]) or \
+                isinstance(position, bool) or not isinstance(position, (int, float)) or \
+                position < 0:
             raise InputError("adapter emitted invalid text")
+    elif frame["kind"] == "stopped":
+        expected.add("audio_position_ms")
+        position = frame.get("audio_position_ms")
+        if isinstance(position, bool) or not isinstance(position, (int, float)) or position < 0:
+            raise InputError("adapter emitted invalid audio progress")
     elif frame["kind"] == "error":
         expected.add("code")
         if frame.get("code") not in {"audio-device", "engine", "protocol", "worker"}:
@@ -66,6 +77,76 @@ def _frame(raw: str, session: str, last_sequence: int) -> dict:
     if set(frame) != expected:
         raise InputError("adapter emitted fields outside the protocol")
     return frame
+
+
+def _mount_is_read_only(path: Path) -> bool:
+    try:
+        return bool(os.statvfs(path).f_flag & os.ST_RDONLY)
+    except OSError as error:
+        raise InputError("isolation mount validation failed") from error
+
+
+def _network_interfaces() -> set[str]:
+    try:
+        return {name for _, name in socket.if_nameindex()}
+    except OSError as error:
+        raise InputError("network isolation validation failed") from error
+
+
+def _effective_capabilities() -> int:
+    try:
+        lines = Path("/proc/self/status").read_text(encoding="ascii").splitlines()
+    except (OSError, UnicodeError) as error:
+        raise InputError("capability isolation validation failed") from error
+    for line in lines:
+        if line.startswith("CapEff:"):
+            try:
+                return int(line.split()[1], 16)
+            except (IndexError, ValueError) as error:
+                raise InputError("capability isolation validation failed") from error
+    raise InputError("capability isolation validation failed")
+
+
+def _verify_isolation(arguments: argparse.Namespace) -> str:
+    if os.environ.get("CPB_BENCHMARK_ISOLATION") != ISOLATION_PROFILE:
+        raise InputError("benchmark requires the controlled bwrap launcher")
+    expected = {
+        "audio": Path("/audio/input.wav"),
+        "engine_path": Path("/engine"),
+        "model_path": Path("/model"),
+    }
+    if any(getattr(arguments, name) != path for name, path in expected.items()) or \
+            arguments.results.parent != Path("/results"):
+        raise InputError("benchmark paths do not match the isolation profile")
+    required = tuple(expected.values()) + (
+        Path("/benchmark"), Path("/results"), Path("/usr"), Path("/proc"),
+        Path("/dev"), Path("/tmp"),
+    )
+    if any(not path.exists() for path in required):
+        raise InputError("isolation profile is incomplete")
+    if any(path.exists() for path in (Path("/home"), Path("/etc/passwd"), Path("/dev/snd"))):
+        raise InputError("isolation exposes a forbidden resource")
+    for path in (Path("/"), Path("/usr"), Path("/benchmark"), Path("/engine"),
+                 Path("/model"), Path("/audio/input.wav")):
+        if not _mount_is_read_only(path):
+            raise InputError("isolation exposes a writable input")
+    if _mount_is_read_only(Path("/results")) or _mount_is_read_only(Path("/tmp")):
+        raise InputError("isolation output mounts are not writable")
+    if _network_interfaces() - {"lo"}:
+        raise InputError("network isolation exposes an external interface")
+    try:
+        routes = Path("/proc/net/route").read_text(encoding="ascii").splitlines()[1:]
+        ipv6_routes = Path("/proc/net/ipv6_route").read_text(encoding="ascii").splitlines()
+    except (OSError, UnicodeError) as error:
+        raise InputError("network isolation validation failed") from error
+    if any(line.split()[1] == "00000000" for line in routes if len(line.split()) > 1):
+        raise InputError("network isolation has an IPv4 default route")
+    if any(parts[0] == "0" * 32 and parts[1] == "00" and parts[-1] != "lo"
+           for line in ipv6_routes if len(parts := line.split()) > 1):
+        raise InputError("network isolation has an IPv6 default route")
+    if _effective_capabilities() != 0:
+        raise InputError("benchmark process retained capabilities")
+    return ISOLATION_PROFILE
 
 
 def _reader(stream, messages: queue.Queue) -> None:
@@ -91,10 +172,10 @@ def _append_private(path: Path, result: dict) -> None:
     if path.exists():
         document = _read_json(path)
         if not isinstance(document, dict) or set(document) != {"version", "results"} or \
-                document["version"] != 2 or not isinstance(document["results"], list):
+            document["version"] != 3 or not isinstance(document["results"], list):
             raise InputError("existing result file has an invalid shape")
     else:
-        document = {"version": 2, "results": []}
+        document = {"version": 3, "results": []}
     if len(document["results"]) >= MAX_RESULTS:
         raise InputError("result file is full")
     document["results"].append(result)
@@ -117,18 +198,21 @@ def main() -> int:
     parser.add_argument("--engine", required=True, choices=sorted(ALLOWED_ENGINES))
     parser.add_argument("--run", required=True, type=int, choices=(1, 2, 3))
     parser.add_argument("--mode", required=True, choices=("streaming", "windowed", "batch"))
+    parser.add_argument("--input-pacing", required=True, choices=("fast", "realtime"))
     parser.add_argument("--session", required=True)
     parser.add_argument("--audio", required=True, type=Path)
     parser.add_argument("--engine-path", required=True, type=Path)
     parser.add_argument("--model-path", required=True, type=Path)
     parser.add_argument("--results", required=True, type=Path)
     parser.add_argument("--timeout-seconds", type=int, default=300)
-    parser.add_argument("--offline", action="store_true",
-                        help="Assert that the command is running in a network namespace")
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
-    if not args.offline:
-        parser.error("refusing a run not explicitly marked offline")
+    try:
+        isolation_profile = _verify_isolation(args)
+    except InputError as error:
+        parser.error(str(error))
+    if args.mode == "batch" and args.input_pacing != "fast":
+        parser.error("batch mode requires fast file input")
     if not args.command or args.command[0] != "--" or len(args.command) == 1:
         parser.error("adapter command must follow --")
     command = args.command[1:]
@@ -170,8 +254,10 @@ def main() -> int:
     usage_after = resource.getrusage(resource.RUSAGE_CHILDREN)
 
     state, last_sequence, last_segment = "starting", 0, -1
-    ready_ms = first_partial_ms = stopped_ms = None
+    ready_ms = first_partial_ms = final_result_ms = stopped_ms = None
     partials, finals = [], []
+    final_audio_position_ms = None
+    last_audio_position_ms = 0.0
     for observed_ms, raw in events:
         frame = _frame(raw, args.session, last_sequence)
         last_sequence = frame["sequence"]
@@ -179,18 +265,42 @@ def main() -> int:
         if kind == "ready" and state == "starting":
             state, ready_ms = "recording", observed_ms
         elif kind == "partial" and state == "recording" and frame["segment"] > last_segment:
-            partials.append({"at_ms": observed_ms, "text": frame["text"]})
+            audio_position_ms = float(frame["audio_position_ms"])
+            if audio_position_ms < last_audio_position_ms or audio_position_ms > duration_ms:
+                raise InputError("adapter reported audio progress beyond the input")
+            last_audio_position_ms = audio_position_ms
+            lag_ms = None
+            if args.input_pacing == "realtime":
+                observed_lag_ms = observed_ms - ready_ms - audio_position_ms
+                if observed_lag_ms < -20:
+                    raise InputError("adapter emitted a result before live audio was available")
+                lag_ms = round(max(0, observed_lag_ms), 3)
+            partials.append({"at_ms": observed_ms, "audio_position_ms": audio_position_ms,
+                             "lag_ms": lag_ms, "text": frame["text"]})
             first_partial_ms = observed_ms if first_partial_ms is None else first_partial_ms
         elif kind == "final" and state == "recording" and frame["segment"] > last_segment:
+            audio_position_ms = float(frame["audio_position_ms"])
+            if audio_position_ms < last_audio_position_ms or audio_position_ms > duration_ms:
+                raise InputError("adapter reported audio progress beyond the input")
+            last_audio_position_ms = audio_position_ms
+            if args.input_pacing == "realtime" and observed_ms - ready_ms - audio_position_ms < -20:
+                raise InputError("adapter emitted a result before live audio was available")
             last_segment = frame["segment"]
             finals.append(frame["text"])
+            final_result_ms = observed_ms
+            final_audio_position_ms = audio_position_ms
         elif kind == "stopped" and state == "recording":
+            audio_position_ms = float(frame["audio_position_ms"])
+            if audio_position_ms < last_audio_position_ms or \
+                    abs(audio_position_ms - duration_ms) > 1:
+                raise InputError("adapter did not consume the complete audio input")
             state, stopped_ms = "stopped", observed_ms
         elif kind == "error":
             raise InputError("adapter reported an error")
         else:
             raise InputError("adapter frame violates session state")
-    if state != "stopped" or ready_ms is None or stopped_ms is None or not finals:
+    if state != "stopped" or ready_ms is None or stopped_ms is None or \
+            final_result_ms is None or final_audio_position_ms is None or not finals:
         raise InputError("adapter stream is incomplete")
     if args.mode == "batch" and partials:
         raise InputError("batch adapter emitted partial results")
@@ -203,16 +313,20 @@ def main() -> int:
         "run": args.run,
         "transcript": " ".join(finals),
         "recognition_mode": args.mode,
+        "input_pacing": args.input_pacing,
         "audio_duration_ms": duration_ms,
         "model_init_ms": ready_ms,
         "first_partial_ms": first_partial_ms,
-        "final_result_ms": stopped_ms,
+        "final_result_ms": final_result_ms,
+        "final_audio_position_ms": final_audio_position_ms,
+        "completed_ms": stopped_ms,
         "partials": partials,
         "cpu_seconds": round(cpu_seconds, 6),
         "peak_rss_mib": round(peak_rss, 3),
         "engine_bytes": engine_bytes,
         "model_bytes": model_bytes,
         "offline": True,
+        "isolation_profile": isolation_profile,
     }
     _append_private(args.results, result)
     print("Benchmark run recorded without printing transcript content.")

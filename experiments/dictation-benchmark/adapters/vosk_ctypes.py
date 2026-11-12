@@ -7,6 +7,7 @@ import argparse
 import ctypes
 import json
 import re
+import time
 import wave
 from pathlib import Path
 
@@ -16,6 +17,26 @@ def emit(session: str, sequence: int, kind: str, **extra: object) -> None:
                       "kind": kind, **extra}, ensure_ascii=False), flush=True)
 
 
+def iter_audio_chunks(
+    audio,
+    frames_per_chunk: int,
+    feed_mode: str,
+    *,
+    monotonic=time.monotonic,
+    sleep=time.sleep,
+):
+    """Yield PCM chunks immediately or when they would become available live."""
+    started = monotonic()
+    frames_sent = 0
+    while data := audio.readframes(frames_per_chunk):
+        frames_sent += len(data) // 2
+        if feed_mode == "realtime":
+            remaining = started + frames_sent / 16000 - monotonic()
+            if remaining > 0:
+                sleep(remaining)
+        yield data, frames_sent
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--library", required=True, type=Path)
@@ -23,6 +44,7 @@ def main() -> int:
     parser.add_argument("--audio", required=True, type=Path)
     parser.add_argument("--session", required=True)
     parser.add_argument("--chunk-ms", type=int, default=100)
+    parser.add_argument("--feed-mode", choices=("file", "realtime"), required=True)
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]{0,63}", args.session):
         parser.error("invalid session identifier")
@@ -62,28 +84,35 @@ def main() -> int:
                     audio.getcomptype()) != (1, 2, 16000, "NONE"):
                 raise RuntimeError("audio must be mono 16-bit PCM WAV at 16 kHz")
             frames_per_chunk = 16000 * args.chunk_ms // 1000
-            while data := audio.readframes(frames_per_chunk):
+            frames_sent = 0
+            for data, frames_sent in iter_audio_chunks(
+                    audio, frames_per_chunk, args.feed_mode):
                 accepted = library.vosk_recognizer_accept_waveform(
                     recognizer, data, len(data))
                 payload_name = "vosk_recognizer_result" if accepted else "vosk_recognizer_partial_result"
                 payload = json.loads(getattr(library, payload_name)(recognizer).decode("utf-8"))
                 text = payload.get("text" if accepted else "partial", "").strip()
+                audio_position_ms = round(frames_sent / 16, 3)
                 if accepted and text:
                     sequence += 1
-                    emit(args.session, sequence, "final", segment=segment, text=text)
+                    emit(args.session, sequence, "final", segment=segment, text=text,
+                         audio_position_ms=audio_position_ms)
                     segment += 1
                     last_partial = ""
                 elif not accepted and text != last_partial:
                     sequence += 1
-                    emit(args.session, sequence, "partial", segment=segment, text=text)
+                    emit(args.session, sequence, "partial", segment=segment, text=text,
+                         audio_position_ms=audio_position_ms)
                     last_partial = text
         payload = json.loads(library.vosk_recognizer_final_result(recognizer).decode("utf-8"))
         text = payload.get("text", "").strip()
+        audio_position_ms = round(frames_sent / 16, 3)
         if text:
             sequence += 1
-            emit(args.session, sequence, "final", segment=segment, text=text)
+            emit(args.session, sequence, "final", segment=segment, text=text,
+                 audio_position_ms=audio_position_ms)
         sequence += 1
-        emit(args.session, sequence, "stopped")
+        emit(args.session, sequence, "stopped", audio_position_ms=audio_position_ms)
     finally:
         if recognizer:
             library.vosk_recognizer_free(recognizer)

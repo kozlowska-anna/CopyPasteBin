@@ -12,7 +12,7 @@ silnikami. Pierwszy przebieg mierzy zimną inicjalizację, a kolejne dwa działa
 po zwolnieniu poprzedniego procesu; model jest ładowany od nowa w każdym
 przebiegu. Nie wolno wykonywać innych ciężkich zadań równolegle.
 
-Są dwa osobne tory:
+Są dwa osobne tory i dwa jawne sposoby podawania danych:
 
 1. **Jakość końcowa:** Vosk i wszystkie modele Whisper przetwarzają cały ten
    sam plik. Mierzymy WER, CER, zgodność interpunkcji, CPU, RSS, czas
@@ -23,14 +23,25 @@ Są dwa osobne tory:
    fikcyjnego czasu pierwszego wyniku. Ewentualny adapter ponownie analizujący
    rosnące okno audio jest oznaczany `windowed`, nie `streaming`.
 
+`input_pacing=fast` podaje plik bez czekania i mierzy przepustowość, CPU, RAM,
+inicjalizację oraz jakość. `input_pacing=realtime` udostępnia kolejne fragmenty
+według terminów z zegara monotonicznego i dopiero wtedy pozwala interpretować
+opóźnienie częściowe oraz końcowe jako symulację dyktowania. Raporty tych trybów
+nie są łączone. `whisper-cli` pozostaje `batch/fast` i nie otrzymuje fikcyjnych
+wyników częściowych.
+
 Stabilność częściowych wyników to częstotliwość aktualizacji na sekundę i
 średnia znormalizowana odległość edycyjna między kolejnymi podglądami. Brak
 częściowych wyników pozostaje `null`, a nie zerem.
 
-`run_adapter.py` obserwuje ramki `ready`, `partial`, `final`, `stopped`,
-utrzymuje sesję, kolejność i segmenty C1–C3, mierzy zasoby i zapisuje plik
-`0600`. `analyze_runs.py` nie wypisuje transkrypcji. Adapter nie zmienia
-protokołu edytora; tłumaczy API silnika na istniejące ramki.
+`run_isolated.py` jest jedyną wspieraną ścieżką uruchomienia: ustanawia profil
+`bwrap`, a `run_adapter.py` przed startem silnika sprawdza montowania tylko do
+odczytu, brak `/home`, `/etc/passwd` i `/dev/snd`, brak zewnętrznych interfejsów
+i tras domyślnych oraz brak capabilities. Runner obserwuje ramki `ready`,
+`partial`, `final`, `stopped`, utrzymuje sesję, kolejność i segmenty C1–C3,
+mierzy zasoby i zapisuje plik `0600`. Benchmarkowe ramki częściowe i końcowe
+dodają pozycję audio wyłącznie do obliczenia opóźnienia; nie zmienia to
+produkcyjnego protokołu edytora. `analyze_runs.py` nie wypisuje transkrypcji.
 
 ## Audio
 
@@ -81,7 +92,7 @@ Python.
 | --- | --- | --- |
 | natywna inferencja | wykonanie pobranego kodu C/C++ | przypięte wersje, opublikowane SHA gdzie istnieje, przegląd źródła, osobny katalog |
 | modele STT | duże nieprzejrzyste pliki | HTTPS, immutable commit HF, SHA-256 i limity rozmiaru; jawny brak SHA Vosk |
-| pomiar offline | proces może próbować sieci | osobna przestrzeń sieciowa `bwrap --unshare-net`; `offline=true` tylko dla takiego przebiegu |
+| pomiar offline | proces może próbować sieci | kontrolowany launcher ustanawia `bwrap --unshare-net`; runner weryfikuje profil przed startem silnika |
 | pliki wynikowe | zawierają publiczne transkrypcje testowe | katalog testowy, tryb `0600`, brak stdout/logów z treścią |
 | audio testowe | głos może być danymi osobowymi | tylko licencjonowany publiczny korpus lub świadomie wydany CC0; bez prywatnych klipów |
 
@@ -89,65 +100,58 @@ Proces dostaje tylko odczyt kodu, modelu i jednego klipu, prywatny katalog
 wyników oraz pusty `/tmp`. Nie ma mikrofonu, urządzeń audio, schowka ani
 historii CPB. Rozpoznawanie działa po zakończeniu pobierania bez sieci.
 
-## Stan przygotowania i polecenia referencyjne
+## Stan przygotowania i bezpieczne polecenia
 
-Artefakty przygotowano w izolowanym katalogu C4. Poniższe polecenia dokumentują
-przypięcia i sposób odtworzenia środowiska; nie są skryptem do automatycznego
-uruchomienia w całości.
-
-Katalog eksperymentu:
+Przenośny katalog eksperymentu:
 
 ```bash
-install -d -m 0700 /home/anna/.local/share/copypastebin-stt-c4/{downloads,tools,src,build,models,audio,results}
+C4_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/copypastebin-stt-c4"
+install -d -m 0700 "$C4_ROOT"/{downloads,tools,src,build,models,audio,results}
 ```
 
-Każdy artefakt należy pobierać osobnym `curl --proto '=https' --tlsv1.2
---fail --location`, do `downloads/`, następnie sprawdzić dokładną sumą z tabeli
-przed rozpakowaniem. Pełne URL-e i sumy są maszynowo zapisane w
-`experiments/dictation-benchmark/artifacts.json`.
+Artefakty są już przygotowane. Pełne źródła, rozmiary i sumy znajdują się w
+`experiments/dictation-benchmark/artifacts.json`; nie należy pobierać ich
+ponownie przed benchmarkiem.
 
-Przykład CMake i Vosk po weryfikacji:
+Po zatwierdzeniu manifestu audio jedyną wspieraną ścieżką Vosk jest launcher.
+Poniższy przykład symuluje tempo nagrywania; wariant wydajności plikowej wymaga
+jednoczesnej zamiany `--input-pacing realtime` na `fast` oraz
+`--feed-mode realtime` na `file`:
 
 ```bash
-python3 -m zipfile -e /home/anna/.local/share/copypastebin-stt-c4/downloads/cmake-4.4.4.whl /home/anna/.local/share/copypastebin-stt-c4/tools/cmake
-python3 -m zipfile -e /home/anna/.local/share/copypastebin-stt-c4/downloads/vosk-0.3.45.whl /home/anna/.local/share/copypastebin-stt-c4/tools/vosk
+C4_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/copypastebin-stt-c4"
+python3 experiments/dictation-benchmark/run_isolated.py \
+  --case-id pl-01 --engine vosk-small-pl-0.22 --run 1 \
+  --mode streaming --input-pacing realtime --session c4-vosk-pl01-r1 \
+  --audio "$C4_ROOT/audio/pl-01.wav" \
+  --engine-path "$C4_ROOT/tools/vosk/vosk/libvosk.so" \
+  --model-path "$C4_ROOT/models/vosk-model-small-pl-0.22" \
+  --results "$C4_ROOT/results/results.json" -- \
+  /usr/bin/python3 /benchmark/adapters/vosk_ctypes.py \
+  --library /engine --model /model --audio /audio/input.wav \
+  --session c4-vosk-pl01-r1 --feed-mode realtime
 ```
 
-Przypięcie whisper.cpp:
+Launcher sam tworzy osobne przestrzenie sieciową/PID/IPC/UTS, usuwa
+capabilities, montuje wejścia tylko do odczytu i zapisuje wyłącznie do
+prywatnego katalogu wyników oraz pustego `/tmp`. `run_adapter.py` odmawia pracy
+poza tym profilem. Nie ma już flagi `--offline` do ręcznego potwierdzania.
+
+Raport formatu 3:
 
 ```bash
-git clone --filter=blob:none --no-checkout https://github.com/ggml-org/whisper.cpp.git /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp
-git -C /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp checkout --detach d1be6fde11ac6e0407606b4e42fe72d34add8037
-mkdir /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp-work
-git -C /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp archive d1be6fde11ac6e0407606b4e42fe72d34add8037 | tar -xf - -C /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp-work
-/home/anna/.local/share/copypastebin-stt-c4/tools/cmake/cmake/data/bin/cmake -S /home/anna/.local/share/copypastebin-stt-c4/src/whisper.cpp-work -B /home/anna/.local/share/copypastebin-stt-c4/build/whisper.cpp -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=ON -DGGML_CCACHE=OFF -DWHISPER_BUILD_IS_DEV=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=ON
-/home/anna/.local/share/copypastebin-stt-c4/tools/cmake/cmake/data/bin/cmake --build /home/anna/.local/share/copypastebin-stt-c4/build/whisper.cpp --target whisper-cli -j 8
+C4_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/copypastebin-stt-c4"
+PYTHONDONTWRITEBYTECODE=1 python3 \
+  experiments/dictation-benchmark/analyze_runs.py \
+  --results "$C4_ROOT/results/results.json"
 ```
 
-Przykładowy Vosk po zatwierdzeniu modelu i manifestu audio:
+Odzyskiwalne usunięcie całego, osobnego środowiska C4 — wyłącznie po osobnej
+decyzji o zakończeniu eksperymentu:
 
 ```bash
-bwrap --unshare-net --die-with-parent --ro-bind / / --bind /home/anna/.local/share/copypastebin-stt-c4/results /home/anna/.local/share/copypastebin-stt-c4/results --tmpfs /tmp --dev /dev --proc /proc python3 experiments/dictation-benchmark/run_adapter.py --case-id pl-01 --engine vosk-small-pl-0.22 --run 1 --mode streaming --session c4-vosk-pl01-r1 --audio /home/anna/.local/share/copypastebin-stt-c4/audio/pl-01.wav --engine-path /home/anna/.local/share/copypastebin-stt-c4/tools/vosk/vosk/libvosk.so --model-path /home/anna/.local/share/copypastebin-stt-c4/models/vosk-model-small-pl-0.22 --results /home/anna/.local/share/copypastebin-stt-c4/results/results.json --offline -- python3 experiments/dictation-benchmark/adapters/vosk_ctypes.py --library /home/anna/.local/share/copypastebin-stt-c4/tools/vosk/vosk/libvosk.so --model /home/anna/.local/share/copypastebin-stt-c4/models/vosk-model-small-pl-0.22 --audio /home/anna/.local/share/copypastebin-stt-c4/audio/pl-01.wav --session c4-vosk-pl01-r1
-```
-
-Pierwszy zapis polecenia `bwrap` powyżej jest historycznym szkicem i nie wolno
-go użyć do benchmarku, ponieważ binduje szerokie `/`. Sprawdzone profile Vosk i
-Whisper używają osobnych przestrzeni sieciowej/PID/IPC/UTS, montują tylko
-`/usr`, `/lib`, `/lib64`, cache loadera, konkretny harness, silnik, model i audio
-do odczytu oraz wyniki do zapisu. Nie udostępniają `/home`, `/etc/passwd` ani
-`/dev/snd`. Nie należy przedstawiać samej flagi `--offline` jako dowodu
-izolacji.
-
-Raport:
-
-```bash
-PYTHONDONTWRITEBYTECODE=1 python3 experiments/dictation-benchmark/analyze_runs.py --results /home/anna/.local/share/copypastebin-stt-c4/results/results.json
-```
-
-Usunięcie jest odzyskiwalne i nie dotyka instalacji CPB:
-
-```bash
-gio trash /home/anna/.local/share/copypastebin-stt-c4
+C4_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/copypastebin-stt-c4"
+gio trash -- "$C4_ROOT"
 ```
 
 ## Kolejność

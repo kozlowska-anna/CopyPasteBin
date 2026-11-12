@@ -12,10 +12,22 @@ size. Live metrics are compared only inside an explicit `streaming` or
 `batch` test and receives no invented first-partial value. Reprocessing a
 growing window must be labelled `windowed`, not streaming.
 
-`run_adapter.py` validates the C1–C3 session frames, measures resources, and
-writes a private `0600` result without printing transcripts. `analyze_runs.py`
-aggregates metrics without content. `validate_audio_manifest.py` accepts only
-checksum-pinned mono PCM files inside one isolated audio directory.
+`input_pacing=fast` feeds a file without waiting and measures throughput,
+quality, CPU, RAM, and initialization. `input_pacing=realtime` schedules PCM
+chunks from a monotonic clock and is the only mode whose partial and endpoint
+lags represent simulated live dictation. Reports keep these pacing modes
+separate. Whisper CLI remains `batch/fast`.
+
+`run_isolated.py` is the only supported entry point. It establishes the bwrap
+profile; before spawning an adapter, `run_adapter.py` verifies read-only input
+mounts, absent home/password/audio-device paths, no external interfaces or
+default routes, and zero effective capabilities. It then validates the C1–C3
+session frames, measures resources, and writes a private `0600` format-3 result
+without printing transcripts. Benchmark-only audio-position fields make live
+lag measurable without changing the editor's production protocol.
+`analyze_runs.py` aggregates metrics without content.
+`validate_audio_manifest.py` accepts only checksum-pinned mono PCM files inside
+one isolated audio directory.
 
 The current text cases are for adapter mechanics, not STT-quality evidence.
 The quality corpus should contain 12–20 Polish clips totalling about 2–4
@@ -52,12 +64,12 @@ the new risks. Mitigations are pinned sources, published hashes where
 available, source review, size limits, a separate user directory, a network
 namespace for inference, read-only inputs, private `0600` results, public
 licensed audio only, no microphone, and no clipboard or CPB-history access.
-The original `bwrap --unshare-net` example exposed a broad read-only `/` and is
-retained only as a historical draft. Verified Vosk and Whisper profiles use
-separate network/PID/IPC/UTS namespaces and mount only `/usr`, `/lib`, `/lib64`,
-the loader cache, the specific harness, engine, model, and read-only audio plus
-writable results. They expose no `/home`, `/etc/passwd`, or `/dev/snd`. The
-`--offline` metadata flag alone is not proof of isolation.
+The unsafe broad-root example has been removed. The controlled launcher uses
+separate network/PID/IPC/UTS namespaces, drops capabilities, and mounts only
+`/usr`, `/lib`, `/lib64`, the loader cache, the specific harness, engine, model,
+and read-only audio plus writable results. It exposes no `/home`, `/etc/passwd`,
+or `/dev/snd`. `run_adapter.py` refuses direct execution, so a flag or
+environment claim alone cannot mark a run offline.
 
 Recommended order: add the `whisper-cli` adapter, approve and pin audio, then
 with separate approval test Vosk and Whisper tiny final quality and native
@@ -65,6 +77,6 @@ Vosk streaming. Add base and then small only if resource results justify them;
 decide about a Whisper `windowed` adapter only after those measurements.
 Microphone and editor integration remain outside C4.
 
-Exact download, extraction, build, run, report, and recoverable removal
-commands are in the Polish version above; both documents describe the same
-pins, boundaries, and methodology.
+The portable `$XDG_DATA_HOME` paths and the safe launcher command are in the
+Polish version; both documents describe the same pins, boundaries, and
+methodology.

@@ -209,7 +209,8 @@ def _parse_manifest(payload: bytes) -> tuple[SpeechModel, ...]:
         raise ModelManifestError()
     raw_models = document["models"]
     if (
-        document["version"] != MANIFEST_VERSION
+        type(document["version"]) is not int
+        or document["version"] != MANIFEST_VERSION
         or type(raw_models) is not list
         or not 1 <= len(raw_models) <= MAX_MODELS
     ):

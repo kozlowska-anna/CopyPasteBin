@@ -34,11 +34,15 @@ syntetycznych zdań; nagrania nie są potrzebne ani zapisywane przez harness.
 
 `artifacts.json` przypina źródła, wersje, rozmiary i opublikowane sumy.
 `adapters/vosk_ctypes.py` potrafi po zatwierdzonej instalacji zasilać protokół
-C1–C3 z pliku PCM WAV, bez mikrofonu. `run_adapter.py` mierzy czas ramek,
-CPU, RSS oraz rozmiar plików i dopisuje wynik do prywatnego pliku o trybie
-`0600`; nie wypisuje transkrypcji do terminala. `analyze_runs.py` oblicza WER,
-CER, interpunkcję, inicjalizację, RTF, opóźnienie końcowe i stabilność wyników
-częściowych.
+C1–C3 z pliku PCM WAV, bez mikrofonu. Ma osobne tryby `file` i `realtime`;
+drugi taktuje fragmenty zegarem monotonicznym. `run_isolated.py` ustanawia i
+ogranicza profil `bwrap`, a `run_adapter.py` weryfikuje go przed startem
+adaptera, mierzy czas ramek, CPU, RSS oraz rozmiar plików i dopisuje wynik
+formatu 3 do prywatnego pliku `0600`. Bezpośrednie uruchomienie runnera albo
+sama deklaracja `--offline` są odrzucane. `analyze_runs.py` rozdziela
+`fast`/`realtime`, `streaming`/`windowed`/`batch`, WER, CER, interpunkcję,
+inicjalizację, czas wyniku końcowego i zakończenia, opóźnienia względem pozycji
+audio oraz stabilność wyników częściowych.
 
 `validate_audio_manifest.py` akceptuje wyłącznie zwykłe, przypięte sumą
 SHA-256 pliki mono 16-bit PCM WAV 16 kHz w jednym izolowanym katalogu.

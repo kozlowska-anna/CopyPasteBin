@@ -23,10 +23,11 @@ ENGINES = {
 }
 MODES = {"streaming", "windowed", "batch"}
 RESULT_KEYS = {
-    "case_id", "engine", "run", "transcript", "recognition_mode",
+    "case_id", "engine", "run", "transcript", "recognition_mode", "input_pacing",
     "audio_duration_ms", "model_init_ms", "first_partial_ms",
-    "final_result_ms", "partials", "cpu_seconds", "peak_rss_mib",
-    "engine_bytes", "model_bytes", "offline",
+    "final_result_ms", "final_audio_position_ms", "completed_ms", "partials",
+    "cpu_seconds", "peak_rss_mib", "engine_bytes", "model_bytes", "offline",
+    "isolation_profile",
 }
 
 
@@ -57,13 +58,14 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
     document = _read_json(path)
     if not isinstance(document, dict) or set(document) != {"version", "results"}:
         raise InputError("result document has an invalid shape")
-    if document["version"] != 2 or not isinstance(document["results"], list):
+    if type(document["version"]) is not int or document["version"] != 3 or \
+            not isinstance(document["results"], list):
         raise InputError("unsupported result document")
     if not 1 <= len(document["results"]) <= MAX_RESULTS:
         raise InputError("result count is invalid")
 
-    grouped: dict[str, list[dict[str, Any]]] = {}
-    seen: set[tuple[str, str, int]] = set()
+    grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+    seen: set[tuple[str, str, str, str, int]] = set()
     for raw in document["results"]:
         if not isinstance(raw, dict) or set(raw) != RESULT_KEYS:
             raise InputError("result has an invalid shape")
@@ -72,25 +74,32 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             raise InputError("result uses an unknown case or engine")
         if isinstance(run, bool) or not isinstance(run, int) or run not in {1, 2, 3}:
             raise InputError("run must be 1, 2, or 3")
-        identity = (engine, case_id, run)
-        if identity in seen:
-            raise InputError("duplicate engine, case, and run")
-        seen.add(identity)
         transcript = raw["transcript"]
         if not isinstance(transcript, str) or len(transcript) > 4000 or "\0" in transcript:
             raise InputError("invalid transcript")
         mode = raw["recognition_mode"]
         if mode not in MODES:
             raise InputError("invalid recognition mode")
-        if raw["offline"] is not True:
+        pacing = raw["input_pacing"]
+        if pacing not in {"fast", "realtime"} or (mode == "batch" and pacing != "fast"):
+            raise InputError("invalid input pacing")
+        if raw["offline"] is not True or raw["isolation_profile"] != "bwrap-v1":
             raise InputError("run was not confirmed offline")
+        identity = (engine, mode, pacing, case_id, run)
+        if identity in seen:
+            raise InputError("duplicate engine, mode, pacing, case, and run")
+        seen.add(identity)
         duration = _number(raw["audio_duration_ms"], "audio_duration_ms", positive=True)
         init_ms = _number(raw["model_init_ms"], "model_init_ms")
         final_ms = _number(raw["final_result_ms"], "final_result_ms")
+        final_position = _number(raw["final_audio_position_ms"], "final_audio_position_ms")
+        completed_ms = _number(raw["completed_ms"], "completed_ms")
+        if final_position > duration or final_ms < init_ms or completed_ms < final_ms:
+            raise InputError("final timing is inconsistent")
         first_ms = raw["first_partial_ms"]
         if first_ms is not None:
             first_ms = _number(first_ms, "first_partial_ms")
-            if first_ms > final_ms:
+            if first_ms < init_ms or first_ms > final_ms:
                 raise InputError("first partial follows final result")
         if mode == "batch" and first_ms is not None:
             raise InputError("batch run cannot claim a partial result")
@@ -100,14 +109,27 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
         previous_ms = -1.0
         checked_partials = []
         for partial in partials:
-            if not isinstance(partial, dict) or set(partial) != {"at_ms", "text"}:
+            if not isinstance(partial, dict) or set(partial) != {
+                    "at_ms", "audio_position_ms", "lag_ms", "text"}:
                 raise InputError("partial has an invalid shape")
             at_ms = _number(partial["at_ms"], "partial at_ms")
+            audio_position_ms = _number(partial["audio_position_ms"], "partial audio_position_ms")
+            lag_ms = partial["lag_ms"]
             text = partial["text"]
-            if at_ms < previous_ms or at_ms > final_ms or not isinstance(text, str) or len(text) > 4000 or "\0" in text:
+            if at_ms < previous_ms or at_ms > final_ms or audio_position_ms > duration or \
+                    not isinstance(text, str) or len(text) > 4000 or "\0" in text:
                 raise InputError("invalid partial")
+            if pacing == "realtime":
+                checked_lag = _number(lag_ms, "partial lag_ms")
+                if abs(checked_lag - max(0, at_ms - init_ms - audio_position_ms)) > 0.01:
+                    raise InputError("partial lag does not match observed timing")
+            elif lag_ms is not None:
+                raise InputError("fast input cannot claim live partial lag")
             previous_ms = at_ms
-            checked_partials.append({"at_ms": at_ms, "text": text})
+            checked_partials.append({
+                "at_ms": at_ms, "audio_position_ms": audio_position_ms,
+                "lag_ms": lag_ms, "text": text,
+            })
         if (first_ms is None) != (len(checked_partials) == 0):
             raise InputError("partial timing and events disagree")
 
@@ -116,8 +138,9 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
         ref_chars = " ".join(reference.casefold().split())
         hyp_chars = " ".join(transcript.casefold().split())
         ref_punctuation, hyp_punctuation = _punctuation(reference), _punctuation(transcript)
-        grouped.setdefault(engine, []).append({
+        grouped.setdefault((engine, mode, pacing), []).append({
             "mode": mode,
+            "pacing": pacing,
             "word_edits": _edit_distance(ref_words, hyp_words),
             "word_units": len(ref_words),
             "char_edits": _edit_distance(ref_chars, hyp_chars),
@@ -128,7 +151,11 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             "init": init_ms,
             "first": first_ms,
             "final": final_ms,
+            "final_position": final_position,
+            "completed": completed_ms,
             "churn": _partial_churn(checked_partials),
+            "partial_lags": [row["lag_ms"] for row in checked_partials
+                             if row["lag_ms"] is not None],
             "partial_count": len(checked_partials),
             "cpu": _number(raw["cpu_seconds"], "cpu_seconds"),
             "rss": _number(raw["peak_rss_mib"], "peak_rss_mib"),
@@ -137,26 +164,38 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
         })
 
     engines = []
-    for engine in sorted(grouped):
-        rows = grouped[engine]
+    for engine, mode, pacing in sorted(grouped):
+        rows = grouped[(engine, mode, pacing)]
         word_units = sum(row["word_units"] for row in rows)
         char_units = sum(row["char_units"] for row in rows)
         first = [row["first"] for row in rows if row["first"] is not None]
         churn = [row["churn"] for row in rows if row["churn"] is not None]
+        partial_lags = [lag for row in rows for lag in row["partial_lags"]]
+        endpoint_lags = [max(0, row["final"] - row["init"] - row["final_position"])
+                         for row in rows] if pacing == "realtime" else []
         engines.append({
             "engine": engine,
-            "modes": sorted(set(row["mode"] for row in rows)),
+            "recognition_mode": mode,
+            "input_pacing": pacing,
             "runs": len(rows),
             "wer": round(sum(row["word_edits"] for row in rows) / word_units, 6),
             "cer": round(sum(row["char_edits"] for row in rows) / char_units, 6),
             "mean_punctuation_accuracy": round(fmean(row["punctuation_accuracy"] for row in rows), 6),
             "mean_model_init_ms": round(fmean(row["init"] for row in rows), 3),
             "mean_first_partial_ms": None if not first else round(fmean(first), 3),
+            "mean_first_partial_after_ready_ms": None if not first else round(
+                fmean(row["first"] - row["init"] for row in rows
+                      if row["first"] is not None), 3),
             "runs_without_partial": len(rows) - len(first),
             "mean_final_result_ms": round(fmean(row["final"] for row in rows), 3),
-            "mean_realtime_factor": round(fmean(row["final"] / row["duration"] for row in rows), 6),
-            "mean_endpoint_latency_ms": round(fmean(max(0, row["final"] - row["duration"]) for row in rows), 3),
+            "mean_completed_ms": round(fmean(row["completed"] for row in rows), 3),
+            "mean_wall_clock_ratio": round(
+                fmean(row["completed"] / row["duration"] for row in rows), 6),
+            "mean_endpoint_latency_ms": None if not endpoint_lags else round(
+                fmean(endpoint_lags), 3),
             "mean_partial_updates_per_second": round(fmean(row["partial_count"] / (row["duration"] / 1000) for row in rows), 6),
+            "mean_partial_lag_ms": None if not partial_lags else round(
+                fmean(partial_lags), 3),
             "mean_partial_churn": None if not churn else round(fmean(churn), 6),
             "mean_cpu_seconds": round(fmean(row["cpu"] for row in rows), 3),
             "peak_rss_mib": round(max(row["rss"] for row in rows), 3),
@@ -164,7 +203,7 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             "model_bytes": max(row["model_bytes"] for row in rows),
             "offline_runs": len(rows),
         })
-    return {"version": 2, "scored_results": len(seen), "engines": engines}
+    return {"version": 3, "scored_results": len(seen), "engines": engines}
 
 
 def main() -> int:

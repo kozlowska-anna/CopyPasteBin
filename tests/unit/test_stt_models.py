@@ -81,6 +81,26 @@ class SpeechModelManifestTests(unittest.TestCase):
                 with self.assertRaises(ModelManifestError):
                     load_model_manifest(path)
 
+    def test_manifest_version_requires_exact_integer_one(self):
+        payload = b"synthetic-model-content"
+        versions = (True, False, "1", 2)
+        for version in versions:
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as directory:
+                document = self._fake_manifest(payload)
+                document["version"] = version
+                path = Path(directory) / "manifest.json"
+                path.write_text(json.dumps(document), encoding="utf-8")
+                with self.assertRaises(ModelManifestError):
+                    load_model_manifest(path)
+
+        with tempfile.TemporaryDirectory() as directory:
+            document = self._fake_manifest(payload)
+            del document["version"]
+            path = Path(directory) / "manifest.json"
+            path.write_text(json.dumps(document), encoding="utf-8")
+            with self.assertRaises(ModelManifestError):
+                load_model_manifest(path)
+
     @staticmethod
     def _fake_manifest(payload: bytes) -> dict:
         return {
