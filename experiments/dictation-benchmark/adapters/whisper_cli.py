@@ -37,7 +37,7 @@ def _audio_duration_ms(path: Path) -> float:
         if (audio.getnchannels(), audio.getsampwidth(), audio.getframerate(),
                 audio.getcomptype()) != (1, 2, 16000, "NONE"):
             raise AdapterError("audio must be mono 16-bit PCM WAV at 16 kHz")
-        return round(audio.getnframes() / 16, 3)
+        return audio.getnframes() / 16
 
 
 def _limit_output_files() -> None:

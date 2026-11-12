@@ -360,6 +360,8 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             FakeAudio(), 1600, "file", monotonic=monotonic, sleep=sleep))
         self.assertEqual([], sleeps)
 
+        self.assertEqual(2272.6875, module._audio_position_ms(36363))
+
     @unittest.skipUnless(shutil.which("bwrap"), "bwrap is required for isolation test")
     def test_whisper_adapter_uses_batch_protocol_without_leaking_content(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -369,7 +371,7 @@ class RealDictationBenchmarkTests(unittest.TestCase):
                 output.setnchannels(1)
                 output.setsampwidth(2)
                 output.setframerate(16000)
-                output.writeframes(b"\0\0" * 1600)
+                output.writeframes(b"\0\0" * 36363)
             engine = root / "engine"
             engine.mkdir()
             fake = engine / "whisper-cli"

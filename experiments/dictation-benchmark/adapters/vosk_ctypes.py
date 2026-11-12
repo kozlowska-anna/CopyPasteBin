@@ -41,6 +41,11 @@ def iter_audio_chunks(
         yield data, frames_sent
 
 
+def _audio_position_ms(frames_sent: int) -> float:
+    """Return the exact 16 kHz frame position without rounding past EOF."""
+    return frames_sent / 16
+
+
 def _result(function, key: str) -> str:
     raw = function()
     if not raw or len(raw) > MAX_RESULT_BYTES:
@@ -112,7 +117,7 @@ def main() -> int:
                 result_key = "text" if accepted else "partial"
                 text = _result(
                     lambda: getattr(library, payload_name)(recognizer), result_key)
-                audio_position_ms = round(frames_sent / 16, 3)
+                audio_position_ms = _audio_position_ms(frames_sent)
                 if accepted and text:
                     sequence += 1
                     emit(args.session, sequence, "final", segment=segment, text=text,
@@ -125,7 +130,7 @@ def main() -> int:
                          audio_position_ms=audio_position_ms)
                     last_partial = text
         text = _result(lambda: library.vosk_recognizer_final_result(recognizer), "text")
-        audio_position_ms = round(frames_sent / 16, 3)
+        audio_position_ms = _audio_position_ms(frames_sent)
         if text:
             sequence += 1
             emit(args.session, sequence, "final", segment=segment, text=text,
