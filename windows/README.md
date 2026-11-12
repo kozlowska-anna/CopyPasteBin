@@ -64,6 +64,14 @@ zdarzenia innych sesji. Nie wypisuje go.
 zaczynającym się od `CPB-STAGE0-CANARY` i nie czyta poprzedniej zawartości.
 Potrafi dodać formaty prywatności (także z uszkodzoną wartością), opóźnić
 udostępnienie danych i przytrzymać schowek po publikacji.
+Opcja `--unique-canary` nadaje każdemu uruchomieniu niesekretny, unikalny
+identyfikator tekstu testowego (np. `CPB-STAGE0-CANARY-A1B2C3D4E5F60718`),
+widoczny jako wiersz `canary_id` w wynikach właściciela; sonda tekstu nie
+czyta, więc go nie zna. Wiersz `publish` raportuje `text_published`
+odzwierciedlające rzeczywisty wynik `SetClipboardData`: `false` przy
+`--empty-only`, `--no-text`, niepowodzeniu publikacji oraz dla samej zapowiedzi
+opóźnionego renderowania (faktyczne udostępnienie danych widać osobno jako
+`render_result`).
 
 `CpbClipboardBlocker` otwiera schowek, trzyma go przez zadany czas i zamyka.
 Nie czyta i nie zmienia zawartości.

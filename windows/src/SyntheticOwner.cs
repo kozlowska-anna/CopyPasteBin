@@ -13,9 +13,10 @@ namespace CopyPasteBin.Stage0
     /// </summary>
     internal sealed class OwnerWindow : Form
     {
-        // The only text this tool can place on the clipboard. The probe must
-        // never print it; the manual protocol searches the logs for it.
-        private const string CanaryText = "CPB-STAGE0-CANARY synthetic test value";
+        // The base token of the test value. The probe must never print it; the
+        // manual protocol searches the probe logs for it.
+        public const string CanaryBase = "CPB-STAGE0-CANARY";
+        private const string CanaryText = CanaryBase + " synthetic test value";
 
         private const int OpenAttempts = 400;
         private const int OpenDelayMs = 5;
@@ -104,12 +105,14 @@ namespace CopyPasteBin.Stage0
         {
             if (!Open())
             {
-                log.Write("publish", "index=" + Fmt.Number(index) + " open=failed");
+                log.Write("publish",
+                    "index=" + Fmt.Number(index) + " open=failed text_published=false");
                 return false;
             }
             StringBuilder details = new StringBuilder();
             details.Append("index=").Append(Fmt.Number(index));
             details.Append(" open=ok");
+            bool textPublished = false;
             try
             {
                 bool emptied = Native.EmptyClipboard();
@@ -124,13 +127,17 @@ namespace CopyPasteBin.Stage0
                     {
                         if (plan.DelayTextMs >= 0)
                         {
+                            // Delayed rendering only PROMISES the format here; the
+                            // data is delivered later via WM_RENDERFORMAT. A promise
+                            // is not a successful publication.
                             Native.SetClipboardData(Native.CF_UNICODETEXT, IntPtr.Zero);
                             details.Append(" text=delayed");
                         }
                         else
                         {
-                            details.Append(" text=").Append(
-                                Put(Native.CF_UNICODETEXT, TextBytes(index)));
+                            string textResult = Put(Native.CF_UNICODETEXT, TextBytes(index));
+                            textPublished = textResult == "set";
+                            details.Append(" text=").Append(textResult);
                         }
                     }
                     if (plan.DelaySyntheticMs >= 0)
@@ -177,6 +184,7 @@ namespace CopyPasteBin.Stage0
                 }
                 details.Append(" hold_after=").Append(held ? "ok" : "failed");
             }
+            details.Append(" text_published=").Append(Fmt.Flag(textPublished));
             details.Append(" seq=").Append(Fmt.Number(Native.GetClipboardSequenceNumber()));
             log.Write("publish", details.ToString());
             return true;
@@ -216,8 +224,18 @@ namespace CopyPasteBin.Stage0
 
         private byte[] TextBytes(int index)
         {
-            string text = plan.Vary ? CanaryText + " #" + Fmt.Number(index) : CanaryText;
+            string baseText = plan.CanaryId != null ? plan.CanaryId : CanaryText;
+            string text = plan.Vary ? baseText + " #" + Fmt.Number(index) : baseText;
             return Encoding.Unicode.GetBytes(text + "\0");
+        }
+
+        // Builds a fresh, non-secret id for one run: the base token, a dash and
+        // 16 uppercase hex characters (e.g. ...-A1B2C3D4E5F60718). Uses only a
+        // random GUID: no time, user name, machine name or environment data.
+        public static string MakeCanaryId()
+        {
+            string hex = Guid.NewGuid().ToString("N").Substring(0, 16).ToUpperInvariant();
+            return CanaryBase + "-" + hex;
         }
 
         private static byte[] FlagBytes(string mode)
@@ -262,6 +280,8 @@ namespace CopyPasteBin.Stage0
         public int Count = 1;
         public int IntervalMs;
         public bool Vary;
+        public bool UniqueCanary;
+        public string CanaryId;
         public bool NoText;
         public bool EmptyOnly;
         public bool ExcludeMonitor;
@@ -294,6 +314,9 @@ namespace CopyPasteBin.Stage0
             "  --count <n>               number of transactions, 1-1000 (default 1)\r\n" +
             "  --interval-ms <n>         pause between transactions, 0-60000 (default 0)\r\n" +
             "  --vary                    make every transaction's text different\r\n" +
+            "  --unique-canary           use a fresh non-secret id as the test text,\r\n" +
+            "                            logged as a canary_id line; the probe never\r\n" +
+            "                            reads text, so it never sees the id\r\n" +
             "  --no-text                 publish only the synthetic private format\r\n" +
             "  --empty-only              only empty the clipboard\r\n" +
             "  --exclude-monitor         add ExcludeClipboardContentFromMonitorProcessing\r\n" +
@@ -318,7 +341,7 @@ namespace CopyPasteBin.Stage0
                 new string[]
                 {
                     "--vary", "--no-text", "--empty-only", "--exclude-monitor",
-                    "--render-nothing", "--help"
+                    "--render-nothing", "--unique-canary", "--help"
                 },
                 new string[]
                 {
@@ -345,6 +368,9 @@ namespace CopyPasteBin.Stage0
             plan.EmptyOnly = options.Has("--empty-only");
             plan.ExcludeMonitor = options.Has("--exclude-monitor");
             plan.RenderNothing = options.Has("--render-nothing");
+            plan.UniqueCanary = options.Has("--unique-canary");
+            if (plan.UniqueCanary)
+                plan.CanaryId = OwnerWindow.MakeCanaryId();
             plan.History = options.Text("--history");
             plan.Cloud = options.Text("--cloud");
             bool valid =
@@ -386,6 +412,8 @@ namespace CopyPasteBin.Stage0
                     "owner_start",
                     "count=" + Fmt.Number(plan.Count) +
                     " delayed=" + Fmt.Flag(plan.Delayed));
+                if (plan.UniqueCanary)
+                    log.Write("canary_id", "value=" + plan.CanaryId);
                 using (OwnerWindow window = new OwnerWindow(log, plan))
                 {
                     window.Start();

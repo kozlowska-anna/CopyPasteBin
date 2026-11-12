@@ -178,6 +178,29 @@ class Stage0SourceTests(unittest.TestCase):
         for name in ("README.md", "TEST-PROTOCOL.md"):
             self.assertTrue((WINDOWS / name).is_file(), name)
 
+    def test_unique_canary_option_and_generation(self):
+        owner = read("SyntheticOwner.cs")
+        self.assertIn("--unique-canary", owner)
+        self.assertIn("MakeCanaryId", owner)
+        self.assertIn("Guid.NewGuid()", owner)
+        self.assertIn("Substring(0, 16)", owner)
+        self.assertIn("ToUpperInvariant()", owner)
+        self.assertIn('CanaryBase + "-"', owner)
+        self.assertEqual(owner.count(CANARY), 1)
+
+    def test_unique_canary_id_is_emitted_by_owner_only(self):
+        owner = read("SyntheticOwner.cs")
+        self.assertIn('log.Write("canary_id"', owner)
+        self.assertIn("text_published=", owner)
+        probe = read("ClipboardProbe.cs")
+        self.assertNotIn("canary_id", probe)
+        self.assertNotIn(CANARY, probe)
+        self.assertNotIn("unique-canary", probe)
+
+    def test_unique_canary_preserves_default_behaviour(self):
+        owner = read("SyntheticOwner.cs")
+        self.assertIn("plan.CanaryId != null ? plan.CanaryId : CanaryText", owner)
+
 
 if __name__ == "__main__":
     unittest.main()

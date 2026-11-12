@@ -101,6 +101,50 @@ Po każdym poleceniu naciśnij `Win+V` i zapisz, czy tekst testowy pojawił się
 historii Windows. Zapisz wartości `exclude_monitor`, `history_fmt`,
 `history_val`, `cloud_fmt`, `cloud_val`, w tym ewentualny dopisek `_size_gt4`.
 
+### S5c. Unikalny identyfikator a historia `Win+V`
+
+Historia `Win+V` włączona. Sondę w oknie A uruchom z `--log` (katalog
+`wyniki`). Właściciela w oknie B uruchamiaj **bez** `--log` — jego wyjście
+(wiersz `canary_id`) celowo zawiera identyfikator i nie może trafić do
+katalogu `wyniki`. Trzy próby, każda z innym automatycznym identyfikatorem:
+
+```bat
+build\CpbSyntheticOwner.exe --unique-canary --history 1 --cloud 0
+build\CpbSyntheticOwner.exe --unique-canary --history 0 --cloud 0
+build\CpbSyntheticOwner.exe --unique-canary --exclude-monitor --history 0 --cloud 0
+```
+
+Dla każdej próby odczytaj wiersz `canary_id` w oknie B, naciśnij `Win+V` i
+zapisz, czy kafelek z **dokładnie** tym identyfikatorem się pojawił. Różne
+identyfikatory pozwalają przypisać kafelek do konkretnej próby bez czyszczenia
+historii między próbami.
+
+Sprzątanie: usuń prawym przyciskiem tylko kafelki zaczynające się od
+`CPB-STAGE0-CANARY-`.
+
+Oczekiwane (do potwierdzenia na Windows, nie dowiedzione statycznie): próba 1
+widoczna; próby 2 i 3 nieobecne, jeśli flaga jest honorowana; różnica między
+próbą 2 a 3 rozstrzyga, czy potrzebny jest `--exclude-monitor`.
+
+### S5d. Rzeczywisty generator identyfikatorów (po kompilacji, na Windows)
+
+Odpowiednik testu unikalności, który w środowisku chmurowym wykonano jako
+ANALOG — tu na skompilowanym kodzie C#. Użyj `--empty-only`, aby nie
+publikować tekstu testowego (wiersz `publish` pokaże `text_published=false`
+i nic nie trafi do historii `Win+V`). Uwaga: `--empty-only` **opróżnia schowek
+i zastępuje jego dotychczasową zawartość**, mimo że nie publikuje tekstu
+testowego — zapisz wcześniej to, czego potrzebujesz ze schowka:
+
+```bat
+build\CpbSyntheticOwner.exe --unique-canary --empty-only
+build\CpbSyntheticOwner.exe --unique-canary --empty-only
+build\CpbSyntheticOwner.exe --unique-canary --empty-only
+```
+
+Zapisz trzy wiersze `canary_id value=...`. Potwierdź: (a) każdy pasuje do
+`^CPB-STAGE0-CANARY-[0-9A-F]{16}$`, (b) wszystkie trzy są różne. To ćwiczy
+rzeczywisty `MakeCanaryId` (GUID → 16 znaków hex → wielkie litery), a nie analog.
+
 ### S6. Formaty prywatności — wartości uszkodzone
 
 ```bat
@@ -222,13 +266,16 @@ Potwierdź, że wszystkie powyższe kroki działały na zwykłym koncie, z
 Te warunki muszą być spełnione; każde odstępstwo to błąd narzędzia do
 zgłoszenia:
 
-1. Tekst kontrolny nie występuje w żadnym dzienniku sondy:
+1. Tekst kontrolny nie występuje w żadnym dzienniku **sondy**:
 
    ```bat
    findstr /s /c:"CPB-STAGE0-CANARY" wyniki\*.log
    ```
 
-   Polecenie nie może niczego znaleźć.
+   Polecenie nie może niczego znaleźć. Uwaga: wyjście **właściciela** (wiersz
+   `canary_id` przy `--unique-canary`) celowo zawiera identyfikator oparty na
+   tekście kontrolnym — dlatego właściciela w S5c uruchamia się bez `--log`, a
+   katalog `wyniki` zawiera wyłącznie logi sondy. Kryterium dotyczy tych logów.
 2. Żaden wiersz sondy nie zawiera treści, długości treści, nazwy programu,
    PID ani tytułu okna.
 3. Podczas blokady sesji sonda nie wypisuje pól `text`, `open` ani wartości
