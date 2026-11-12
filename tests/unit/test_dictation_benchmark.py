@@ -57,10 +57,13 @@ class DictationBenchmarkTests(unittest.TestCase):
 
 class RealDictationBenchmarkTests(unittest.TestCase):
     def _run(self, result: dict) -> subprocess.CompletedProcess[str]:
+        return self._run_results([result])
+
+    def _run_results(self, results: list[dict]) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as temporary:
             result_path = Path(temporary) / "real-results.json"
             result_path.write_text(
-                json.dumps({"version": 3, "results": [result]}),
+                json.dumps({"version": 3, "results": results}),
                 encoding="utf-8",
             )
             return subprocess.run(
@@ -113,6 +116,10 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         self.assertEqual(100, engine["mean_endpoint_latency_ms"])
         self.assertEqual(50, engine["mean_partial_lag_ms"])
         self.assertEqual(250, engine["mean_first_partial_after_ready_ms"])
+        self.assertEqual(120, engine["mean_adapter_ready_ms"])
+        self.assertEqual(1250, engine["median_completed_ms"])
+        self.assertEqual(300, engine["mean_peak_rss_mib"])
+        self.assertEqual(300, engine["max_peak_rss_mib"])
         self.assertIsNotNone(engine["mean_partial_churn"])
         self.assertNotIn("syntetyczna", completed.stdout)
 
@@ -132,6 +139,7 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         self.assertEqual(1, engine["runs_without_partial"])
         self.assertEqual("batch", engine["recognition_mode"])
         self.assertEqual("fast", engine["input_pacing"])
+        self.assertEqual("native-cli-reported-load", engine["model_init_scope"])
         self.assertIsNone(engine["mean_endpoint_latency_ms"])
 
     def test_model_init_and_ready_timestamps_are_distinct(self):
@@ -142,7 +150,27 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         self.assertEqual(0, completed.returncode, completed.stderr)
         engine = json.loads(completed.stdout)["engines"][0]
         self.assertEqual(50, engine["mean_model_init_ms"])
+        self.assertEqual("adapter-start-to-ready", engine["model_init_scope"])
         self.assertEqual(250, engine["mean_first_partial_after_ready_ms"])
+
+    def test_repeats_are_aggregated_by_unique_case_without_claiming_independence(self):
+        results = [
+            self._result(run=1, completed_ms=1250, peak_rss_mib=300),
+            self._result(run=2, completed_ms=1350, peak_rss_mib=320),
+            self._result(run=3, completed_ms=1550, peak_rss_mib=280),
+        ]
+        completed = self._run_results(results)
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        engine = json.loads(completed.stdout)["engines"][0]
+        self.assertEqual(3, engine["runs"])
+        self.assertEqual(1, engine["unique_cases"])
+        self.assertEqual(1, engine["zero_word_error_cases"])
+        self.assertEqual(0, engine["cases_with_quality_variation"])
+        self.assertEqual(1350, engine["median_completed_ms"])
+        self.assertEqual(300, engine["mean_repeat_completed_range_ms"])
+        self.assertEqual(300, engine["max_repeat_completed_range_ms"])
+        self.assertEqual(300, engine["mean_peak_rss_mib"])
+        self.assertEqual(320, engine["max_peak_rss_mib"])
 
     def test_unconfirmed_offline_run_fails_without_echoing_transcript(self):
         canary = "private transcript canary"

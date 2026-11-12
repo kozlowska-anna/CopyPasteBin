@@ -8,7 +8,7 @@ import json
 import math
 import re
 from pathlib import Path
-from statistics import fmean
+from statistics import fmean, median
 from typing import Any
 
 from score import InputError, _edit_distance, _read_json, _words, load_cases
@@ -141,6 +141,8 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
         hyp_chars = " ".join(transcript.casefold().split())
         ref_punctuation, hyp_punctuation = _punctuation(reference), _punctuation(transcript)
         grouped.setdefault((engine, mode, pacing), []).append({
+            "case_id": case_id,
+            "run": run,
             "mode": mode,
             "pacing": pacing,
             "word_edits": _edit_distance(ref_words, hyp_words),
@@ -169,6 +171,15 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
     engines = []
     for engine, mode, pacing in sorted(grouped):
         rows = grouped[(engine, mode, pacing)]
+        by_case = {
+            case_id: [row for row in rows if row["case_id"] == case_id]
+            for case_id in sorted({row["case_id"] for row in rows})
+        }
+        repeat_ranges = [
+            max(row["completed"] for row in case_rows) -
+            min(row["completed"] for row in case_rows)
+            for case_rows in by_case.values() if len(case_rows) > 1
+        ]
         word_units = sum(row["word_units"] for row in rows)
         char_units = sum(row["char_units"] for row in rows)
         first = [row["first"] for row in rows if row["first"] is not None]
@@ -181,10 +192,24 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             "recognition_mode": mode,
             "input_pacing": pacing,
             "runs": len(rows),
+            "unique_cases": len(by_case),
+            "zero_word_error_cases": sum(
+                all(row["word_edits"] == 0 for row in case_rows)
+                for case_rows in by_case.values()),
+            "punctuation_perfect_cases": sum(
+                all(row["punctuation_accuracy"] == 1 for row in case_rows)
+                for case_rows in by_case.values()),
+            "cases_with_quality_variation": sum(
+                len({(row["word_edits"], row["char_edits"])
+                     for row in case_rows}) > 1
+                for case_rows in by_case.values()),
             "wer": round(sum(row["word_edits"] for row in rows) / word_units, 6),
             "cer": round(sum(row["char_edits"] for row in rows) / char_units, 6),
             "mean_punctuation_accuracy": round(fmean(row["punctuation_accuracy"] for row in rows), 6),
+            "model_init_scope": "native-cli-reported-load" if mode == "batch" else
+                "adapter-start-to-ready",
             "mean_model_init_ms": round(fmean(row["init"] for row in rows), 3),
+            "mean_adapter_ready_ms": round(fmean(row["ready"] for row in rows), 3),
             "mean_first_partial_ms": None if not first else round(fmean(first), 3),
             "mean_first_partial_after_ready_ms": None if not first else round(
                 fmean(row["first"] - row["ready"] for row in rows
@@ -192,6 +217,13 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             "runs_without_partial": len(rows) - len(first),
             "mean_final_result_ms": round(fmean(row["final"] for row in rows), 3),
             "mean_completed_ms": round(fmean(row["completed"] for row in rows), 3),
+            "median_completed_ms": round(median(row["completed"] for row in rows), 3),
+            "mean_repeat_completed_range_ms": None if not repeat_ranges else round(
+                fmean(repeat_ranges), 3),
+            "median_repeat_completed_range_ms": None if not repeat_ranges else round(
+                median(repeat_ranges), 3),
+            "max_repeat_completed_range_ms": None if not repeat_ranges else round(
+                max(repeat_ranges), 3),
             "mean_wall_clock_ratio": round(
                 fmean(row["completed"] / row["duration"] for row in rows), 6),
             "mean_endpoint_latency_ms": None if not endpoint_lags else round(
@@ -201,6 +233,8 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
                 fmean(partial_lags), 3),
             "mean_partial_churn": None if not churn else round(fmean(churn), 6),
             "mean_cpu_seconds": round(fmean(row["cpu"] for row in rows), 3),
+            "mean_peak_rss_mib": round(fmean(row["rss"] for row in rows), 3),
+            "max_peak_rss_mib": round(max(row["rss"] for row in rows), 3),
             "peak_rss_mib": round(max(row["rss"] for row in rows), 3),
             "engine_bytes": max(row["engine_bytes"] for row in rows),
             "model_bytes": max(row["model_bytes"] for row in rows),

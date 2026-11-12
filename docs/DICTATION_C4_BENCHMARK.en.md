@@ -5,9 +5,14 @@ the `whisper-cli` adapter, and a technical audio corpus are prepared locally.
 Updated: 2026-11-12.
 
 Every candidate receives the same mono 16-bit PCM WAV at 16 kHz, three times.
+The model is loaded afresh for each run, but OS caches are not flushed, so the
+first run is not labelled a guaranteed cold start. Three repetitions of one
+clip are not independent quality samples; quality conclusions are based on 20
+unique clips. Engine order is rotated between repetitions.
 Final-quality metrics are WER, CER, punctuation accuracy, model initialization,
-final latency, real-time factor, endpoint latency, CPU, peak RSS, and disk
-size. Live metrics are compared only inside an explicit `streaming` or
+final latency, real-time factor, CPU, peak RSS, and disk size. Endpoint latency
+is interpreted only for real-time input. Live metrics are compared only inside
+an explicit `streaming` or
 `windowed` class. Vosk can emit native partials; `whisper-cli` is initially a
 `batch` test and receives no invented first-partial value. Reprocessing a
 growing window must be labelled `windowed`, not streaming.
@@ -25,7 +30,15 @@ default routes, and zero effective capabilities. It then validates the C1–C3
 session frames, measures resources, and writes a private `0600` format-3 result
 without printing transcripts. Benchmark-only audio-position fields make live
 lag measurable without changing the editor's production protocol.
-`analyze_runs.py` aggregates metrics without content.
+`analyze_runs.py` aggregates metrics without content. `completed_ms` has one
+definition for both engines: adapter start through clean process completion
+after the final frame; `final_result_ms` is the earlier observation of that
+frame. CPU, wall time, and RSS remain separate. Adapter readiness is also
+separate from `model_init_ms`: Vosk's initialization covers adapter start
+through library/model/recognizer readiness, while Whisper's is the native
+CLI-reported model-load time. Those differently scoped values must not be
+compared directly. The report labels their scope and includes mean and median
+completion time, mean/max RSS, and per-clip repeat spread.
 `validate_audio_manifest.py` accepts only checksum-pinned mono PCM files inside
 one isolated audio directory.
 The launcher compares the complete command against one of two approved

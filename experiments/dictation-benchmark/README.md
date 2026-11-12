@@ -44,6 +44,13 @@ sama deklaracja `--offline` są odrzucane. `analyze_runs.py` rozdziela
 inicjalizację, czas wyniku końcowego i zakończenia, opóźnienia względem pozycji
 audio oraz stabilność wyników częściowych.
 
+`completed_ms` obejmuje od startu adaptera jego poprawne zakończenie po ramce
+końcowej i jest wspólną miarą czasu ściennego. Zakres `model_init_ms` jest
+jawnie oznaczony i różny: Vosk mierzy dojście adaptera do `ready`, a Whisper
+natywny czas ładowania raportowany przez CLI. Tych wartości nie porównuje się
+bezpośrednio. Agregat odróżnia unikalne klipy od trzech nie-niezależnych
+powtórzeń oraz podaje medianę czasu, średnie/maksymalne RSS i rozrzut powtórzeń.
+
 `adapters/whisper_cli.py` opakowuje przypięty `whisper-cli` wyłącznie jako
 `batch/fast`. Przechwytuje i ogranicza JSON oraz diagnostykę, nie wypisuje
 transkrypcji, emituje jedną ramkę końcową i oddziela czas ładowania modelu od

@@ -8,15 +8,18 @@ Data aktualizacji: 2026-11-12.
 
 Każdy kandydat otrzymuje dokładnie ten sam plik mono 16-bit PCM WAV 16 kHz.
 Każdy przypadek wykonuje się trzy razy, w stałej kolejności rotowanej między
-silnikami. Pierwszy przebieg mierzy zimną inicjalizację, a kolejne dwa działają
-po zwolnieniu poprzedniego procesu; model jest ładowany od nowa w każdym
-przebiegu. Nie wolno wykonywać innych ciężkich zadań równolegle.
+silnikami. Model jest ładowany od nowa w każdym przebiegu, ale cache systemu
+operacyjnego nie jest czyszczony, więc pierwszego przebiegu nie nazywamy
+gwarantowanym pomiarem zimnego startu. Trzy powtórzenia tego samego klipu nie
+są niezależnymi próbkami jakości; wnioski jakościowe opierają się na 20
+unikalnych nagraniach. Nie wolno wykonywać innych ciężkich zadań równolegle.
 
 Są dwa osobne tory i dwa jawne sposoby podawania danych:
 
 1. **Jakość końcowa:** Vosk i wszystkie modele Whisper przetwarzają cały ten
    sam plik. Mierzymy WER, CER, zgodność interpunkcji, CPU, RSS, czas
-   inicjalizacji, czas końcowy, RTF i opóźnienie po końcu audio.
+   inicjalizacji, czas końcowy i RTF. Opóźnienie względem pozycji audio ma
+   znaczenie wyłącznie w torze `realtime`.
 2. **Zachowanie na żywo:** wynik jest porównywany tylko w obrębie jawnej klasy
    `streaming` albo `windowed`. Vosk emituje częściowe wyniki podczas podawania
    kolejnych ramek PCM. `whisper-cli` jest testem `batch` i nie otrzymuje
@@ -33,6 +36,16 @@ wyników częściowych.
 Stabilność częściowych wyników to częstotliwość aktualizacji na sekundę i
 średnia znormalizowana odległość edycyjna między kolejnymi podglądami. Brak
 częściowych wyników pozostaje `null`, a nie zerem.
+
+`completed_ms` ma tę samą definicję dla obu silników: czas od uruchomienia
+adaptera do poprawnego zakończenia procesu po ramce końcowej. `final_result_ms`
+oznacza wcześniejszą chwilę zaobserwowania wyniku końcowego. CPU, czas ścienny
+i RSS są raportowane osobno. `ready_ms` mierzy gotowość całego adaptera.
+`model_init_ms` nie jest bezpośrednio porównywalne między kandydatami: dla
+Vosk obejmuje start adaptera, załadowanie biblioteki, modelu i recognizera do
+`ready`, a dla Whisper jest natywnym czasem `load` raportowanym przez CLI.
+Raport podaje zakres tej metryki jawnie oraz średnią i medianę `completed_ms`,
+średnie/maksymalne RSS i rozrzut czasu między trzema powtórzeniami klipu.
 
 `run_isolated.py` jest jedyną wspieraną ścieżką uruchomienia: ustanawia profil
 `bwrap`, a `run_adapter.py` przed startem silnika sprawdza montowania tylko do
