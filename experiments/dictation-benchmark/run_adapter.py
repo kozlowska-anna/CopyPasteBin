@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import queue
 import resource
 import socket
+import stat
 import subprocess
 import threading
 import time
@@ -27,11 +29,17 @@ def _tree_size(path: Path) -> int:
     if resolved.is_file():
         return resolved.stat().st_size
     total = 0
+    seen = set()
     for item in resolved.rglob("*"):
         if item.is_symlink():
-            raise InputError("measured path contains a symlink")
-        if item.is_file():
-            total += item.stat().st_size
+            target = item.resolve(strict=True)
+            if not target.is_relative_to(resolved) or not target.is_file():
+                raise InputError("measured path contains an unsafe symlink")
+            continue
+        info = item.stat()
+        if stat.S_ISREG(info.st_mode) and (info.st_dev, info.st_ino) not in seen:
+            seen.add((info.st_dev, info.st_ino))
+            total += info.st_size
     return total
 
 
@@ -56,7 +64,13 @@ def _frame(raw: str, session: str, last_sequence: int) -> dict:
             frame.get("kind") not in {"ready", "partial", "final", "stopped", "error"}:
         raise InputError("adapter emitted an invalid frame")
     expected = {"version", "session_id", "sequence", "kind"}
-    if frame["kind"] in {"partial", "final"}:
+    if frame["kind"] == "ready" and "model_init_ms" in frame:
+        value = frame["model_init_ms"]
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or \
+                not math.isfinite(value) or value < 0:
+            raise InputError("adapter emitted an invalid model initialization time")
+        expected.add("model_init_ms")
+    elif frame["kind"] in {"partial", "final"}:
         expected |= {"segment", "text", "audio_position_ms"}
         position = frame.get("audio_position_ms")
         if type(frame.get("segment")) is not int or frame["segment"] < 0 or \
@@ -157,7 +171,31 @@ def _reader(stream, messages: queue.Queue) -> None:
         messages.put(None)
 
 
+def _child_pids(pid: int) -> set[int]:
+    pending, found = [pid], set()
+    while pending:
+        current = pending.pop()
+        try:
+            children = Path(f"/proc/{current}/task/{current}/children").read_text(
+                encoding="ascii").split()
+        except (OSError, UnicodeError):
+            continue
+        for value in children:
+            child = int(value)
+            if child not in found:
+                found.add(child)
+                pending.append(child)
+    return found
+
+
 def _rss_mib(pid: int) -> float:
+    total = 0.0
+    for process_id in {pid, *_child_pids(pid)}:
+        total += _process_rss_mib(process_id)
+    return total
+
+
+def _process_rss_mib(pid: int) -> float:
     try:
         status = Path(f"/proc/{pid}/status").read_text(encoding="ascii")
     except (OSError, UnicodeError):
@@ -254,7 +292,7 @@ def main() -> int:
     usage_after = resource.getrusage(resource.RUSAGE_CHILDREN)
 
     state, last_sequence, last_segment = "starting", 0, -1
-    ready_ms = first_partial_ms = final_result_ms = stopped_ms = None
+    ready_ms = model_init_ms = first_partial_ms = final_result_ms = stopped_ms = None
     partials, finals = [], []
     final_audio_position_ms = None
     last_audio_position_ms = 0.0
@@ -264,6 +302,7 @@ def main() -> int:
         kind = frame["kind"]
         if kind == "ready" and state == "starting":
             state, ready_ms = "recording", observed_ms
+            model_init_ms = float(frame.get("model_init_ms", observed_ms))
         elif kind == "partial" and state == "recording" and frame["segment"] > last_segment:
             audio_position_ms = float(frame["audio_position_ms"])
             if audio_position_ms < last_audio_position_ms or audio_position_ms > duration_ms:
@@ -315,7 +354,8 @@ def main() -> int:
         "recognition_mode": args.mode,
         "input_pacing": args.input_pacing,
         "audio_duration_ms": duration_ms,
-        "model_init_ms": ready_ms,
+        "ready_ms": ready_ms,
+        "model_init_ms": model_init_ms,
         "first_partial_ms": first_partial_ms,
         "final_result_ms": final_result_ms,
         "final_audio_position_ms": final_audio_position_ms,

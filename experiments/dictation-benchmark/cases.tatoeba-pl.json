@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "language": "pl",
+  "cases": [
+    {"id": "pl-01", "text": "Chciałbym studiować francuski."},
+    {"id": "pl-02", "text": "Cieszę się, że mi uwierzyłeś."},
+    {"id": "pl-03", "text": "Dlaczego chcesz to kupić?"},
+    {"id": "pl-04", "text": "Dziękujemy za pomoc w rozwiązaniu problemu."},
+    {"id": "pl-05", "text": "Garaż jest obok domu."},
+    {"id": "pl-06", "text": "Ja to zbudowałem."},
+    {"id": "pl-07", "text": "Jak to używasz?"},
+    {"id": "pl-08", "text": "Jestem tylko mechanikiem."},
+    {"id": "pl-09", "text": "Każdemu mogło się to stać."},
+    {"id": "pl-10", "text": "Mogłabym zadzwonić."},
+    {"id": "pl-11", "text": "Muszę Cię o coś zapytać."},
+    {"id": "pl-12", "text": "Mów za siebie!"},
+    {"id": "pl-13", "text": "Nie chcę wygrać."},
+    {"id": "pl-14", "text": "Nie sądzę, żebym miał czas."},
+    {"id": "pl-15", "text": "Oddzwaniam do Ciebie."},
+    {"id": "pl-16", "text": "Pamiętaj, to nie jest gra."},
+    {"id": "pl-17", "text": "Rzadko prowadzę auto ojca."},
+    {"id": "pl-18", "text": "Tom powiedział, że się spóźni."},
+    {"id": "pl-19", "text": "Zagrajmy w karty zamiast oglądać telewizję."},
+    {"id": "pl-20", "text": "Zegar nie działa."}
+  ]
+}

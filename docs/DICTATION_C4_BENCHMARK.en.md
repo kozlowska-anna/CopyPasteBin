@@ -1,7 +1,7 @@
 # CopyPasteBin 1.3 — C4 real STT benchmark plan
 
-Status: Vosk 0.3.45, Vosk `small-pl-0.22`, whisper.cpp 1.9.5, and Whisper tiny
-are prepared locally; approved audio and a `whisper-cli` adapter are missing.
+Status: Vosk 0.3.45, Vosk `small-pl-0.22`, whisper.cpp 1.9.5, Whisper tiny,
+the `whisper-cli` adapter, and a technical audio corpus are prepared locally.
 Updated: 2026-11-12.
 
 Every candidate receives the same mono 16-bit PCM WAV at 16 kHz, three times.
@@ -29,14 +29,17 @@ lag measurable without changing the editor's production protocol.
 `validate_audio_manifest.py` accepts only checksum-pinned mono PCM files inside
 one isolated audio directory.
 
-The current text cases are for adapter mechanics, not STT-quality evidence.
-The quality corpus should contain 12–20 Polish clips totalling about 2–4
-minutes and covering short/long speech, numbers and dates, names, Polish
-characters, punctuation, computer/AI terminology, pauses, corrections, and an
-unfinished sentence. Mozilla Common Voice Polish 27.0 is listed as CC0-1.0,
-but the full archive is about 4.49 GB. No clip was downloaded; first determine
-whether a deterministic small subset can be obtained without the full archive.
-Private user recordings are excluded.
+The first real technical set is pinned in `cases.tatoeba-pl.json` and
+`audio-manifest.tatoeba-pl.json`: 20 short utterances (28.395 seconds total)
+from one Tatoeba speaker, `antio`. Audio is CC BY 4.0 and reference text is
+CC BY 2.0 FR. The manifest records sentence IDs, source URLs, source MP3 and
+derived WAV SHA-256 values, and the GStreamer conversion to mono 16-bit PCM
+WAV at 16 kHz. One Tatoeba/Wikimedia source pair was byte-compared. This is
+enough for adapter readiness and an initial technical comparison, but its
+short duration, single speaker, and limited content are not representative
+STT-quality evidence. A later quality corpus should still cover 2–4 minutes,
+more speakers, numbers, names, technical terms, pauses, and corrections.
+Private user recordings remain excluded.
 
 ## Pinned dependencies
 
@@ -71,9 +74,9 @@ and read-only audio plus writable results. It exposes no `/home`, `/etc/passwd`,
 or `/dev/snd`. `run_adapter.py` refuses direct execution, so a flag or
 environment claim alone cannot mark a run offline.
 
-Recommended order: add the `whisper-cli` adapter, approve and pin audio, then
-with separate approval test Vosk and Whisper tiny final quality and native
-Vosk streaming. Add base and then small only if resource results justify them;
+Recommended order: with separate approval test Vosk and Whisper tiny on the
+pinned technical corpus, including native Vosk streaming. Add base and then
+small only if resource results justify them;
 decide about a Whisper `windowed` adapter only after those measurements.
 Microphone and editor integration remain outside C4.
 

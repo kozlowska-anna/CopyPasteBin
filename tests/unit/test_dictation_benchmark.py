@@ -18,6 +18,7 @@ RUNNER = ROOT / "experiments" / "dictation-benchmark" / "run_adapter.py"
 ISOLATED_RUNNER = ROOT / "experiments" / "dictation-benchmark" / "run_isolated.py"
 ADAPTER_FIXTURE = ROOT / "tests" / "helpers" / "stt_adapter_fixture.py"
 VOSK_ADAPTER = ROOT / "experiments" / "dictation-benchmark" / "adapters" / "vosk_ctypes.py"
+WHISPER_ADAPTER = ROOT / "experiments" / "dictation-benchmark" / "adapters" / "whisper_cli.py"
 
 
 class DictationBenchmarkTests(unittest.TestCase):
@@ -78,6 +79,7 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             "recognition_mode": "streaming",
             "input_pacing": "realtime",
             "audio_duration_ms": 1000,
+            "ready_ms": 120,
             "model_init_ms": 120,
             "first_partial_ms": 370,
             "final_result_ms": 1220,
@@ -132,6 +134,16 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         self.assertEqual("fast", engine["input_pacing"])
         self.assertIsNone(engine["mean_endpoint_latency_ms"])
 
+    def test_model_init_and_ready_timestamps_are_distinct(self):
+        completed = self._run(self._result(
+            model_init_ms=50,
+            ready_ms=120,
+        ))
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        engine = json.loads(completed.stdout)["engines"][0]
+        self.assertEqual(50, engine["mean_model_init_ms"])
+        self.assertEqual(250, engine["mean_first_partial_after_ready_ms"])
+
     def test_unconfirmed_offline_run_fails_without_echoing_transcript(self):
         canary = "private transcript canary"
         completed = self._run(self._result(transcript=canary, offline=False))
@@ -170,6 +182,44 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             ], capture_output=True, text=True)
             self.assertEqual(0, completed.returncode, completed.stderr)
             self.assertEqual(100, json.loads(completed.stdout)["duration_ms"])
+
+    def test_attributed_v2_audio_manifest_accepts_a_safe_subdirectory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            corpus = root / "corpus"
+            corpus.mkdir()
+            audio = corpus / "pl-01.wav"
+            with wave.open(str(audio), "wb") as output:
+                output.setnchannels(1)
+                output.setsampwidth(2)
+                output.setframerate(16000)
+                output.writeframes(b"\0\0" * 1600)
+            digest = hashlib.sha256(audio.read_bytes()).hexdigest()
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({
+                "version": 2,
+                "dataset": {
+                    "name": "Synthetic attributed corpus", "language": "pl",
+                    "speaker": "synthetic", "selection": "test fixture",
+                    "audio_license": "CC BY 4.0",
+                    "reference_license": "CC BY 2.0 FR",
+                    "attribution_url": "https://example.invalid/author",
+                    "retrieved_at": "2026-11-12", "conversion": "synthetic PCM",
+                },
+                "samples": [{
+                    "case_id": "pl-01", "file": "corpus/pl-01.wav",
+                    "sha256": digest, "source_sha256": "0" * 64,
+                    "source_url": "https://example.invalid/source.mp3",
+                    "reference_url": "https://example.invalid/sentence/1",
+                    "purpose": "technical",
+                }],
+            }), encoding="utf-8")
+            completed = subprocess.run([
+                sys.executable, str(AUDIO_VALIDATOR),
+                "--manifest", str(manifest), "--audio-root", str(root),
+            ], capture_output=True, text=True)
+            self.assertEqual(0, completed.returncode, completed.stderr)
+            self.assertEqual(2, json.loads(completed.stdout)["version"])
 
     @unittest.skipUnless(shutil.which("bwrap"), "bwrap is required for isolation test")
     def test_controlled_launcher_records_verified_offline_metrics_privately(self):
@@ -292,6 +342,62 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         list(module.iter_audio_chunks(
             FakeAudio(), 1600, "file", monotonic=monotonic, sleep=sleep))
         self.assertEqual([], sleeps)
+
+    @unittest.skipUnless(shutil.which("bwrap"), "bwrap is required for isolation test")
+    def test_whisper_adapter_uses_batch_protocol_without_leaking_content(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            audio = root / "pl-01.wav"
+            with wave.open(str(audio), "wb") as output:
+                output.setnchannels(1)
+                output.setsampwidth(2)
+                output.setframerate(16000)
+                output.writeframes(b"\0\0" * 1600)
+            engine = root / "engine"
+            engine.mkdir()
+            fake = engine / "whisper-cli"
+            fake.write_text(
+                "#!/usr/bin/python3\n"
+                "import json, sys\n"
+                "print(json.dumps({'transcription':[{'text':'syntetyczna tajna treść'}]}))\n"
+                "print('whisper_print_timings: load time = 12.34 ms', file=sys.stderr)\n",
+                encoding="utf-8",
+            )
+            fake.chmod(0o755)
+            (engine / "libfake.so.1").write_bytes(b"library")
+            (engine / "libfake.so").symlink_to("libfake.so.1")
+            model = root / "model.bin"
+            model.write_bytes(b"model")
+            results = root / "results.json"
+            session = "synthetic-whisper"
+            completed = subprocess.run([
+                sys.executable, str(ISOLATED_RUNNER),
+                "--case-id", "pl-01", "--engine", "whisper.cpp-tiny",
+                "--run", "1", "--mode", "batch", "--input-pacing", "fast",
+                "--session", session, "--audio", str(audio),
+                "--engine-path", str(engine), "--model-path", str(model),
+                "--results", str(results), "--", "/usr/bin/python3",
+                "/benchmark/adapters/whisper_cli.py",
+                "--binary", "/engine/whisper-cli", "--model", "/model",
+                "--audio", "/audio/input.wav", "--session", session,
+            ], capture_output=True, text=True)
+            self.assertEqual(0, completed.returncode, completed.stderr)
+            self.assertNotIn("syntetyczna", completed.stdout + completed.stderr)
+            result = json.loads(results.read_text(encoding="utf-8"))["results"][0]
+            self.assertEqual("batch", result["recognition_mode"])
+            self.assertEqual(12.34, result["model_init_ms"])
+            self.assertGreaterEqual(result["ready_ms"], result["model_init_ms"])
+            self.assertEqual([], result["partials"])
+
+    def test_whisper_parser_rejects_malformed_output_without_echoing_it(self):
+        specification = importlib.util.spec_from_file_location("whisper_adapter", WHISPER_ADAPTER)
+        module = importlib.util.module_from_spec(specification)
+        assert specification.loader is not None
+        specification.loader.exec_module(module)
+        canary = b"private transcript canary"
+        with self.assertRaises(module.AdapterError) as raised:
+            module._parse_output(canary)
+        self.assertNotIn(canary.decode(), str(raised.exception))
 
 
 if __name__ == "__main__":

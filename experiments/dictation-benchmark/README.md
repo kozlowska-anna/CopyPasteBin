@@ -44,8 +44,19 @@ sama deklaracja `--offline` są odrzucane. `analyze_runs.py` rozdziela
 inicjalizację, czas wyniku końcowego i zakończenia, opóźnienia względem pozycji
 audio oraz stabilność wyników częściowych.
 
-`validate_audio_manifest.py` akceptuje wyłącznie zwykłe, przypięte sumą
-SHA-256 pliki mono 16-bit PCM WAV 16 kHz w jednym izolowanym katalogu.
+`adapters/whisper_cli.py` opakowuje przypięty `whisper-cli` wyłącznie jako
+`batch/fast`. Przechwytuje i ogranicza JSON oraz diagnostykę, nie wypisuje
+transkrypcji, emituje jedną ramkę końcową i oddziela czas ładowania modelu od
+chwili zaobserwowania `ready`. Runner mierzy RSS całego drzewa adaptera, więc
+obejmuje także potomny proces natywny.
+
+`cases.tatoeba-pl.json` i `audio-manifest.tatoeba-pl.json` opisują techniczny
+zestaw 20 krótkich polskich nagrań jednego mówcy Tatoeba. Audio `antio` jest
+CC BY 4.0, teksty referencyjne CC BY 2.0 FR, a konwersję formatu jawnie
+oznaczono w manifeście. Zestaw służy pierwszej kontroli adapterów, nie jest
+reprezentatywnym dowodem jakości STT. `validate_audio_manifest.py` akceptuje
+wyłącznie zwykłe, przypięte sumą SHA-256 pliki mono 16-bit PCM WAV 16 kHz
+w jednym izolowanym katalogu.
 Rozpoznawanie `batch`, okienkowe `windowed` i rzeczywiste `streaming` są
 raportowane osobno. Kod nie pobiera artefaktów i nie uruchamia mikrofonu.
 

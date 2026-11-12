@@ -1,7 +1,7 @@
 # CopyPasteBin 1.3 — C4: plan rzeczywistego benchmarku STT
 
-Status: Vosk 0.3.45, Vosk `small-pl-0.22`, whisper.cpp 1.9.5 i Whisper tiny
-przygotowane lokalnie; brak zatwierdzonego audio i adaptera `whisper-cli`.
+Status: Vosk 0.3.45, Vosk `small-pl-0.22`, whisper.cpp 1.9.5, Whisper tiny,
+adapter `whisper-cli` i techniczny korpus audio są przygotowane lokalnie.
 Data aktualizacji: 2026-11-12.
 
 ## Metodologia
@@ -45,22 +45,23 @@ produkcyjnego protokołu edytora. `analyze_runs.py` nie wypisuje transkrypcji.
 
 ## Audio
 
-Obecne `cases.json` służy testom technicznym adaptera, nie jest dowodem jakości
-STT. Docelowy mały korpus jakości powinien zawierać 12–20 polskich klipów o
+`cases.json` nadal służy syntetycznym testom mechaniki adaptera. Pierwszy
+rzeczywisty zestaw techniczny jest przypięty w `cases.tatoeba-pl.json` oraz
+`audio-manifest.tatoeba-pl.json`: 20 krótkich wypowiedzi (łącznie 28,395 s)
+jednego mówcy `antio`, opublikowanych przez Tatoeba i Wikimedia Commons.
+Nagrania są CC BY 4.0, teksty referencyjne CC BY 2.0 FR. Manifest zachowuje
+identyfikatory zdań, źródłowe URL-e, SHA-256 MP3 i wynikowych WAV, a także
+oznacza transkodowanie GStreamerem do mono 16-bit PCM WAV 16 kHz. Jedna próbka
+z serwerów Tatoeba i Wikimedia została porównana bajtowo. Zestaw wystarcza do
+pierwszej kontroli działania i porównania technicznego, ale przez krótki czas,
+jednego mówcę i brak liczb oraz terminologii technicznej nie jest dowodem
+ogólnej jakości rozpoznawania.
+
+Ewentualny późniejszy korpus jakości powinien zawierać 12–20 polskich klipów o
 łącznym czasie około 2–4 minut: krótkie i długie wypowiedzi, liczby i daty,
 nazwy własne, terminologię komputerową/AI, pauzy, autokorektę i urwane zdanie.
-
-Preferowanym źródłem jest deterministycznie wybrany podzbiór polskiego Mozilla
-Common Voice, ponieważ wersja 27.0 jest oznaczona CC0-1.0. Pełny zbiór ma około
-4,49 GB i jego pobranie byłoby nieproporcjonalne; najpierw trzeba ustalić, czy
-Mozilla Data Collective pozwoli pobrać mały podzbiór bez pełnego archiwum.
-Nie pobrano żadnego klipu. Alternatywą jest nowy zestaw nagrany specjalnie i
-świadomie udostępniony jako CC0 przez osobę testującą — nie prywatne nagranie
-użytkowniczki.
-
-Każdy zatwierdzony klip otrzyma wpis manifestu: identyfikator, dokładny tekst,
-źródłowy URL/ID, licencję, cel `technical`/`quality` i SHA-256. Walidator
-odrzuca symlinki, wyjście poza katalog audio i inne formaty.
+Nie należy rozszerzać obecnego zestawu o prywatne nagrania użytkowniczki.
+Walidator odrzuca symlinki, wyjście poza katalog audio i inne formaty.
 
 ## Przypięte artefakty
 
@@ -123,7 +124,7 @@ C4_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/copypastebin-stt-c4"
 python3 experiments/dictation-benchmark/run_isolated.py \
   --case-id pl-01 --engine vosk-small-pl-0.22 --run 1 \
   --mode streaming --input-pacing realtime --session c4-vosk-pl01-r1 \
-  --audio "$C4_ROOT/audio/pl-01.wav" \
+  --audio "$C4_ROOT/audio/corpus-tatoeba-pl/pl-01.wav" \
   --engine-path "$C4_ROOT/tools/vosk/vosk/libvosk.so" \
   --model-path "$C4_ROOT/models/vosk-model-small-pl-0.22" \
   --results "$C4_ROOT/results/results.json" -- \
@@ -137,13 +138,28 @@ capabilities, montuje wejścia tylko do odczytu i zapisuje wyłącznie do
 prywatnego katalogu wyników oraz pustego `/tmp`. `run_adapter.py` odmawia pracy
 poza tym profilem. Nie ma już flagi `--offline` do ręcznego potwierdzania.
 
+Weryfikacja przygotowanego korpusu bez uruchamiania STT:
+
+```bash
+C4_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/copypastebin-stt-c4"
+python3 experiments/dictation-benchmark/validate_audio_manifest.py \
+  --manifest experiments/dictation-benchmark/audio-manifest.tatoeba-pl.json \
+  --cases experiments/dictation-benchmark/cases.tatoeba-pl.json \
+  --audio-root "$C4_ROOT/audio"
+```
+
+Adapter Whisper jest uruchamiany przez ten sam launcher z trybem `batch/fast`
+i poleceniem `/usr/bin/python3 /benchmark/adapters/whisper_cli.py`; bezpośrednie
+uruchomienie `/engine/whisper-cli` nie spełnia protokołu i jest odrzucane.
+
 Raport formatu 3:
 
 ```bash
 C4_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/copypastebin-stt-c4"
 PYTHONDONTWRITEBYTECODE=1 python3 \
   experiments/dictation-benchmark/analyze_runs.py \
-  --results "$C4_ROOT/results/results.json"
+  --results "$C4_ROOT/results/results.json" \
+  --cases experiments/dictation-benchmark/cases.tatoeba-pl.json
 ```
 
 Odzyskiwalne usunięcie całego, osobnego środowiska C4 — wyłącznie po osobnej
@@ -156,8 +172,8 @@ gio trash -- "$C4_ROOT"
 
 ## Kolejność
 
-1. Dodać adapter `whisper-cli`, zatwierdzić źródło małego korpusu audio i
-   utworzyć jego manifest.
+1. Wykonano: dodać adapter `whisper-cli`, mały legalny korpus techniczny,
+   teksty referencyjne i manifest z atrybucją oraz sumami.
 2. Wykonano: pobrać lokalny CMake, libvosk, model Vosk i Whisper tiny;
    zweryfikować artefakty i przejrzeć rozpakowaną zawartość.
 3. Po osobnej zgodzie uruchomić Vosk oraz Whisper tiny w torze jakości
@@ -166,5 +182,5 @@ gio trash -- "$C4_ROOT"
 5. Dopiero po wynikach zdecydować, czy warto budować adapter `windowed` dla
    Whisper. Nie podłączać mikrofonu ani edytora CPB w C4.
 
-Źródła: oficjalne strony Vosk, PyPI, repozytorium whisper.cpp, API Hugging Face
-oraz warunki i katalog Mozilla Common Voice.
+Źródła: oficjalne strony Vosk, PyPI, repozytorium whisper.cpp, API Hugging Face,
+Tatoeba (teksty i pliki audio) oraz Wikimedia Commons (metadane licencji audio).

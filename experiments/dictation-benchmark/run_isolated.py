@@ -13,6 +13,7 @@ from pathlib import Path
 
 PROFILE = "bwrap-v1"
 SAFE_RESULT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
+SAFE_SESSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,63}")
 
 
 class IsolationError(Exception):
@@ -34,13 +35,22 @@ def _validate_input(path: Path, *, regular_file: bool = False) -> Path:
     elif not (stat.S_ISREG(info.st_mode) or stat.S_ISDIR(info.st_mode)):
         raise IsolationError("engine and model inputs must be regular files or directories")
     if stat.S_ISDIR(info.st_mode):
+        root = path.resolve(strict=True)
         for item in path.rglob("*"):
             try:
                 item_info = os.lstat(item)
             except OSError as error:
                 raise IsolationError("an input tree could not be validated") from error
-            if stat.S_ISLNK(item_info.st_mode) or item_info.st_uid != os.geteuid() or not (
-                    stat.S_ISREG(item_info.st_mode) or stat.S_ISDIR(item_info.st_mode)):
+            if item_info.st_uid != os.geteuid():
+                raise IsolationError("an input tree contains an untrusted object")
+            if stat.S_ISLNK(item_info.st_mode):
+                try:
+                    target = item.resolve(strict=True)
+                except OSError as error:
+                    raise IsolationError("an input tree contains a broken symlink") from error
+                if not target.is_relative_to(root) or not target.is_file():
+                    raise IsolationError("an input tree contains an unsafe symlink")
+            elif not (stat.S_ISREG(item_info.st_mode) or stat.S_ISDIR(item_info.st_mode)):
                 raise IsolationError("an input tree contains an untrusted object")
     return path
 
@@ -76,18 +86,41 @@ def _validate_results(path: Path) -> tuple[Path, str]:
     return directory, path.name
 
 
-def _validate_command(command: list[str], input_pacing: str) -> None:
-    if not command or command[0] not in {"/usr/bin/python3", "/engine/whisper-cli"}:
+def _option(command: list[str], name: str) -> str | None:
+    positions = [index for index, value in enumerate(command) if value == name]
+    if len(positions) != 1 or positions[0] + 1 >= len(command):
+        return None
+    return command[positions[0] + 1]
+
+
+def _validate_command(command: list[str], engine: str, mode: str,
+                      input_pacing: str, session: str) -> None:
+    if not command or command[0] != "/usr/bin/python3":
         raise IsolationError("adapter command is outside the closed executable set")
     if len(command) > 64 or any(not value or "\0" in value or len(value) > 4096 for value in command):
         raise IsolationError("adapter command is invalid")
-    if len(command) >= 2 and command[:2] == [
-            "/usr/bin/python3", "/benchmark/adapters/vosk_ctypes.py"]:
+    if len(command) < 2 or command[1] not in {
+            "/benchmark/adapters/vosk_ctypes.py",
+            "/benchmark/adapters/whisper_cli.py",
+            "/engine/fixture.py",
+    }:
+        raise IsolationError("adapter script is outside the closed executable set")
+    if command[1] == "/benchmark/adapters/vosk_ctypes.py":
         expected = "realtime" if input_pacing == "realtime" else "file"
-        positions = [index for index, value in enumerate(command) if value == "--feed-mode"]
-        if len(positions) != 1 or positions[0] + 1 >= len(command) or \
-                command[positions[0] + 1] != expected:
+        if not engine.startswith("vosk-") or _option(command, "--feed-mode") != expected or \
+                _option(command, "--library") != "/engine" or \
+                _option(command, "--model") != "/model" or \
+                _option(command, "--audio") != "/audio/input.wav" or \
+                _option(command, "--session") != session:
             raise IsolationError("Vosk feed mode does not match benchmark input pacing")
+    elif command[1] == "/benchmark/adapters/whisper_cli.py":
+        if not engine.startswith("whisper.cpp-") or mode != "batch" or \
+                input_pacing != "fast" or \
+                _option(command, "--binary") != "/engine/whisper-cli" or \
+                _option(command, "--model") != "/model" or \
+                _option(command, "--audio") != "/audio/input.wav" or \
+                _option(command, "--session") != session:
+            raise IsolationError("whisper-cli requires the controlled batch profile")
 
 
 def build_command(arguments: argparse.Namespace) -> list[str]:
@@ -102,7 +135,10 @@ def build_command(arguments: argparse.Namespace) -> list[str]:
     command = arguments.command
     if command and command[0] == "--":
         command = command[1:]
-    _validate_command(command, arguments.input_pacing)
+    if not SAFE_SESSION.fullmatch(arguments.session):
+        raise IsolationError("session identifier is invalid")
+    _validate_command(command, arguments.engine, arguments.mode,
+                      arguments.input_pacing, arguments.session)
 
     runner = [
         "/usr/bin/python3", "/benchmark/run_adapter.py",

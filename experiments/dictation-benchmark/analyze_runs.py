@@ -24,7 +24,7 @@ ENGINES = {
 MODES = {"streaming", "windowed", "batch"}
 RESULT_KEYS = {
     "case_id", "engine", "run", "transcript", "recognition_mode", "input_pacing",
-    "audio_duration_ms", "model_init_ms", "first_partial_ms",
+    "audio_duration_ms", "ready_ms", "model_init_ms", "first_partial_ms",
     "final_result_ms", "final_audio_position_ms", "completed_ms", "partials",
     "cpu_seconds", "peak_rss_mib", "engine_bytes", "model_bytes", "offline",
     "isolation_profile",
@@ -90,16 +90,18 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             raise InputError("duplicate engine, mode, pacing, case, and run")
         seen.add(identity)
         duration = _number(raw["audio_duration_ms"], "audio_duration_ms", positive=True)
+        ready_ms = _number(raw["ready_ms"], "ready_ms")
         init_ms = _number(raw["model_init_ms"], "model_init_ms")
         final_ms = _number(raw["final_result_ms"], "final_result_ms")
         final_position = _number(raw["final_audio_position_ms"], "final_audio_position_ms")
         completed_ms = _number(raw["completed_ms"], "completed_ms")
-        if final_position > duration or final_ms < init_ms or completed_ms < final_ms:
+        if final_position > duration or final_ms < ready_ms or init_ms > final_ms or \
+                completed_ms < final_ms:
             raise InputError("final timing is inconsistent")
         first_ms = raw["first_partial_ms"]
         if first_ms is not None:
             first_ms = _number(first_ms, "first_partial_ms")
-            if first_ms < init_ms or first_ms > final_ms:
+            if first_ms < ready_ms or first_ms > final_ms:
                 raise InputError("first partial follows final result")
         if mode == "batch" and first_ms is not None:
             raise InputError("batch run cannot claim a partial result")
@@ -121,7 +123,7 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
                 raise InputError("invalid partial")
             if pacing == "realtime":
                 checked_lag = _number(lag_ms, "partial lag_ms")
-                if abs(checked_lag - max(0, at_ms - init_ms - audio_position_ms)) > 0.01:
+                if abs(checked_lag - max(0, at_ms - ready_ms - audio_position_ms)) > 0.01:
                     raise InputError("partial lag does not match observed timing")
             elif lag_ms is not None:
                 raise InputError("fast input cannot claim live partial lag")
@@ -148,6 +150,7 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             "punctuation_accuracy": 1 - _edit_distance(ref_punctuation, hyp_punctuation) /
                 max(len(ref_punctuation), len(hyp_punctuation), 1),
             "duration": duration,
+            "ready": ready_ms,
             "init": init_ms,
             "first": first_ms,
             "final": final_ms,
@@ -171,7 +174,7 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
         first = [row["first"] for row in rows if row["first"] is not None]
         churn = [row["churn"] for row in rows if row["churn"] is not None]
         partial_lags = [lag for row in rows for lag in row["partial_lags"]]
-        endpoint_lags = [max(0, row["final"] - row["init"] - row["final_position"])
+        endpoint_lags = [max(0, row["final"] - row["ready"] - row["final_position"])
                          for row in rows] if pacing == "realtime" else []
         engines.append({
             "engine": engine,
@@ -184,7 +187,7 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             "mean_model_init_ms": round(fmean(row["init"] for row in rows), 3),
             "mean_first_partial_ms": None if not first else round(fmean(first), 3),
             "mean_first_partial_after_ready_ms": None if not first else round(
-                fmean(row["first"] - row["init"] for row in rows
+                fmean(row["first"] - row["ready"] for row in rows
                       if row["first"] is not None), 3),
             "runs_without_partial": len(rows) - len(first),
             "mean_final_result_ms": round(fmean(row["final"] for row in rows), 3),
