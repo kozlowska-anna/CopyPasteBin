@@ -77,7 +77,8 @@ def load_cases(path: Path) -> dict[str, str]:
     cases: dict[str, str] = {}
     for item in document["cases"]:
         case = _exact_object(item, {"id", "text"}, "case")
-        if not isinstance(case["id"], str) or not re.fullmatch(r"pl-[0-9]{2}", case["id"]):
+        if not isinstance(case["id"], str) or not re.fullmatch(
+                r"(?:pl|natural-pl)-[0-9]{2}", case["id"]):
             raise InputError("invalid case identifier")
         if not isinstance(case["text"], str) or not 1 <= len(case["text"]) <= 500:
             raise InputError("invalid case text")

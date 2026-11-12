@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "status": "planned-no-audio",
+  "language": "pl",
+  "target": {
+    "samples": 15,
+    "minimum_speakers": 5,
+    "clips_per_speaker": 3,
+    "clip_duration_ms": {"minimum": 10000, "maximum": 30000},
+    "total_duration_ms": {"minimum": 180000, "maximum": 360000},
+    "maximum_download_bytes": 25000000
+  },
+  "primary_source": {
+    "id": "voxpopuli-pl",
+    "dataset": "facebook/voxpopuli",
+    "revision": "5ab868a7cddb87d84224ebfc8112ebd0905fc5bd",
+    "config": "pl",
+    "split": "test",
+    "audio_license": "CC0-1.0",
+    "reference_license": "CC0-1.0",
+    "attribution": "VoxPopuli; European Parliament source recordings; Wang et al., ACL-IJCNLP 2021",
+    "dataset_url": "https://huggingface.co/datasets/facebook/voxpopuli",
+    "upstream_url": "https://github.com/facebookresearch/voxpopuli",
+    "full_polish_download_bytes": 20600000000,
+    "selection_access": "Hugging Face Dataset Viewer /rows metadata and per-row cached audio only; never the full Polish parquet set"
+  },
+  "alternatives": [
+    {
+      "id": "common-voice-27-pl",
+      "status": "deferred-too-large",
+      "license": "CC0-1.0",
+      "size_bytes": 4490000000,
+      "speaker_id_available": true,
+      "reason": "The official Polish release is a single 4.49 GB archive and is predominantly short scripted speech.",
+      "url": "https://mozilladatacollective.com/datasets/cmu5wsxwp00e0nq07m8v0274j"
+    },
+    {
+      "id": "fleurs-pl-pl",
+      "status": "reserve-speaker-count-unverifiable",
+      "license": "CC-BY-4.0",
+      "size_bytes": 2045982318,
+      "speaker_id_available": false,
+      "reason": "Selective rows are possible, but the public schema has no speaker identifier and the corpus is read speech.",
+      "url": "https://huggingface.co/datasets/google/fleurs"
+    }
+  ],
+  "selection": {
+    "procedure": [
+      "Confirm the pinned dataset revision and CC0 data license before any audio request.",
+      "Enumerate test metadata in bounded pages; retain gold transcripts with non-empty pseudonymous speaker_id and raw_text.",
+      "Do not infer or search for real speaker identities.",
+      "Download only candidate rows, stop at 25 MB, validate duration, and discard candidates outside 10-30 seconds.",
+      "Choose five pseudonymous speakers in lexical speaker_id order and three qualifying clips per speaker.",
+      "Within each speaker choose the lowest stable audio_id satisfying the still-unfilled category slots.",
+      "Record source hashes before conversion and derived WAV hashes after conversion.",
+      "Stop if fewer than five speakers or 180 seconds can be obtained within the cap."
+    ],
+    "provisional_coverage_gaps": [
+      "daily-conversation",
+      "computing",
+      "self-correction"
+    ]
+  },
+  "slots": [
+    {"case_id":"natural-pl-01","speaker_slot":"speaker-01","category":"numbers-dates-times","source_item_id":null},
+    {"case_id":"natural-pl-02","speaker_slot":"speaker-01","category":"proper-names","source_item_id":null},
+    {"case_id":"natural-pl-03","speaker_slot":"speaker-01","category":"punctuation","source_item_id":null},
+    {"case_id":"natural-pl-04","speaker_slot":"speaker-02","category":"natural-long","source_item_id":null},
+    {"case_id":"natural-pl-05","speaker_slot":"speaker-02","category":"pauses-tempo","source_item_id":null},
+    {"case_id":"natural-pl-06","speaker_slot":"speaker-02","category":"numbers-dates-times","source_item_id":null},
+    {"case_id":"natural-pl-07","speaker_slot":"speaker-03","category":"proper-names","source_item_id":null},
+    {"case_id":"natural-pl-08","speaker_slot":"speaker-03","category":"natural-long","source_item_id":null},
+    {"case_id":"natural-pl-09","speaker_slot":"speaker-03","category":"punctuation","source_item_id":null},
+    {"case_id":"natural-pl-10","speaker_slot":"speaker-04","category":"pauses-tempo","source_item_id":null},
+    {"case_id":"natural-pl-11","speaker_slot":"speaker-04","category":"numbers-dates-times","source_item_id":null},
+    {"case_id":"natural-pl-12","speaker_slot":"speaker-04","category":"proper-names","source_item_id":null},
+    {"case_id":"natural-pl-13","speaker_slot":"speaker-05","category":"natural-long","source_item_id":null},
+    {"case_id":"natural-pl-14","speaker_slot":"speaker-05","category":"punctuation","source_item_id":null},
+    {"case_id":"natural-pl-15","speaker_slot":"speaker-05","category":"pauses-tempo","source_item_id":null}
+  ]
+}

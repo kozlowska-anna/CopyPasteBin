@@ -1,0 +1,23 @@
+{
+  "version": 0,
+  "status": "pending-source-selection",
+  "language": "pl",
+  "notice": "This is not benchmark input. Reference text must be copied from pinned source metadata, never inferred from an STT result.",
+  "cases": [
+    {"id":"natural-pl-01","text":null,"source_item_id":null},
+    {"id":"natural-pl-02","text":null,"source_item_id":null},
+    {"id":"natural-pl-03","text":null,"source_item_id":null},
+    {"id":"natural-pl-04","text":null,"source_item_id":null},
+    {"id":"natural-pl-05","text":null,"source_item_id":null},
+    {"id":"natural-pl-06","text":null,"source_item_id":null},
+    {"id":"natural-pl-07","text":null,"source_item_id":null},
+    {"id":"natural-pl-08","text":null,"source_item_id":null},
+    {"id":"natural-pl-09","text":null,"source_item_id":null},
+    {"id":"natural-pl-10","text":null,"source_item_id":null},
+    {"id":"natural-pl-11","text":null,"source_item_id":null},
+    {"id":"natural-pl-12","text":null,"source_item_id":null},
+    {"id":"natural-pl-13","text":null,"source_item_id":null},
+    {"id":"natural-pl-14","text":null,"source_item_id":null},
+    {"id":"natural-pl-15","text":null,"source_item_id":null}
+  ]
+}

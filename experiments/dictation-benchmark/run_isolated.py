@@ -14,7 +14,7 @@ from pathlib import Path
 PROFILE = "bwrap-v1"
 SAFE_RESULT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 SAFE_SESSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,63}")
-SAFE_CASE = re.compile(r"pl-[0-9]{2}")
+SAFE_CASE = re.compile(r"(?:pl|natural-pl)-[0-9]{2}")
 
 
 class IsolationError(Exception):

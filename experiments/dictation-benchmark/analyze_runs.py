@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import math
 import re
+import unicodedata
 from pathlib import Path
 from statistics import fmean, median
 from typing import Any
@@ -40,8 +42,75 @@ def _number(value: Any, label: str, *, positive: bool = False) -> float:
     return result
 
 
+PUNCTUATION_MARKS = ".,!?;:—-"
+
+
 def _punctuation(text: str) -> str:
+    """Historical C4 punctuation sequence, retained for old-result comparability."""
     return "".join(re.findall(r"[.,!?;:—-]", text))
+
+
+def _lexical_normalization(text: str) -> str:
+    """C4-v2 lexical normalization: NFC, casefold, word tokens, single spaces."""
+    normalized = unicodedata.normalize("NFC", text).casefold()
+    return " ".join(re.findall(r"\w+", normalized, flags=re.UNICODE))
+
+
+def _punctuation_aware_normalization(text: str) -> str:
+    """C4-v2 text normalization retaining punctuation and collapsing whitespace."""
+    return " ".join(unicodedata.normalize("NFC", text).casefold().split())
+
+
+def _punctuation_events(text: str) -> Counter[tuple[int, str]]:
+    """Count marks at lexical boundaries, represented by preceding-word count."""
+    events: Counter[tuple[int, str]] = Counter()
+    word_count = 0
+    normalized = unicodedata.normalize("NFC", text)
+    for match in re.finditer(r"\w+|[.,!?;:—-]", normalized, flags=re.UNICODE):
+        token = match.group(0)
+        if token in PUNCTUATION_MARKS:
+            events[(word_count, token)] += 1
+        else:
+            word_count += 1
+    return events
+
+
+def _punctuation_assessment(reference: str, hypothesis: str) -> dict[str, int] | None:
+    """Score placement only when lexical tokens match exactly.
+
+    Word errors make boundary indices ambiguous, so those observations are
+    deliberately excluded from placement precision/recall and counted by the
+    caller as blocked.
+    """
+    if _lexical_normalization(reference) != _lexical_normalization(hypothesis):
+        return None
+    expected = _punctuation_events(reference)
+    actual = _punctuation_events(hypothesis)
+    correct_events = expected & actual
+    remaining_expected = expected - correct_events
+    remaining_actual = actual - correct_events
+    misplaced = 0
+    for mark in PUNCTUATION_MARKS:
+        expected_mark = sum(count for (_, value), count in remaining_expected.items()
+                            if value == mark)
+        actual_mark = sum(count for (_, value), count in remaining_actual.items()
+                          if value == mark)
+        misplaced += min(expected_mark, actual_mark)
+    correct = sum(correct_events.values())
+    missing = sum(remaining_expected.values()) - misplaced
+    extra = sum(remaining_actual.values()) - misplaced
+    return {
+        "reference": sum(expected.values()),
+        "hypothesis": sum(actual.values()),
+        "correct": correct,
+        "misplaced": misplaced,
+        "missing": missing,
+        "extra": extra,
+    }
+
+
+def _safe_ratio(numerator: int, denominator: int) -> float | None:
+    return None if denominator == 0 else numerator / denominator
 
 
 def _partial_churn(partials: list[dict[str, Any]]) -> float | None:
@@ -139,6 +208,10 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
         ref_words, hyp_words = _words(reference), _words(transcript)
         ref_chars = " ".join(reference.casefold().split())
         hyp_chars = " ".join(transcript.casefold().split())
+        normalized_reference = _lexical_normalization(reference)
+        normalized_hypothesis = _lexical_normalization(transcript)
+        punctuation_reference = _punctuation_aware_normalization(reference)
+        punctuation_hypothesis = _punctuation_aware_normalization(transcript)
         ref_punctuation, hyp_punctuation = _punctuation(reference), _punctuation(transcript)
         grouped.setdefault((engine, mode, pacing), []).append({
             "case_id": case_id,
@@ -149,8 +222,18 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             "word_units": len(ref_words),
             "char_edits": _edit_distance(ref_chars, hyp_chars),
             "char_units": len(ref_chars),
+            "normalized_word_edits": _edit_distance(
+                normalized_reference.split(), normalized_hypothesis.split()),
+            "normalized_word_units": len(normalized_reference.split()),
+            "normalized_char_edits": _edit_distance(
+                normalized_reference, normalized_hypothesis),
+            "normalized_char_units": len(normalized_reference),
+            "punctuation_aware_char_edits": _edit_distance(
+                punctuation_reference, punctuation_hypothesis),
+            "punctuation_aware_char_units": len(punctuation_reference),
             "punctuation_accuracy": 1 - _edit_distance(ref_punctuation, hyp_punctuation) /
                 max(len(ref_punctuation), len(hyp_punctuation), 1),
+            "punctuation": _punctuation_assessment(reference, transcript),
             "duration": duration,
             "ready": ready_ms,
             "init": init_ms,
@@ -182,6 +265,27 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
         ]
         word_units = sum(row["word_units"] for row in rows)
         char_units = sum(row["char_units"] for row in rows)
+        normalized_word_units = sum(row["normalized_word_units"] for row in rows)
+        normalized_char_units = sum(row["normalized_char_units"] for row in rows)
+        punctuation_aware_char_units = sum(
+            row["punctuation_aware_char_units"] for row in rows)
+        punctuation_rows = [row["punctuation"] for row in rows
+                            if row["punctuation"] is not None]
+        punctuation_correct = sum(row["correct"] for row in punctuation_rows)
+        punctuation_misplaced = sum(row["misplaced"] for row in punctuation_rows)
+        punctuation_missing = sum(row["missing"] for row in punctuation_rows)
+        punctuation_extra = sum(row["extra"] for row in punctuation_rows)
+        punctuation_precision = _safe_ratio(
+            punctuation_correct,
+            punctuation_correct + punctuation_misplaced + punctuation_extra)
+        punctuation_recall = _safe_ratio(
+            punctuation_correct,
+            punctuation_correct + punctuation_misplaced + punctuation_missing)
+        punctuation_f1 = None
+        if punctuation_precision is not None and punctuation_recall is not None and \
+                punctuation_precision + punctuation_recall:
+            punctuation_f1 = 2 * punctuation_precision * punctuation_recall / (
+                punctuation_precision + punctuation_recall)
         first = [row["first"] for row in rows if row["first"] is not None]
         churn = [row["churn"] for row in rows if row["churn"] is not None]
         partial_lags = [lag for row in rows for lag in row["partial_lags"]]
@@ -205,7 +309,37 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
                 for case_rows in by_case.values()),
             "wer": round(sum(row["word_edits"] for row in rows) / word_units, 6),
             "cer": round(sum(row["char_edits"] for row in rows) / char_units, 6),
+            "normalized_wer": round(
+                sum(row["normalized_word_edits"] for row in rows) /
+                normalized_word_units, 6),
+            "normalized_cer": round(
+                sum(row["normalized_char_edits"] for row in rows) /
+                normalized_char_units, 6),
+            "punctuation_aware_cer": round(
+                sum(row["punctuation_aware_char_edits"] for row in rows) /
+                punctuation_aware_char_units, 6),
             "mean_punctuation_accuracy": round(fmean(row["punctuation_accuracy"] for row in rows), 6),
+            "punctuation_assessable_runs": len(punctuation_rows),
+            "punctuation_runs_blocked_by_word_errors": len(rows) - len(punctuation_rows),
+            "punctuation_assessable_unique_cases": sum(
+                all(row["punctuation"] is not None for row in case_rows)
+                for case_rows in by_case.values()),
+            "punctuation_exact_unique_cases": sum(
+                all(row["punctuation"] is not None and
+                    not any(row["punctuation"][key]
+                            for key in ("misplaced", "missing", "extra"))
+                    for row in case_rows)
+                for case_rows in by_case.values()),
+            "punctuation_correct_marks": punctuation_correct,
+            "punctuation_misplaced_marks": punctuation_misplaced,
+            "punctuation_missing_marks": punctuation_missing,
+            "punctuation_extra_marks": punctuation_extra,
+            "punctuation_precision": None if punctuation_precision is None else round(
+                punctuation_precision, 6),
+            "punctuation_recall": None if punctuation_recall is None else round(
+                punctuation_recall, 6),
+            "punctuation_f1": None if punctuation_f1 is None else round(
+                punctuation_f1, 6),
             "model_init_scope": "native-cli-reported-load" if mode == "batch" else
                 "adapter-start-to-ready",
             "mean_model_init_ms": round(fmean(row["init"] for row in rows), 3),
@@ -240,7 +374,19 @@ def analyze(cases: dict[str, str], path: Path) -> dict[str, Any]:
             "model_bytes": max(row["model_bytes"] for row in rows),
             "offline_runs": len(rows),
         })
-    return {"version": 3, "scored_results": len(seen), "engines": engines}
+    return {
+        "version": 4,
+        "source_result_version": 3,
+        "quality_methodology": {
+            "historical_wer": "casefold plus Unicode word tokens; punctuation ignored",
+            "historical_cer": "casefold plus collapsed whitespace; punctuation retained",
+            "normalized_v2": "NFC plus casefold plus Unicode word tokens joined by one space",
+            "punctuation_aware_v2": "NFC plus casefold plus collapsed whitespace; punctuation retained",
+            "punctuation_placement_v2": "word-boundary scoring only when normalized lexical tokens match",
+        },
+        "scored_results": len(seen),
+        "engines": engines,
+    }
 
 
 def main() -> int:

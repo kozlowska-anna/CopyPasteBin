@@ -75,3 +75,17 @@ raportowane osobno. Kod nie pobiera artefaktów i nie uruchamia mikrofonu.
 
 Kompletna metodologia i niewykonane polecenia instalacyjne znajdują się w
 `docs/DICTATION_C4_BENCHMARK.pl.md` oraz wersji angielskiej `.en.md`.
+
+## Plan naturalnego korpusu
+
+`audio-manifest.natural-pl.plan.json` i `cases.natural-pl.plan.json` opisują
+nieuzupełnione sloty przyszłego korpusu wielu mówców. Nie są wejściem
+benchmarku i nie zawierają audio ani referencji. Po osobnej zgodzie właściwy
+manifest wersji 3 sprawdzi `validate_natural_audio_manifest.py`: 12–20 plików,
+co najmniej trzech pseudonimowych mówców, 3–6 minut, przypięte źródła i
+licencje, SHA-256, mono PCM WAV 16 kHz oraz zgodność z oddzielnymi referencjami.
+
+`analyze_runs.py` zachowuje historyczne WER/CER, a w raporcie wersji 4 dodaje
+normalizację jakości v2, CER bez i z interpunkcją oraz ocenę znaków na granicach
+słów. Położenie interpunkcji jest oceniane tylko przy zgodnych tokenach
+słownych; przypadki blokowane błędami słownymi są raportowane osobno.

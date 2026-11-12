@@ -15,6 +15,9 @@ ROOT = Path(__file__).resolve().parents[2]
 HARNESS = ROOT / "experiments" / "dictation-benchmark" / "score.py"
 REAL_ANALYZER = ROOT / "experiments" / "dictation-benchmark" / "analyze_runs.py"
 AUDIO_VALIDATOR = ROOT / "experiments" / "dictation-benchmark" / "validate_audio_manifest.py"
+NATURAL_AUDIO_VALIDATOR = ROOT / "experiments" / "dictation-benchmark" / "validate_natural_audio_manifest.py"
+NATURAL_AUDIO_PLAN = ROOT / "experiments" / "dictation-benchmark" / "audio-manifest.natural-pl.plan.json"
+NATURAL_CASES_PLAN = ROOT / "experiments" / "dictation-benchmark" / "cases.natural-pl.plan.json"
 RUNNER = ROOT / "experiments" / "dictation-benchmark" / "run_adapter.py"
 ISOLATED_RUNNER = ROOT / "experiments" / "dictation-benchmark" / "run_isolated.py"
 VOSK_ADAPTER = ROOT / "experiments" / "dictation-benchmark" / "adapters" / "vosk_ctypes.py"
@@ -108,10 +111,18 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         completed = self._run(self._result())
         self.assertEqual(0, completed.returncode, completed.stderr)
         report = json.loads(completed.stdout)
+        self.assertEqual(4, report["version"])
+        self.assertEqual(3, report["source_result_version"])
         engine = report["engines"][0]
         self.assertEqual(0, engine["wer"])
         self.assertEqual(0, engine["cer"])
+        self.assertEqual(0, engine["normalized_wer"])
+        self.assertEqual(0, engine["normalized_cer"])
+        self.assertEqual(0, engine["punctuation_aware_cer"])
         self.assertEqual(1, engine["mean_punctuation_accuracy"])
+        self.assertEqual(1, engine["punctuation_assessable_runs"])
+        self.assertEqual(1, engine["punctuation_correct_marks"])
+        self.assertEqual(0, engine["punctuation_runs_blocked_by_word_errors"])
         self.assertEqual(1.25, engine["mean_wall_clock_ratio"])
         self.assertEqual(100, engine["mean_endpoint_latency_ms"])
         self.assertEqual(50, engine["mean_partial_lag_ms"])
@@ -122,6 +133,50 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         self.assertEqual(300, engine["max_peak_rss_mib"])
         self.assertIsNotNone(engine["mean_partial_churn"])
         self.assertNotIn("syntetyczna", completed.stdout)
+
+    def test_punctuation_v2_separates_lexical_and_placement_errors(self):
+        completed = self._run(self._result(
+            transcript="To jest syntetyczna próba lokalnego dyktowania",
+        ))
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        engine = json.loads(completed.stdout)["engines"][0]
+        self.assertEqual(0, engine["normalized_wer"])
+        self.assertEqual(0, engine["normalized_cer"])
+        self.assertGreater(engine["punctuation_aware_cer"], 0)
+        self.assertEqual(1, engine["punctuation_missing_marks"])
+
+        completed = self._run(self._result(
+            transcript="To jest błędna próba lokalnego dyktowania.",
+        ))
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        engine = json.loads(completed.stdout)["engines"][0]
+        self.assertEqual(0, engine["punctuation_assessable_runs"])
+        self.assertEqual(1, engine["punctuation_runs_blocked_by_word_errors"])
+        self.assertIsNone(engine["punctuation_precision"])
+
+        specification = importlib.util.spec_from_file_location(
+            "real_analyzer", REAL_ANALYZER)
+        module = importlib.util.module_from_spec(specification)
+        assert specification.loader is not None
+        sys.path.insert(0, str(REAL_ANALYZER.parent))
+        try:
+            specification.loader.exec_module(module)
+        finally:
+            sys.path.pop(0)
+        reference = "Ala ma kota, dzisiaj."
+        missing = module._punctuation_assessment(
+            reference, "Ala ma kota dzisiaj.")
+        misplaced = module._punctuation_assessment(
+            reference, "Ala ma, kota dzisiaj.")
+        extra = module._punctuation_assessment(
+            "Ala ma kota.", "Ala, ma kota.")
+        self.assertEqual(1, missing["missing"])
+        self.assertEqual(1, missing["correct"])
+        self.assertEqual(1, misplaced["misplaced"])
+        self.assertEqual(1, misplaced["correct"])
+        self.assertEqual(1, extra["extra"])
+        self.assertIsNone(module._punctuation_assessment(
+            reference, "Ala ma psa, dzisiaj."))
 
     def test_batch_mode_marks_partial_metrics_unavailable(self):
         completed = self._run(self._result(
@@ -248,6 +303,103 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             ], capture_output=True, text=True)
             self.assertEqual(0, completed.returncode, completed.stderr)
             self.assertEqual(2, json.loads(completed.stdout)["version"])
+
+    def test_natural_corpus_plan_has_fifteen_closed_unfilled_slots(self):
+        manifest = json.loads(NATURAL_AUDIO_PLAN.read_text(encoding="utf-8"))
+        references = json.loads(NATURAL_CASES_PLAN.read_text(encoding="utf-8"))
+        self.assertEqual("planned-no-audio", manifest["status"])
+        self.assertEqual(15, manifest["target"]["samples"])
+        self.assertEqual(5, manifest["target"]["minimum_speakers"])
+        self.assertLessEqual(manifest["target"]["maximum_download_bytes"], 25_000_000)
+        slot_ids = [slot["case_id"] for slot in manifest["slots"]]
+        case_ids = [case["id"] for case in references["cases"]]
+        self.assertEqual(case_ids, slot_ids)
+        self.assertEqual(len(slot_ids), len(set(slot_ids)))
+        self.assertTrue(all(slot["source_item_id"] is None
+                            for slot in manifest["slots"]))
+        self.assertTrue(all(case["text"] is None and case["source_item_id"] is None
+                            for case in references["cases"]))
+
+    def test_natural_v3_manifest_validates_files_speakers_duration_and_count(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            audio_root = root / "audio"
+            audio_root.mkdir()
+            audio_root.chmod(0o700)
+            cases = []
+            samples = []
+            categories = [
+                "daily-conversation", "natural-long", "numbers-dates-times",
+                "proper-names", "computing", "pauses-tempo",
+                "self-correction", "punctuation",
+            ]
+            revision = "5ab868a7cddb87d84224ebfc8112ebd0905fc5bd"
+            for index in range(1, 13):
+                case_id = f"natural-pl-{index:02d}"
+                cases.append({"id": case_id, "text": f"Syntetyczna próba numer {index}."})
+                audio = audio_root / f"{case_id}.wav"
+                with wave.open(str(audio), "wb") as output:
+                    output.setnchannels(1)
+                    output.setsampwidth(2)
+                    output.setframerate(16000)
+                    output.writeframes(b"\0\0" * 240000)
+                audio.chmod(0o600)
+                samples.append({
+                    "case_id": case_id,
+                    "file": audio.name,
+                    "sha256": hashlib.sha256(audio.read_bytes()).hexdigest(),
+                    "source_sha256": "0" * 64,
+                    "source_dataset": "voxpopuli-pl",
+                    "source_revision": revision,
+                    "source_item_id": f"synthetic-{index:02d}",
+                    "source_url": "https://example.invalid/audio",
+                    "reference_url": "https://example.invalid/reference",
+                    "audio_license": "CC0-1.0",
+                    "reference_license": "CC0-1.0",
+                    "attribution": "Synthetic test fixture",
+                    "speaker_id": f"speaker-{(index - 1) % 3 + 1}",
+                    "duration_ms": 15000,
+                    "categories": [categories[(index - 1) % len(categories)]],
+                    "purpose": "quality",
+                })
+            cases_path = root / "cases.json"
+            cases_path.write_text(json.dumps({
+                "version": 1, "language": "pl", "cases": cases,
+            }), encoding="utf-8")
+            manifest_path = root / "manifest.json"
+            document = {
+                "version": 3,
+                "corpus": {
+                    "name": "Synthetic natural corpus",
+                    "language": "pl",
+                    "selection": "Synthetic validator fixture",
+                    "source_revisions": {"voxpopuli-pl": revision},
+                    "conversion": "Synthetic mono PCM",
+                    "minimum_speakers": 3,
+                    "clip_duration_ms": {"minimum": 10000, "maximum": 30000},
+                    "total_duration_ms": {"minimum": 180000, "maximum": 360000},
+                    "coverage_gaps": [],
+                },
+                "samples": samples,
+            }
+            manifest_path.write_text(json.dumps(document), encoding="utf-8")
+            command = [
+                sys.executable, str(NATURAL_AUDIO_VALIDATOR),
+                "--manifest", str(manifest_path), "--audio-root", str(audio_root),
+                "--cases", str(cases_path),
+            ]
+            completed = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(0, completed.returncode, completed.stderr)
+            report = json.loads(completed.stdout)
+            self.assertEqual(12, report["samples"])
+            self.assertEqual(3, report["speakers"])
+            self.assertEqual(180000, report["duration_ms"])
+
+            for sample in document["samples"]:
+                sample["speaker_id"] = "speaker-1"
+            manifest_path.write_text(json.dumps(document), encoding="utf-8")
+            completed = subprocess.run(command, capture_output=True, text=True)
+            self.assertNotEqual(0, completed.returncode)
 
     def test_offline_flag_or_environment_claim_cannot_bypass_launcher(self):
         with tempfile.TemporaryDirectory() as temporary:
