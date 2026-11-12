@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "status": "planned-no-audio",
+  "status": "blocked-before-audio",
   "language": "pl",
   "target": {
     "samples": 15,
     "minimum_speakers": 5,
     "clips_per_speaker": 3,
-    "clip_duration_ms": {"minimum": 10000, "maximum": 30000},
-    "total_duration_ms": {"minimum": 180000, "maximum": 360000},
+    "clip_duration_ms": {"minimum": 10000, "maximum": 20000},
+    "total_duration_ms": {"minimum": 180000, "maximum": 300000},
     "maximum_download_bytes": 25000000
   },
   "primary_source": {
@@ -22,7 +22,18 @@
     "dataset_url": "https://huggingface.co/datasets/facebook/voxpopuli",
     "upstream_url": "https://github.com/facebookresearch/voxpopuli",
     "full_polish_download_bytes": 20600000000,
-    "selection_access": "Hugging Face Dataset Viewer /rows metadata and per-row cached audio only; never the full Polish parquet set"
+    "selection_access": "Blocked: Dataset Viewer cannot scan the 519677114-byte row group under its 300000000-byte limit; never download the full Polish parquet set"
+  },
+  "verification": {
+    "pinned_revision_available": true,
+    "current_revision": "42f01879c780b4a2e90ec0b4f616c2ece526e4f1",
+    "polish_tree_identical": true,
+    "test_parquet_oid": "7139cfca3efa5f25d3f69b8b99d4144d84134a78",
+    "test_parquet_bytes": 946977412,
+    "dataset_viewer_status": "blocked-scan-size-limit",
+    "attempted_scan_bytes": 519677114,
+    "service_scan_limit_bytes": 300000000,
+    "audio_downloaded": false
   },
   "alternatives": [
     {

@@ -307,7 +307,9 @@ class RealDictationBenchmarkTests(unittest.TestCase):
     def test_natural_corpus_plan_has_fifteen_closed_unfilled_slots(self):
         manifest = json.loads(NATURAL_AUDIO_PLAN.read_text(encoding="utf-8"))
         references = json.loads(NATURAL_CASES_PLAN.read_text(encoding="utf-8"))
-        self.assertEqual("planned-no-audio", manifest["status"])
+        self.assertEqual("blocked-before-audio", manifest["status"])
+        self.assertFalse(manifest["verification"]["audio_downloaded"])
+        self.assertTrue(manifest["verification"]["polish_tree_identical"])
         self.assertEqual(15, manifest["target"]["samples"])
         self.assertEqual(5, manifest["target"]["minimum_speakers"])
         self.assertLessEqual(manifest["target"]["maximum_download_bytes"], 25_000_000)
@@ -376,8 +378,8 @@ class RealDictationBenchmarkTests(unittest.TestCase):
                     "source_revisions": {"voxpopuli-pl": revision},
                     "conversion": "Synthetic mono PCM",
                     "minimum_speakers": 3,
-                    "clip_duration_ms": {"minimum": 10000, "maximum": 30000},
-                    "total_duration_ms": {"minimum": 180000, "maximum": 360000},
+                    "clip_duration_ms": {"minimum": 10000, "maximum": 20000},
+                    "total_duration_ms": {"minimum": 180000, "maximum": 300000},
                     "coverage_gaps": [],
                 },
                 "samples": samples,

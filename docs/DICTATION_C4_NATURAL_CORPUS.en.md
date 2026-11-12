@@ -1,6 +1,6 @@
 # CopyPasteBin 1.3 — C4 natural Polish corpus plan
 
-Status: **source-approval plan; no new audio has been downloaded**. Reviewed
+Status: **stopped before audio: selective access is unavailable**. Reviewed
 2026-11-12. The Tatoeba corpus and all earlier results remain unchanged.
 
 ## Source decision
@@ -10,9 +10,15 @@ to revision `5ab868a7cddb87d84224ebfc8112ebd0905fc5bd`. VoxPopuli explicitly lic
 its data as CC0 (separately from its CC BY-NC code/models), attributes the raw
 recordings to the European Parliament, and provides Polish transcripts and
 pseudonymous `speaker_id` values. Polish data covers 111 hours and 282 speakers.
-The full Hub export is about 20.6 GB, so it must not be downloaded. The
-Hugging Face Dataset Viewer `/rows` endpoint can expose individual rows and
-temporary per-row audio assets.
+The full Hub export is about 20.6 GB, so it must not be downloaded.
+
+The pinned revision exists. Current revision `42f01879…` has a Polish tree
+identical to the pinned revision; the test Parquet object is
+`7139cfca3efa5f25d3f69b8b99d4144d84134a78` and 946,977,412 bytes in both.
+Provenance is therefore linked reliably. Selective access nevertheless fails:
+`/rows` returns HTTP 500 for both 100 and one row, and `/first-rows` returns
+501. The service reports a required 519,677,114-byte scan over its 300,000,000
+byte limit. No row metadata or audio was obtained.
 
 Mozilla Common Voice 27.0 Polish is CC0 but is a 4.49 GB official archive and
 mostly short scripted speech; it is deferred. Its no-reidentification and
@@ -33,7 +39,7 @@ Primary references:
 ## Closed selection plan
 
 The target is five pseudonymous speakers with three clips each. Every clip
-must be 10–30 seconds, total duration 3–6 minutes, with a hard 25 MB transfer
+must be 10–20 seconds, total duration 3–5 minutes, with a hard 25 MB transfer
 cap. Metadata must have `is_gold_transcript`, `raw_text`, and `speaker_id`.
 Selection uses lexical speaker ID order and the lowest stable qualifying
 `audio_id`; no real-world identity lookup is permitted. Source and derived WAV
@@ -78,6 +84,7 @@ performance repetitions, and a separate Vosk `realtime` run on longer clips.
 Quality conclusions use unique utterances, not repeated executions.
 
 No audio, dependency, model, microphone, or inference was used in this stage.
-Separate approval is required for the first bounded audio download, conversion,
-and every later benchmark run. Audio stays in the private C4 directory and is
-never committed.
+A source change or a newly approved bounded Parquet mechanism is required
+before work can continue. Downloading the 947 MB test Parquet, installing a
+reader, or using full archives was not authorized. Conversion and every later
+benchmark run still require separate approval.

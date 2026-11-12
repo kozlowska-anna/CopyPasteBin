@@ -1,6 +1,6 @@
 {
   "version": 0,
-  "status": "pending-source-selection",
+  "status": "blocked-before-source-selection",
   "language": "pl",
   "notice": "This is not benchmark input. Reference text must be copied from pinned source metadata, never inferred from an STT result.",
   "cases": [

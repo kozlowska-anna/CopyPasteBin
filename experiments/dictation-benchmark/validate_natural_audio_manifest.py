@@ -70,8 +70,8 @@ def validate(manifest_path: Path, audio_root: Path, cases_path: Path) -> dict:
                                        "clip duration")
     total_min, total_max = _closed_range(corpus.get("total_duration_ms"),
                                          "total duration")
-    if (clip_min, clip_max) != (10_000, 30_000) or \
-            (total_min, total_max) != (180_000, 360_000):
+    if (clip_min, clip_max) != (10_000, 20_000) or \
+            (total_min, total_max) != (180_000, 300_000):
         raise InputError("natural corpus duration policy is invalid")
     gaps = corpus.get("coverage_gaps")
     if not isinstance(gaps, list) or len(gaps) != len(set(gaps)) or \

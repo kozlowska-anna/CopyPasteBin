@@ -82,8 +82,11 @@ Kompletna metodologia i niewykonane polecenia instalacyjne znajdują się w
 nieuzupełnione sloty przyszłego korpusu wielu mówców. Nie są wejściem
 benchmarku i nie zawierają audio ani referencji. Po osobnej zgodzie właściwy
 manifest wersji 3 sprawdzi `validate_natural_audio_manifest.py`: 12–20 plików,
-co najmniej trzech pseudonimowych mówców, 3–6 minut, przypięte źródła i
+co najmniej trzech pseudonimowych mówców, 3–5 minut, przypięte źródła i
 licencje, SHA-256, mono PCM WAV 16 kHz oraz zgodność z oddzielnymi referencjami.
+Aktualny plan jest zatrzymany przed audio: przypięcie VoxPopuli potwierdzono,
+ale Dataset Viewer nie potrafi selektywnie odczytać dużej grupy wierszy testowego
+Parquet w swoim limicie skanu. Plan nie jest finalnym manifestem.
 
 `analyze_runs.py` zachowuje historyczne WER/CER, a w raporcie wersji 4 dodaje
 normalizację jakości v2, CER bez i z interpunkcją oraz ocenę znaków na granicach

@@ -1,6 +1,6 @@
 # CopyPasteBin 1.3 — C4: plan korpusu naturalnej polskiej mowy
 
-Status: **plan zatwierdzenia źródeł; żadnego nowego audio nie pobrano**.
+Status: **zatrzymane przed audio: brak bezpiecznego selektywnego dostępu**.
 Data przeglądu źródeł: 2026-11-12.
 
 Dotychczasowy korpus Tatoeba, jego manifest i wyniki pozostają niezmienione.
@@ -10,7 +10,7 @@ Nowy etap ma sprawdzić dłuższą mowę wielu osób, a nie wyłonić zwycięzc�
 
 | Źródło | Licencja i autorstwo | Przydatność | Decyzja |
 | --- | --- | --- | --- |
-| VoxPopuli, polski ASR | Dane audio i transkrypcje: CC0; źródłowe nagrania Parlamentu Europejskiego. Repozytorium rozdziela licencję danych CC0 od licencji kodu i modeli CC BY-NC. Zalecane cytowanie Wang et al., ACL-IJCNLP 2021. | 111 godzin i 282 mówców; naturalne wypowiedzi parlamentarne; pola `audio_id`, `raw_text`, `speaker_id`, `is_gold_transcript`. Pełny polski eksport HF ma ok. 20,6 GB, ale Dataset Viewer pozwala pobierać pojedyncze wiersze i tymczasowe zasoby audio bez całego Parquet. | **Źródło podstawowe**, wyłącznie selektywny podzbiór z `test`, rewizja `5ab868a7cddb87d84224ebfc8112ebd0905fc5bd`. |
+| VoxPopuli, polski ASR | Dane audio i transkrypcje: CC0; źródłowe nagrania Parlamentu Europejskiego. Repozytorium rozdziela licencję danych CC0 od licencji kodu i modeli CC BY-NC. Zalecane cytowanie Wang et al., ACL-IJCNLP 2021. | 111 godzin i 282 mówców; naturalne wypowiedzi parlamentarne; udokumentowane pola `audio_id`, `raw_text`, `normalized_text`, `speaker_id`, `is_gold_transcript`. Pełny polski eksport HF ma ok. 20,6 GB. | **Źródło zweryfikowane, selektywny dostęp zablokowany** dla splitu `test`, rewizja `5ab868a7cddb87d84224ebfc8112ebd0905fc5bd`. |
 | Common Voice Scripted Speech 27.0 PL | CC0; zakaz prób ustalania tożsamości mówców i ponownego hostowania zbioru. | 4,49 GB w jednym oficjalnym archiwum; głównie krótkie wypowiedzi czytane. | Odłożone: pobranie całości narusza zasadę minimalizacji dla 15 próbek. |
 | FLEURS `pl_pl` | CC BY 4.0; atrybucja korpusu FLEURS/Google i publikacji. | Selektywny dostęp jest możliwy, lecz schemat publiczny nie zawiera identyfikatora mówcy, a domeną jest mowa czytana. Polski config ma ok. 2,05 GB. | Rezerwa, **nie jest liczona** do minimum różnych mówców. |
 
@@ -26,9 +26,26 @@ Nowy etap ma sprawdzić dłuższą mowę wielu osób, a nie wyłonić zwycięzc�
 ## Docelowy podzbiór
 
 Plan obejmuje 15 klipów: pięciu pseudonimowych `speaker_id`, po trzy klipy na
-mówcę. Każdy klip ma trwać 10–30 sekund, a suma 3–6 minut. Limit ruchu dla
+mówcę. Każdy klip ma trwać 10–20 sekund, a suma 3–5 minut. Limit ruchu dla
 audio i niezbędnych metadanych wynosi 25 MB. Osiągnięcie limitu przed uzyskaniem
 pięciu mówców albo 180 sekund oznacza przerwanie, nie pobranie pełnego zbioru.
+
+## Wynik weryfikacji przypięcia i dostępu
+
+Oficjalne API Hugging Face potwierdziło istnienie przypiętej rewizji. Bieżąca
+rewizja to `42f01879c780b4a2e90ec0b4f616c2ece526e4f1`, lecz całe drzewo `pl/` ma
+identyczne ścieżki, rozmiary i identyfikatory obiektów jak rewizja przypięta.
+Plik `pl/test-00000-of-00001.parquet` ma w obu rewizjach OID
+`7139cfca3efa5f25d3f69b8b99d4144d84134a78` i 946 977 412 bajtów. Powiązanie
+pochodzenia jest zatem potwierdzone.
+
+Selektywny dostęp nie działa. `/rows` dla 100 i jednego rekordu zwraca HTTP
+500, a `/first-rows` HTTP 501. Usługa wyjaśnia, że Parquet wymaga skanu
+519 677 114 bajtów przy limicie 300 000 000 bajtów, ponieważ plik nie ma
+indeksu stron lub wystarczająco małych grup wierszy. Bez pobrania 947 MB albo
+nowego czytnika Parquet/Xet nie można sprawdzić faktycznej zawartości
+`raw_text`, długości i relacji audio–referencja. Żadne audio nie zostało
+pobrane, a finalne manifesty nie powstały.
 
 Po osobnej zgodzie procedura będzie następująca:
 
@@ -37,7 +54,7 @@ Po osobnej zgodzie procedura będzie następująca:
    `is_gold_transcript`, z `raw_text` oraz pseudonimowym `speaker_id`;
 3. nie wyszukiwać ani nie ustalać prawdziwej tożsamości mówców;
 4. pobrać wyłącznie kandydatów, zatrzymując się przy 25 MB;
-5. odrzucić klipy poza 10–30 s i wybrać pięć identyfikatorów mówców
+5. odrzucić klipy poza 10–20 s i wybrać pięć identyfikatorów mówców
    leksykograficznie, po trzy najniższe stabilne `audio_id` spełniające sloty;
 6. zapisać hash źródła, następnie przekonwertować istniejącym GStreamerem do
    mono PCM WAV 16 kHz i zapisać drugi hash;
@@ -112,7 +129,7 @@ mówców, dozwolone licencje, przypięte rewizje, SHA-256, format WAV, czas,
 kategorie, katalog `0700`, pliki `0600` i zgodność jeden-do-jednego z
 referencjami.
 
-Osobnej zgody wymagają: pierwszy dostęp sieciowy do wybranych rekordów,
-pobranie maksymalnie 25 MB audio, konwersja i późniejsza inferencja. Jeśli
-Dataset Viewer nie pozwoli pobrać pojedynczych rekordów, zadanie zatrzymuje się;
-nie pobieramy archiwum 20,6 GB ani 4,49 GB jako obejścia.
+Zadanie jest zatrzymane na przewidzianej bramce. Osobnej decyzji wymaga zmiana
+źródła albo jawne zatwierdzenie nowego, ograniczonego mechanizmu odczytu
+Parquet. Nie pobieramy pliku 947 MB, archiwum 20,6 GB ani Common Voice 4,49 GB
+jako obejścia. Konwersja i późniejsza inferencja również wymagają osobnej zgody.
