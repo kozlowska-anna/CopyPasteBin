@@ -12,6 +12,10 @@ import wave
 from pathlib import Path
 
 
+MAX_RESULT_BYTES = 64 * 1024
+MAX_TEXT_CHARS = 4096
+
+
 def emit(session: str, sequence: int, kind: str, **extra: object) -> None:
     print(json.dumps({"version": 1, "session_id": session, "sequence": sequence,
                       "kind": kind, **extra}, ensure_ascii=False), flush=True)
@@ -35,6 +39,21 @@ def iter_audio_chunks(
             if remaining > 0:
                 sleep(remaining)
         yield data, frames_sent
+
+
+def _result(function, key: str) -> str:
+    raw = function()
+    if not raw or len(raw) > MAX_RESULT_BYTES:
+        raise RuntimeError("engine result exceeded the safe limit")
+    try:
+        payload = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RuntimeError("engine returned invalid JSON") from error
+    if not isinstance(payload, dict) or set(payload) != {key} or \
+            not isinstance(payload[key], str) or len(payload[key]) > MAX_TEXT_CHARS or \
+            "\0" in payload[key]:
+        raise RuntimeError("engine returned an invalid result")
+    return payload[key].strip()
 
 
 def main() -> int:
@@ -90,8 +109,9 @@ def main() -> int:
                 accepted = library.vosk_recognizer_accept_waveform(
                     recognizer, data, len(data))
                 payload_name = "vosk_recognizer_result" if accepted else "vosk_recognizer_partial_result"
-                payload = json.loads(getattr(library, payload_name)(recognizer).decode("utf-8"))
-                text = payload.get("text" if accepted else "partial", "").strip()
+                result_key = "text" if accepted else "partial"
+                text = _result(
+                    lambda: getattr(library, payload_name)(recognizer), result_key)
                 audio_position_ms = round(frames_sent / 16, 3)
                 if accepted and text:
                     sequence += 1
@@ -104,8 +124,7 @@ def main() -> int:
                     emit(args.session, sequence, "partial", segment=segment, text=text,
                          audio_position_ms=audio_position_ms)
                     last_partial = text
-        payload = json.loads(library.vosk_recognizer_final_result(recognizer).decode("utf-8"))
-        text = payload.get("text", "").strip()
+        text = _result(lambda: library.vosk_recognizer_final_result(recognizer), "text")
         audio_position_ms = round(frames_sent / 16, 3)
         if text:
             sequence += 1

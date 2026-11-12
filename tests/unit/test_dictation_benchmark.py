@@ -8,6 +8,7 @@ import hashlib
 import importlib.util
 import os
 import shutil
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,7 +17,6 @@ REAL_ANALYZER = ROOT / "experiments" / "dictation-benchmark" / "analyze_runs.py"
 AUDIO_VALIDATOR = ROOT / "experiments" / "dictation-benchmark" / "validate_audio_manifest.py"
 RUNNER = ROOT / "experiments" / "dictation-benchmark" / "run_adapter.py"
 ISOLATED_RUNNER = ROOT / "experiments" / "dictation-benchmark" / "run_isolated.py"
-ADAPTER_FIXTURE = ROOT / "tests" / "helpers" / "stt_adapter_fixture.py"
 VOSK_ADAPTER = ROOT / "experiments" / "dictation-benchmark" / "adapters" / "vosk_ctypes.py"
 WHISPER_ADAPTER = ROOT / "experiments" / "dictation-benchmark" / "adapters" / "whisper_cli.py"
 
@@ -221,44 +221,6 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             self.assertEqual(0, completed.returncode, completed.stderr)
             self.assertEqual(2, json.loads(completed.stdout)["version"])
 
-    @unittest.skipUnless(shutil.which("bwrap"), "bwrap is required for isolation test")
-    def test_controlled_launcher_records_verified_offline_metrics_privately(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            audio = root / "pl-01.wav"
-            with wave.open(str(audio), "wb") as output:
-                output.setnchannels(1)
-                output.setsampwidth(2)
-                output.setframerate(16000)
-                output.writeframes(b"\0\0" * 1600)
-            engine = root / "engine"
-            model = root / "model"
-            engine.mkdir()
-            model.mkdir()
-            shutil.copy2(ADAPTER_FIXTURE, engine / "fixture.py")
-            (model / "weights").write_bytes(b"model")
-            results = root / "results.json"
-            session = "synthetic-run"
-            completed = subprocess.run([
-                sys.executable, str(ISOLATED_RUNNER),
-                "--case-id", "pl-01", "--engine", "vosk-small-pl-0.22",
-                "--run", "1", "--mode", "streaming", "--input-pacing", "fast",
-                "--session", session,
-                "--audio", str(audio), "--engine-path", str(engine),
-                "--model-path", str(model), "--results", str(results),
-                "--", "/usr/bin/python3", "/engine/fixture.py", session,
-            ], capture_output=True, text=True)
-            self.assertEqual(0, completed.returncode, completed.stderr)
-            self.assertNotIn("syntetyczna", completed.stdout + completed.stderr)
-            result = json.loads(results.read_text(encoding="utf-8"))["results"][0]
-            self.assertEqual("streaming", result["recognition_mode"])
-            self.assertEqual("fast", result["input_pacing"])
-            self.assertEqual("bwrap-v1", result["isolation_profile"])
-            self.assertTrue(result["offline"])
-            self.assertIsNone(result["partials"][0]["lag_ms"])
-            self.assertEqual(1, len(result["partials"]))
-            self.assertEqual(0o600, results.stat().st_mode & 0o777)
-
     def test_offline_flag_or_environment_claim_cannot_bypass_launcher(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -276,38 +238,65 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             self.assertNotEqual(0, completed.returncode)
             self.assertFalse((root / "results.json").exists())
 
-    @unittest.skipUnless(shutil.which("bwrap"), "bwrap is required for isolation test")
-    def test_controlled_launcher_records_realtime_lag_against_audio_position(self):
+    def test_launcher_accepts_only_exact_approved_adapter_commands(self):
+        specification = importlib.util.spec_from_file_location("isolated", ISOLATED_RUNNER)
+        module = importlib.util.module_from_spec(specification)
+        assert specification.loader is not None
+        specification.loader.exec_module(module)
+        session = "closed-command"
+        vosk = [
+            "/usr/bin/python3", "/benchmark/adapters/vosk_ctypes.py",
+            "--library", "/engine", "--model", "/model",
+            "--audio", "/audio/input.wav", "--session", session,
+            "--feed-mode", "file",
+        ]
+        module._validate_command(
+            vosk, "vosk-small-pl-0.22", "streaming", "fast", session, 300)
+        whisper = [
+            "/usr/bin/python3", "/benchmark/adapters/whisper_cli.py",
+            "--binary", "/engine/whisper-cli", "--model", "/model",
+            "--audio", "/audio/input.wav", "--session", session,
+            "--threads", "4", "--timeout-seconds", "295",
+        ]
+        module._validate_command(
+            whisper, "whisper.cpp-tiny", "batch", "fast", session, 300)
+        rejected = (
+            (["/usr/bin/python3", "/engine/fixture.py", session],
+             "vosk-small-pl-0.22", "streaming"),
+            (vosk + ["--chunk-ms", "200"],
+             "vosk-small-pl-0.22", "streaming"),
+            (whisper[:-1] + ["294"], "whisper.cpp-tiny", "batch"),
+        )
+        for command, engine, mode in rejected:
+            with self.subTest(command=command):
+                with self.assertRaises(module.IsolationError):
+                    module._validate_command(
+                        command, engine, mode, "fast", session, 300)
+
+    def test_pinned_engine_layout_rejects_renamed_inputs(self):
+        specification = importlib.util.spec_from_file_location("isolated", ISOLATED_RUNNER)
+        module = importlib.util.module_from_spec(specification)
+        assert specification.loader is not None
+        specification.loader.exec_module(module)
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            audio = root / "pl-01.wav"
-            with wave.open(str(audio), "wb") as output:
-                output.setnchannels(1)
-                output.setsampwidth(2)
-                output.setframerate(16000)
-                output.writeframes(b"\0\0" * 1600)
-            engine = root / "engine"
-            model = root / "model"
-            engine.mkdir()
-            model.mkdir()
-            shutil.copy2(ADAPTER_FIXTURE, engine / "fixture.py")
-            (model / "weights").write_bytes(b"model")
-            results = root / "results.json"
-            completed = subprocess.run([
-                sys.executable, str(ISOLATED_RUNNER),
-                "--case-id", "pl-01", "--engine", "vosk-small-pl-0.22",
-                "--run", "1", "--mode", "streaming", "--input-pacing", "realtime",
-                "--session", "synthetic-live", "--audio", str(audio),
-                "--engine-path", str(engine), "--model-path", str(model),
-                "--results", str(results), "--", "/usr/bin/python3",
-                "/engine/fixture.py", "synthetic-live", "realtime",
-            ], capture_output=True, text=True)
-            self.assertEqual(0, completed.returncode, completed.stderr)
-            result = json.loads(results.read_text(encoding="utf-8"))["results"][0]
-            self.assertEqual("realtime", result["input_pacing"])
-            self.assertGreaterEqual(result["partials"][0]["lag_ms"], 0)
-            self.assertLess(result["partials"][0]["lag_ms"], 50)
-            self.assertLessEqual(result["final_result_ms"], result["completed_ms"])
+            library = root / "libvosk.so"
+            library.write_bytes(b"library")
+            vosk_model = root / "vosk-model-small-pl-0.22"
+            vosk_model.mkdir()
+            module._validate_engine_layout(
+                "vosk-small-pl-0.22", library, vosk_model)
+            whisper = root / "whisper"
+            whisper.mkdir()
+            binary = whisper / "whisper-cli"
+            binary.write_bytes(b"binary")
+            binary.chmod(0o700)
+            tiny = root / "ggml-tiny.bin"
+            tiny.write_bytes(b"model")
+            module._validate_engine_layout("whisper.cpp-tiny", whisper, tiny)
+            with self.assertRaises(module.IsolationError):
+                module._validate_engine_layout(
+                    "whisper.cpp-tiny", whisper, root / "renamed.bin")
 
     def test_vosk_realtime_pacing_uses_monotonic_deadlines(self):
         specification = importlib.util.spec_from_file_location("vosk_adapter", VOSK_ADAPTER)
@@ -366,7 +355,7 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             fake.chmod(0o755)
             (engine / "libfake.so.1").write_bytes(b"library")
             (engine / "libfake.so").symlink_to("libfake.so.1")
-            model = root / "model.bin"
+            model = root / "ggml-tiny.bin"
             model.write_bytes(b"model")
             results = root / "results.json"
             session = "synthetic-whisper"
@@ -380,6 +369,7 @@ class RealDictationBenchmarkTests(unittest.TestCase):
                 "/benchmark/adapters/whisper_cli.py",
                 "--binary", "/engine/whisper-cli", "--model", "/model",
                 "--audio", "/audio/input.wav", "--session", session,
+                "--threads", "4", "--timeout-seconds", "295",
             ], capture_output=True, text=True)
             self.assertEqual(0, completed.returncode, completed.stderr)
             self.assertNotIn("syntetyczna", completed.stdout + completed.stderr)
@@ -398,6 +388,72 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         with self.assertRaises(module.AdapterError) as raised:
             module._parse_output(canary)
         self.assertNotIn(canary.decode(), str(raised.exception))
+
+    def test_timeout_helpers_kill_adapter_process_groups(self):
+        runner_spec = importlib.util.spec_from_file_location("runner", RUNNER)
+        runner = importlib.util.module_from_spec(runner_spec)
+        assert runner_spec.loader is not None
+        sys.path.insert(0, str(RUNNER.parent))
+        try:
+            runner_spec.loader.exec_module(runner)
+        finally:
+            sys.path.pop(0)
+        whisper_spec = importlib.util.spec_from_file_location(
+            "whisper_adapter", WHISPER_ADAPTER)
+        whisper = importlib.util.module_from_spec(whisper_spec)
+        assert whisper_spec.loader is not None
+        whisper_spec.loader.exec_module(whisper)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            child_pid = root / "child.pid"
+            fake = root / "spawner.py"
+            fake.write_text(
+                "#!/usr/bin/python3\n"
+                "import pathlib, subprocess, time\n"
+                f"p=subprocess.Popen(['/usr/bin/sleep','60'])\n"
+                f"pathlib.Path({str(child_pid)!r}).write_text(str(p.pid))\n"
+                "time.sleep(60)\n",
+                encoding="utf-8",
+            )
+            fake.chmod(0o700)
+            process = subprocess.Popen([str(fake)], start_new_session=True)
+            deadline = time.monotonic() + 2
+            while not child_pid.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(child_pid.exists())
+            pid = int(child_pid.read_text(encoding="ascii"))
+            runner._kill_process_group(process)
+            deadline = time.monotonic() + 2
+            state = None
+            while time.monotonic() < deadline:
+                try:
+                    state = Path(f"/proc/{pid}/stat").read_text().split()[2]
+                except OSError:
+                    state = None
+                    break
+                if state == "Z":
+                    break
+                time.sleep(0.01)
+            self.assertIn(state, {None, "Z"})
+
+            child_pid.unlink()
+            with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    whisper._run_cli([str(fake)], stdout, stderr, 0.1)
+            self.assertTrue(child_pid.exists())
+            pid = int(child_pid.read_text(encoding="ascii"))
+            deadline = time.monotonic() + 2
+            state = None
+            while time.monotonic() < deadline:
+                try:
+                    state = Path(f"/proc/{pid}/stat").read_text().split()[2]
+                except OSError:
+                    state = None
+                    break
+                if state == "Z":
+                    break
+                time.sleep(0.01)
+            self.assertIn(state, {None, "Z"})
 
 
 if __name__ == "__main__":

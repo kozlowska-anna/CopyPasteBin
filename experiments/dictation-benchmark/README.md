@@ -50,6 +50,12 @@ transkrypcji, emituje jedną ramkę końcową i oddziela czas ładowania modelu 
 chwili zaobserwowania `ready`. Runner mierzy RSS całego drzewa adaptera, więc
 obejmuje także potomny proces natywny.
 
+Launcher porównuje całe polecenie adaptera z jedną z dwóch zatwierdzonych list,
+łącznie z kolejnością i wartościami argumentów. Nie dopuszcza dowolnego skryptu
+Pythona ani dodatkowych flag. Nazwy biblioteki/modelu muszą odpowiadać
+przypiętemu kandydatowi. Timeout zabija całą osobną grupę procesów adaptera;
+Whisper ma wewnętrzny limit krótszy o pięć sekund od limitu runnera.
+
 `cases.tatoeba-pl.json` i `audio-manifest.tatoeba-pl.json` opisują techniczny
 zestaw 20 krótkich polskich nagrań jednego mówcy Tatoeba. Audio `antio` jest
 CC BY 4.0, teksty referencyjne CC BY 2.0 FR, a konwersję formatu jawnie

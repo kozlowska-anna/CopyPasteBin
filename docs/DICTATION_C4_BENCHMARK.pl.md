@@ -42,6 +42,10 @@ i tras domyślnych oraz brak capabilities. Runner obserwuje ramki `ready`,
 mierzy zasoby i zapisuje plik `0600`. Benchmarkowe ramki częściowe i końcowe
 dodają pozycję audio wyłącznie do obliczenia opóźnienia; nie zmienia to
 produkcyjnego protokołu edytora. `analyze_runs.py` nie wypisuje transkrypcji.
+Launcher akceptuje tylko pełne, dokładnie zgodne polecenia dwóch adapterów;
+odrzuca testowe lub dowolne skrypty Pythona, dodatkowe flagi i nazwy modeli
+niezgodne z kandydatem. Adapter działa w osobnej grupie procesów, którą runner
+zabija w całości przy błędzie lub przekroczeniu limitu.
 
 ## Audio
 
@@ -149,8 +153,9 @@ python3 experiments/dictation-benchmark/validate_audio_manifest.py \
 ```
 
 Adapter Whisper jest uruchamiany przez ten sam launcher z trybem `batch/fast`
-i poleceniem `/usr/bin/python3 /benchmark/adapters/whisper_cli.py`; bezpośrednie
-uruchomienie `/engine/whisper-cli` nie spełnia protokołu i jest odrzucane.
+i dokładnym poleceniem adaptera zawierającym `--threads 4` oraz wewnętrzny
+timeout krótszy o pięć sekund od limitu runnera. Bezpośrednie uruchomienie
+`/engine/whisper-cli` nie spełnia protokołu i jest odrzucane.
 
 Raport formatu 3:
 

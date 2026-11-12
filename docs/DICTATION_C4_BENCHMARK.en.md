@@ -28,6 +28,11 @@ lag measurable without changing the editor's production protocol.
 `analyze_runs.py` aggregates metrics without content.
 `validate_audio_manifest.py` accepts only checksum-pinned mono PCM files inside
 one isolated audio directory.
+The launcher compares the complete command against one of two approved
+argument lists. It rejects arbitrary Python scripts, extra flags, and model
+names that do not match the candidate. Each adapter runs in a separate process
+group that is killed as a whole on failure or timeout; Whisper's internal
+timeout expires five seconds before the outer runner limit.
 
 The first real technical set is pinned in `cases.tatoeba-pl.json` and
 `audio-manifest.tatoeba-pl.json`: 20 short utterances (28.395 seconds total)

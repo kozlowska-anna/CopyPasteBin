@@ -9,6 +9,7 @@ import math
 import os
 import queue
 import resource
+import signal
 import socket
 import stat
 import subprocess
@@ -201,9 +202,17 @@ def _process_rss_mib(pid: int) -> float:
     except (OSError, UnicodeError):
         return 0.0
     for line in status.splitlines():
-        if line.startswith(("VmHWM:", "VmRSS:")):
+        if line.startswith("VmRSS:"):
             return float(line.split()[1]) / 1024
     return 0.0
+
+
+def _kill_process_group(process: subprocess.Popen) -> None:
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait()
 
 
 def _append_private(path: Path, result: dict) -> None:
@@ -251,6 +260,8 @@ def main() -> int:
         parser.error(str(error))
     if args.mode == "batch" and args.input_pacing != "fast":
         parser.error("batch mode requires fast file input")
+    if not 10 <= args.timeout_seconds <= 3600:
+        parser.error("timeout is outside the safe range")
     if not args.command or args.command[0] != "--" or len(args.command) == 1:
         parser.error("adapter command must follow --")
     command = args.command[1:]
@@ -260,8 +271,10 @@ def main() -> int:
 
     usage_before = resource.getrusage(resource.RUSAGE_CHILDREN)
     started = time.monotonic()
-    process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                               stderr=subprocess.DEVNULL, text=True, bufsize=1)
+    process = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+        bufsize=1, start_new_session=True,
+    )
     messages: queue.Queue = queue.Queue()
     reader = threading.Thread(target=_reader, args=(process.stdout, messages), daemon=True)
     reader.start()
@@ -282,9 +295,8 @@ def main() -> int:
                 if len(events) >= MAX_EVENTS or len(line.encode("utf-8")) > 8192:
                     raise InputError("adapter event limit exceeded")
                 events.append((round((observed - started) * 1000, 3), line))
-    except Exception:
-        process.kill()
-        process.wait()
+    except BaseException:
+        _kill_process_group(process)
         raise
     returncode = process.wait()
     if returncode != 0:

@@ -14,6 +14,7 @@ from pathlib import Path
 PROFILE = "bwrap-v1"
 SAFE_RESULT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 SAFE_SESSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,63}")
+SAFE_CASE = re.compile(r"pl-[0-9]{2}")
 
 
 class IsolationError(Exception):
@@ -86,41 +87,52 @@ def _validate_results(path: Path) -> tuple[Path, str]:
     return directory, path.name
 
 
-def _option(command: list[str], name: str) -> str | None:
-    positions = [index for index, value in enumerate(command) if value == name]
-    if len(positions) != 1 or positions[0] + 1 >= len(command):
-        return None
-    return command[positions[0] + 1]
+def _validate_engine_layout(engine_id: str, engine: Path, model: Path) -> None:
+    if engine_id == "vosk-small-pl-0.22":
+        if not engine.is_file() or engine.name != "libvosk.so" or \
+                not model.is_dir() or model.name != "vosk-model-small-pl-0.22":
+            raise IsolationError("Vosk inputs do not match the pinned layout")
+        return
+    expected_model = {
+        "whisper.cpp-tiny": "ggml-tiny.bin",
+        "whisper.cpp-base": "ggml-base.bin",
+        "whisper.cpp-small": "ggml-small.bin",
+    }[engine_id]
+    binary = engine / "whisper-cli"
+    try:
+        binary_info = os.lstat(binary)
+    except OSError as error:
+        raise IsolationError("the pinned whisper-cli executable is unavailable") from error
+    if not engine.is_dir() or not model.is_file() or model.name != expected_model or \
+            stat.S_ISLNK(binary_info.st_mode) or not stat.S_ISREG(binary_info.st_mode) or \
+            binary_info.st_uid != os.geteuid() or not binary_info.st_mode & stat.S_IXUSR:
+        raise IsolationError("Whisper inputs do not match the pinned layout")
 
 
 def _validate_command(command: list[str], engine: str, mode: str,
-                      input_pacing: str, session: str) -> None:
-    if not command or command[0] != "/usr/bin/python3":
-        raise IsolationError("adapter command is outside the closed executable set")
-    if len(command) > 64 or any(not value or "\0" in value or len(value) > 4096 for value in command):
+                      input_pacing: str, session: str, timeout_seconds: int) -> None:
+    if len(command) > 32 or any(not value or "\0" in value or len(value) > 4096
+                                for value in command):
         raise IsolationError("adapter command is invalid")
-    if len(command) < 2 or command[1] not in {
-            "/benchmark/adapters/vosk_ctypes.py",
-            "/benchmark/adapters/whisper_cli.py",
-            "/engine/fixture.py",
-    }:
-        raise IsolationError("adapter script is outside the closed executable set")
-    if command[1] == "/benchmark/adapters/vosk_ctypes.py":
+    if engine == "vosk-small-pl-0.22":
         expected = "realtime" if input_pacing == "realtime" else "file"
-        if not engine.startswith("vosk-") or _option(command, "--feed-mode") != expected or \
-                _option(command, "--library") != "/engine" or \
-                _option(command, "--model") != "/model" or \
-                _option(command, "--audio") != "/audio/input.wav" or \
-                _option(command, "--session") != session:
-            raise IsolationError("Vosk feed mode does not match benchmark input pacing")
-    elif command[1] == "/benchmark/adapters/whisper_cli.py":
-        if not engine.startswith("whisper.cpp-") or mode != "batch" or \
-                input_pacing != "fast" or \
-                _option(command, "--binary") != "/engine/whisper-cli" or \
-                _option(command, "--model") != "/model" or \
-                _option(command, "--audio") != "/audio/input.wav" or \
-                _option(command, "--session") != session:
-            raise IsolationError("whisper-cli requires the controlled batch profile")
+        approved = [
+            "/usr/bin/python3", "/benchmark/adapters/vosk_ctypes.py",
+            "--library", "/engine", "--model", "/model",
+            "--audio", "/audio/input.wav", "--session", session,
+            "--feed-mode", expected,
+        ]
+        if mode != "streaming" or command != approved:
+            raise IsolationError("Vosk requires the exact approved adapter command")
+        return
+    approved = [
+        "/usr/bin/python3", "/benchmark/adapters/whisper_cli.py",
+        "--binary", "/engine/whisper-cli", "--model", "/model",
+        "--audio", "/audio/input.wav", "--session", session,
+        "--threads", "4", "--timeout-seconds", str(timeout_seconds - 5),
+    ]
+    if mode != "batch" or input_pacing != "fast" or command != approved:
+        raise IsolationError("whisper-cli requires the exact approved batch command")
 
 
 def build_command(arguments: argparse.Namespace) -> list[str]:
@@ -131,14 +143,17 @@ def build_command(arguments: argparse.Namespace) -> list[str]:
     audio = _validate_input(arguments.audio, regular_file=True)
     engine = _validate_input(arguments.engine_path)
     model = _validate_input(arguments.model_path)
+    _validate_engine_layout(arguments.engine, engine, model)
     results_directory, result_name = _validate_results(arguments.results)
     command = arguments.command
     if command and command[0] == "--":
         command = command[1:]
-    if not SAFE_SESSION.fullmatch(arguments.session):
+    if not SAFE_CASE.fullmatch(arguments.case_id) or \
+            not SAFE_SESSION.fullmatch(arguments.session):
         raise IsolationError("session identifier is invalid")
     _validate_command(command, arguments.engine, arguments.mode,
-                      arguments.input_pacing, arguments.session)
+                      arguments.input_pacing, arguments.session,
+                      arguments.timeout_seconds)
 
     runner = [
         "/usr/bin/python3", "/benchmark/run_adapter.py",
@@ -203,6 +218,8 @@ def main() -> int:
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument("command", nargs=argparse.REMAINDER)
     arguments = parser.parse_args()
+    if not 10 <= arguments.timeout_seconds <= 3600:
+        parser.error("timeout is outside the safe range")
     if arguments.mode == "batch" and arguments.input_pacing != "fast":
         parser.error("batch mode requires fast file input")
     try:

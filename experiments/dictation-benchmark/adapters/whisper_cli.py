@@ -8,6 +8,7 @@ import json
 import os
 import re
 import resource
+import signal
 import subprocess
 import tempfile
 import wave
@@ -50,6 +51,26 @@ def _read_bounded(stream, limit: int, label: str) -> bytes:
         raise AdapterError(f"whisper-cli {label} exceeded the safe limit")
     stream.seek(0)
     return stream.read(limit + 1)
+
+
+def _kill_process_group(process: subprocess.Popen) -> None:
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait()
+
+
+def _run_cli(command: list[str], stdout, stderr, timeout_seconds: int) -> int:
+    process = subprocess.Popen(
+        command, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr,
+        start_new_session=True, preexec_fn=_limit_output_files,
+    )
+    try:
+        return process.wait(timeout=timeout_seconds)
+    except BaseException:
+        _kill_process_group(process)
+        raise
 
 
 def _parse_output(payload: bytes) -> str:
@@ -111,15 +132,12 @@ def main() -> int:
     ]
     with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
         try:
-            completed = subprocess.run(
-                command, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr,
-                timeout=args.timeout_seconds, check=False, preexec_fn=_limit_output_files,
-            )
+            returncode = _run_cli(command, stdout, stderr, args.timeout_seconds)
         except subprocess.TimeoutExpired as error:
             raise AdapterError("whisper-cli timed out") from error
         output = _read_bounded(stdout, MAX_JSON_BYTES, "JSON output")
         diagnostics = _read_bounded(stderr, MAX_STDERR_BYTES, "diagnostics")
-    if completed.returncode != 0:
+    if returncode != 0:
         raise AdapterError("whisper-cli failed")
     transcript = _parse_output(output)
     model_init_ms = _parse_model_init_ms(diagnostics)
