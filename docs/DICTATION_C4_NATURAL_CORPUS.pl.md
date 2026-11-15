@@ -1,7 +1,7 @@
 # CopyPasteBin 1.3 — C4: plan korpusu naturalnej polskiej mowy
 
-Status: **zatrzymane przed audio: brak bezpiecznego selektywnego dostępu**.
-Data przeglądu źródeł: 2026-11-12.
+Status: **15 rekordów ParlaSpeech-PL wybranych i sprawdzonych przez HEAD; audio nie pobrano**.
+Data przeglądu źródeł: 2026-11-15.
 
 Dotychczasowy korpus Tatoeba, jego manifest i wyniki pozostają niezmienione.
 Nowy etap ma sprawdzić dłuższą mowę wielu osób, a nie wyłonić zwycięzcę STT.
@@ -10,12 +10,16 @@ Nowy etap ma sprawdzić dłuższą mowę wielu osób, a nie wyłonić zwycięzc�
 
 | Źródło | Licencja i autorstwo | Przydatność | Decyzja |
 | --- | --- | --- | --- |
-| VoxPopuli, polski ASR | Dane audio i transkrypcje: CC0; źródłowe nagrania Parlamentu Europejskiego. Repozytorium rozdziela licencję danych CC0 od licencji kodu i modeli CC BY-NC. Zalecane cytowanie Wang et al., ACL-IJCNLP 2021. | 111 godzin i 282 mówców; naturalne wypowiedzi parlamentarne; udokumentowane pola `audio_id`, `raw_text`, `normalized_text`, `speaker_id`, `is_gold_transcript`. Pełny polski eksport HF ma ok. 20,6 GB. | **Źródło zweryfikowane, selektywny dostęp zablokowany** dla splitu `test`, rewizja `5ab868a7cddb87d84224ebfc8112ebd0905fc5bd`. |
+| ParlaSpeech-PL 1.0 | Audio i transkrypcje: CC BY-SA 4.0; autorzy Danijel Koržinek i Nikola Ljubešić; wydawca Jožef Stefan Institute/CLARIN.SI. Źródłem są transkrypcje ParlaMint 4.0 i nagrania polskiego parlamentu. | Naturalna mowa parlamentarna, ręczne oficjalne transkrypcje, automatyczne dopasowanie segmentów, długość, interpunkcja i dane mówcy. HF ma ok. 60,8 GB, lecz udostępnia pojedyncze przypięte rekordy FLAC. | **Źródło podstawowe**, rewizja `88887ee82cdb7e3f20e7b29d4c1740d0bc630f41`, split `train`. Wybrano 15 rekordów; audio nadal nie pobrano. |
+| VoxPopuli, polski ASR | Dane audio i transkrypcje: CC0; źródłowe nagrania Parlamentu Europejskiego. | 111 godzin i 282 mówców, ale Dataset Viewer nie może przeskanować testowej grupy wierszy w swoim limicie. | Źródło zweryfikowane, **selektywny dostęp zablokowany** dla przypiętej rewizji. |
 | Common Voice Scripted Speech 27.0 PL | CC0; zakaz prób ustalania tożsamości mówców i ponownego hostowania zbioru. | 4,49 GB w jednym oficjalnym archiwum; głównie krótkie wypowiedzi czytane. | Odłożone: pobranie całości narusza zasadę minimalizacji dla 15 próbek. |
 | FLEURS `pl_pl` | CC BY 4.0; atrybucja korpusu FLEURS/Google i publikacji. | Selektywny dostęp jest możliwy, lecz schemat publiczny nie zawiera identyfikatora mówcy, a domeną jest mowa czytana. Polski config ma ok. 2,05 GB. | Rezerwa, **nie jest liczona** do minimum różnych mówców. |
 
 Źródła informacji:
 
+- <https://hdl.handle.net/11356/1686>
+- <https://huggingface.co/datasets/classla/ParlaSpeech-PL>
+- <https://clarinsi.github.io/parlaspeech/>
 - <https://github.com/facebookresearch/voxpopuli>
 - <https://huggingface.co/datasets/facebook/voxpopuli>
 - <https://huggingface.co/docs/dataset-viewer/rows>
@@ -30,7 +34,29 @@ mówcę. Każdy klip ma trwać 10–20 sekund, a suma 3–5 minut. Limit ruchu d
 audio i niezbędnych metadanych wynosi 25 MB. Osiągnięcie limitu przed uzyskaniem
 pięciu mówców albo 180 sekund oznacza przerwanie, nie pobranie pełnego zbioru.
 
-## Wynik weryfikacji przypięcia i dostępu
+## Wynik selekcji ParlaSpeech-PL
+
+Oficjalny rekord CLARIN.SI potwierdza licencję CC BY-SA 4.0, autorów, wydawcę
+oraz powiązanie zdań z transkrypcjami ParlaMint 4.0. Repozytorium Hugging Face
+zostało przypięte do rewizji
+`88887ee82cdb7e3f20e7b29d4c1740d0bc630f41`. Każdy sprawdzony adres audio
+zawiera tę rewizję w ścieżce.
+
+Przeskanowano 420 rekordów metadanych od offsetu zero. Kandydat musiał mieć
+10–20 sekund, niepusty `text` i `text_normalised`, typ `audio/flac` oraz etykietę
+mówcy. Nazwy służyły wyłącznie do tymczasowego grupowania i nie zostały
+zapisane. Pierwszych pięciu mówców z co najmniej trzema kandydatami otrzymało
+pseudonimy `speaker-01`–`speaker-05`; wybrano trzy rekordy o najniższych
+indeksach każdego mówcy.
+
+Wybrane 15 rekordów ma łącznie 197,42 s. Wszystkie mają niepuste referencje z
+interpunkcją. HEAD zwrócił HTTP 200 bez przekierowań dla każdego rekordu;
+deklarowany łączny rozmiar to 3 901 424 bajty. Nie pobrano treści audio, więc
+nie ma jeszcze SHA-256 ani finalnego manifestu. Ręczna transkrypcja jest
+oficjalna, lecz dopasowanie segmentu do audio jest automatyczne i wymaga
+kontroli po przyszłym pobraniu.
+
+## Historyczna blokada VoxPopuli
 
 Oficjalne API Hugging Face potwierdziło istnienie przypiętej rewizji. Bieżąca
 rewizja to `42f01879c780b4a2e90ec0b4f616c2ece526e4f1`, lecz całe drzewo `pl/` ma
@@ -47,15 +73,18 @@ nowego czytnika Parquet/Xet nie można sprawdzić faktycznej zawartości
 `raw_text`, długości i relacji audio–referencja. Żadne audio nie zostało
 pobrane, a finalne manifesty nie powstały.
 
-Po osobnej zgodzie procedura będzie następująca:
+## Zamknięta procedura selekcji
 
-1. potwierdzić rewizję, licencję danych i dostępność splitu `test`;
-2. odczytać metadane małymi stronami, bez audio, i zachować tylko rekordy
-   `is_gold_transcript`, z `raw_text` oraz pseudonimowym `speaker_id`;
-3. nie wyszukiwać ani nie ustalać prawdziwej tożsamości mówców;
-4. pobrać wyłącznie kandydatów, zatrzymując się przy 25 MB;
-5. odrzucić klipy poza 10–20 s i wybrać pięć identyfikatorów mówców
-   leksykograficznie, po trzy najniższe stabilne `audio_id` spełniające sloty;
+Zatwierdzona procedura ParlaSpeech jest następująca:
+
+1. potwierdzić rewizję i licencję w autorytatywnym rekordzie CLARIN.SI;
+2. odczytać metadane od offsetu zero stronami po najwyżej 100 rekordów;
+3. użyć jawnych etykiet mówców tylko tymczasowo, przypisać pseudonimy i nie
+   zapisywać nazw ani transkrypcji w Git;
+4. przed audio sprawdzić HEAD, host, rewizję w URL, brak przekierowania, typ i
+   dodatni rozmiar każdego pliku;
+5. po osobnej zgodzie pobrać dokładnie wybrane pliki, zatrzymując się przy
+   25 MB;
 6. zapisać hash źródła, następnie przekonwertować istniejącym GStreamerem do
    mono PCM WAV 16 kHz i zapisać drugi hash;
 7. skopiować tekst referencyjny z przypiętych metadanych; nigdy z wyniku STT.
@@ -68,7 +97,7 @@ referencji w `cases.natural-pl.plan.json`. Po pobraniu powstaną osobne pliki
 
 ## Pokrycie i ograniczenia
 
-VoxPopuli dobrze pokrywa dłuższą naturalną wypowiedź, liczby i daty, nazwy
+ParlaSpeech dobrze pokrywa dłuższą naturalną wypowiedź, liczby i daty, nazwy
 własne, pauzy, zmianę tempa oraz zdania przydatne do oceny interpunkcji.
 Korpus parlamentarny nie jest rozmową codzienną. Nie gwarantuje terminologii
 Linux/GitHub/Python/AI ani naturalnych autokorekt. Te trzy kategorie są jawnie
@@ -124,12 +153,14 @@ Po zatwierdzeniu i walidacji korpusu:
 
 Nie pobrano audio, nie zainstalowano narzędzi i nie uruchomiono inferencji.
 Przyszłe pliki pozostaną w prywatnym katalogu C4 (`0700`, pliki `0600`).
-`validate_natural_audio_manifest.py` wymusza liczbę próbek, co najmniej trzech
-mówców, dozwolone licencje, przypięte rewizje, SHA-256, format WAV, czas,
+`validate_natural_audio_manifest.py` wymusza 15 próbek, dokładnie pięć
+pseudonimowych slotów mówców, dozwolone licencje, przypięte rewizje, SHA-256,
+format WAV, czas,
 kategorie, katalog `0700`, pliki `0600` i zgodność jeden-do-jednego z
 referencjami.
 
-Zadanie jest zatrzymane na przewidzianej bramce. Osobnej decyzji wymaga zmiana
-źródła albo jawne zatwierdzenie nowego, ograniczonego mechanizmu odczytu
-Parquet. Nie pobieramy pliku 947 MB, archiwum 20,6 GB ani Common Voice 4,49 GB
-jako obejścia. Konwersja i późniejsza inferencja również wymagają osobnej zgody.
+Selekcja i HEAD są zakończone. Osobnej zgody wymaga pobranie dokładnie 15
+wybranych plików FLAC o deklarowanym rozmiarze 3 901 424 bajty. Dopiero wtedy
+można zapisać SHA-256, sprawdzić dekoder, odsłuchać zgodność segmentów z
+referencjami i przygotować WAV. Konwersja i późniejsza inferencja również
+wymagają osobnej zgody.

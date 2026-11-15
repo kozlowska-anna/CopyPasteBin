@@ -15,7 +15,7 @@ from pathlib import Path
 from score import InputError, _read_json, load_cases
 
 
-ALLOWED_LICENSES = {"CC0-1.0", "CC-BY-4.0"}
+ALLOWED_LICENSES = {"CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"}
 ALLOWED_CATEGORIES = {
     "daily-conversation", "natural-long", "numbers-dates-times",
     "proper-names", "computing", "pauses-tempo", "self-correction",
@@ -53,13 +53,13 @@ def validate(manifest_path: Path, audio_root: Path, cases_path: Path) -> dict:
     corpus, samples = document["corpus"], document["samples"]
     if not isinstance(corpus, dict) or set(corpus) != CORPUS_KEYS or \
             corpus.get("language") != "pl" or not isinstance(samples, list) or \
-            not 12 <= len(samples) <= 20 or len(samples) != len(cases):
+            len(samples) != 15 or len(samples) != len(cases):
         raise InputError("natural corpus metadata or sample count is invalid")
     for key in ("name", "selection", "conversion"):
         if not isinstance(corpus.get(key), str) or not corpus[key]:
             raise InputError("natural corpus metadata is incomplete")
-    if corpus.get("minimum_speakers") != 3:
-        raise InputError("natural corpus must require at least three speakers")
+    if corpus.get("minimum_speakers") != 5:
+        raise InputError("natural corpus must require exactly five speaker slots")
     revisions = corpus.get("source_revisions")
     if not isinstance(revisions, dict) or not revisions or not all(
             isinstance(key, str) and re.fullmatch(r"[a-z0-9.-]{1,64}", key) and
@@ -158,7 +158,7 @@ def validate(manifest_path: Path, audio_root: Path, cases_path: Path) -> dict:
         total_frames += frames
 
     total_duration_ms = total_frames / 16
-    if seen != set(cases) or len(speakers) < corpus["minimum_speakers"] or \
+    if seen != set(cases) or len(speakers) != corpus["minimum_speakers"] or \
             not total_min <= total_duration_ms <= total_max or \
             covered | set(gaps) != ALLOWED_CATEGORIES or not covered.isdisjoint(gaps):
         raise InputError("natural corpus coverage, speakers, or duration is incomplete")

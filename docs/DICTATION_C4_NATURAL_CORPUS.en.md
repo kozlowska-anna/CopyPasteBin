@@ -1,16 +1,31 @@
 # CopyPasteBin 1.3 — C4 natural Polish corpus plan
 
-Status: **stopped before audio: selective access is unavailable**. Reviewed
-2026-11-12. The Tatoeba corpus and all earlier results remain unchanged.
+Status: **15 ParlaSpeech-PL records selected and HEAD-verified; no audio downloaded**.
+Reviewed 2026-11-15. The Tatoeba corpus and all earlier results remain unchanged.
 
 ## Source decision
 
-The primary proposal is a 15-clip subset of Polish VoxPopuli test data pinned
-to revision `5ab868a7cddb87d84224ebfc8112ebd0905fc5bd`. VoxPopuli explicitly licenses
-its data as CC0 (separately from its CC BY-NC code/models), attributes the raw
-recordings to the European Parliament, and provides Polish transcripts and
-pseudonymous `speaker_id` values. Polish data covers 111 hours and 282 speakers.
-The full Hub export is about 20.6 GB, so it must not be downloaded.
+The approved primary source is ParlaSpeech-PL 1.0, pinned to Hugging Face
+revision `88887ee82cdb7e3f20e7b29d4c1740d0bc630f41`. Its authoritative CLARIN.SI
+record licenses audio and transcripts under CC BY-SA 4.0 and attributes Danijel
+Korzinek, Nikola Ljubesic, the Jozef Stefan Institute/CLARIN.SI, ParlaMint 4.0
+transcripts, and Polish Parliament recordings. The full Hub dataset is about
+60.8 GB and must not be downloaded.
+
+Bounded Dataset Viewer pages exposed individual FLAC records whose cached URLs
+contain the exact pinned revision. Scanning 420 metadata rows yielded five
+qualifying speakers with at least three 10–20 second clips. Names were used only
+for temporary grouping; the plan retains `speaker-01` through `speaker-05`.
+The deterministic selection contains 15 unique records totaling 197.42 seconds.
+All 15 references are non-empty and contain punctuation.
+
+HEAD returned HTTP 200 without redirects for every selected URL. The declared
+total source size is 3,901,424 bytes. No audio body was downloaded, so source
+SHA-256 values and the final manifest do not yet exist. The transcripts are
+official and manual, but sentence-to-audio alignment is automatic and must be
+checked after any later download.
+
+## Historical VoxPopuli blocker
 
 The pinned revision exists. Current revision `42f01879…` has a Polish tree
 identical to the pinned revision; the test Parquet object is
@@ -29,6 +44,12 @@ the speaker minimum.
 
 Primary references:
 
+- <https://hdl.handle.net/11356/1686>
+- <https://huggingface.co/datasets/classla/ParlaSpeech-PL>
+- <https://clarinsi.github.io/parlaspeech/>
+
+Other references:
+
 - <https://github.com/facebookresearch/voxpopuli>
 - <https://huggingface.co/datasets/facebook/voxpopuli>
 - <https://huggingface.co/docs/dataset-viewer/rows>
@@ -40,22 +61,23 @@ Primary references:
 
 The target is five pseudonymous speakers with three clips each. Every clip
 must be 10–20 seconds, total duration 3–5 minutes, with a hard 25 MB transfer
-cap. Metadata must have `is_gold_transcript`, `raw_text`, and `speaker_id`.
-Selection uses lexical speaker ID order and the lowest stable qualifying
-`audio_id`; no real-world identity lookup is permitted. Source and derived WAV
+cap. Candidates require non-empty `text` and `text_normalised`, FLAC metadata,
+a speaker label, and a 10–20 second duration. Qualifying speakers are ordered
+by their first row index and the first three rows are selected. No real-world
+identity lookup is permitted and names are not persisted. Source and derived WAV
 SHA-256 values are recorded, and references are copied only from pinned source
 metadata. Hitting the cap or losing selective access stops the task rather
 than triggering a full archive download.
 
-VoxPopuli should cover longer natural speech, numbers/dates, names, pace/pause
+ParlaSpeech should cover longer natural speech, numbers/dates, names, pace/pause
 variation, and punctuation. Everyday conversation, computing vocabulary, and
 self-corrections are explicit expected gaps in its parliamentary domain.
 
-The unfilled plan is stored separately in
+The selected, no-audio plan is stored separately in
 `audio-manifest.natural-pl.plan.json` and `cases.natural-pl.plan.json`; neither
 is executable benchmark input. The future version-3 manifest will be checked
-by `validate_natural_audio_manifest.py` for 12–20 exact case/file pairs,
-at least three speakers, pinned revisions and licenses, hashes, mono PCM WAV
+by `validate_natural_audio_manifest.py` for 15 exact case/file pairs,
+exactly five speaker slots, pinned revisions and licenses, hashes, mono PCM WAV
 16 kHz, duration, categories, and explicit coverage gaps.
 
 ## Quality methodology v2
@@ -84,7 +106,8 @@ performance repetitions, and a separate Vosk `realtime` run on longer clips.
 Quality conclusions use unique utterances, not repeated executions.
 
 No audio, dependency, model, microphone, or inference was used in this stage.
-A source change or a newly approved bounded Parquet mechanism is required
-before work can continue. Downloading the 947 MB test Parquet, installing a
-reader, or using full archives was not authorized. Conversion and every later
-benchmark run still require separate approval.
+Downloading the 15 selected FLAC files, with a declared total of 3,901,424
+bytes, requires separate approval. Only after download may source hashes,
+decoder validation, reference alignment review, conversion, and the final
+manifest be completed. Conversion and every later benchmark run also require
+separate approval.

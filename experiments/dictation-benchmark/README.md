@@ -78,15 +78,15 @@ Kompletna metodologia i niewykonane polecenia instalacyjne znajdują się w
 
 ## Plan naturalnego korpusu
 
-`audio-manifest.natural-pl.plan.json` i `cases.natural-pl.plan.json` opisują
-nieuzupełnione sloty przyszłego korpusu wielu mówców. Nie są wejściem
-benchmarku i nie zawierają audio ani referencji. Po osobnej zgodzie właściwy
-manifest wersji 3 sprawdzi `validate_natural_audio_manifest.py`: 12–20 plików,
-co najmniej trzech pseudonimowych mówców, 3–5 minut, przypięte źródła i
-licencje, SHA-256, mono PCM WAV 16 kHz oraz zgodność z oddzielnymi referencjami.
-Aktualny plan jest zatrzymany przed audio: przypięcie VoxPopuli potwierdzono,
-ale Dataset Viewer nie potrafi selektywnie odczytać dużej grupy wierszy testowego
-Parquet w swoim limicie skanu. Plan nie jest finalnym manifestem.
+`audio-manifest.natural-pl.plan.json` i `cases.natural-pl.plan.json` opisują 15
+wybranych rekordów ParlaSpeech-PL: pięciu pseudonimowych mówców po trzy klipy,
+197,42 s i 3 901 424 bajty według HEAD. Nie są wejściem benchmarku, nie zawierają
+audio, transkrypcji, nazw mówców ani podpisanych URL-i. Po osobnej zgodzie
+właściwy manifest wersji 3 sprawdzi `validate_natural_audio_manifest.py`:
+15 plików, pięciu pseudonimowych mówców, 3–5 minut, przypięte źródło i licencję
+CC BY-SA 4.0, SHA-256, mono PCM WAV 16 kHz oraz zgodność z oddzielnymi
+referencjami. Plan nie jest finalnym manifestem; pobranie audio nadal wymaga
+osobnej zgody.
 
 `analyze_runs.py` zachowuje historyczne WER/CER, a w raporcie wersji 4 dodaje
 normalizację jakości v2, CER bez i z interpunkcją oraz ocenę znaków na granicach

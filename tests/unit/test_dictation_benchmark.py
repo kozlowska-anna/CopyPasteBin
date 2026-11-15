@@ -304,12 +304,14 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             self.assertEqual(0, completed.returncode, completed.stderr)
             self.assertEqual(2, json.loads(completed.stdout)["version"])
 
-    def test_natural_corpus_plan_has_fifteen_closed_unfilled_slots(self):
+    def test_natural_corpus_plan_has_fifteen_selected_private_slots(self):
         manifest = json.loads(NATURAL_AUDIO_PLAN.read_text(encoding="utf-8"))
         references = json.loads(NATURAL_CASES_PLAN.read_text(encoding="utf-8"))
-        self.assertEqual("blocked-before-audio", manifest["status"])
+        self.assertEqual("selected-head-verified-no-audio", manifest["status"])
         self.assertFalse(manifest["verification"]["audio_downloaded"])
-        self.assertTrue(manifest["verification"]["polish_tree_identical"])
+        self.assertTrue(manifest["verification"]["head_verified"])
+        self.assertLess(manifest["verification"]["selected_source_bytes"],
+                        manifest["target"]["maximum_download_bytes"])
         self.assertEqual(15, manifest["target"]["samples"])
         self.assertEqual(5, manifest["target"]["minimum_speakers"])
         self.assertLessEqual(manifest["target"]["maximum_download_bytes"], 25_000_000)
@@ -317,10 +319,23 @@ class RealDictationBenchmarkTests(unittest.TestCase):
         case_ids = [case["id"] for case in references["cases"]]
         self.assertEqual(case_ids, slot_ids)
         self.assertEqual(len(slot_ids), len(set(slot_ids)))
-        self.assertTrue(all(slot["source_item_id"] is None
+        self.assertEqual(5, len({slot["speaker_slot"]
+                                for slot in manifest["slots"]}))
+        self.assertTrue(all(sum(slot["speaker_slot"] == speaker
+                                for slot in manifest["slots"]) == 3
+                            for speaker in {slot["speaker_slot"]
+                                            for slot in manifest["slots"]}))
+        self.assertEqual(3_901_424, sum(slot["source_bytes"]
+                                      for slot in manifest["slots"]))
+        self.assertEqual(197_420, sum(slot["duration_ms"]
+                                    for slot in manifest["slots"]))
+        self.assertTrue(all(slot["source_item_id"]
                             for slot in manifest["slots"]))
-        self.assertTrue(all(case["text"] is None and case["source_item_id"] is None
+        self.assertTrue(all(case["text"] is None and case["source_item_id"]
                             for case in references["cases"]))
+        serialized = json.dumps([manifest, references])
+        self.assertNotIn("speaker_name", serialized)
+        self.assertNotIn("Signature=", serialized)
 
     def test_natural_v3_manifest_validates_files_speakers_duration_and_count(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -335,8 +350,8 @@ class RealDictationBenchmarkTests(unittest.TestCase):
                 "proper-names", "computing", "pauses-tempo",
                 "self-correction", "punctuation",
             ]
-            revision = "5ab868a7cddb87d84224ebfc8112ebd0905fc5bd"
-            for index in range(1, 13):
+            revision = "88887ee82cdb7e3f20e7b29d4c1740d0bc630f41"
+            for index in range(1, 16):
                 case_id = f"natural-pl-{index:02d}"
                 cases.append({"id": case_id, "text": f"Syntetyczna próba numer {index}."})
                 audio = audio_root / f"{case_id}.wav"
@@ -351,15 +366,15 @@ class RealDictationBenchmarkTests(unittest.TestCase):
                     "file": audio.name,
                     "sha256": hashlib.sha256(audio.read_bytes()).hexdigest(),
                     "source_sha256": "0" * 64,
-                    "source_dataset": "voxpopuli-pl",
+                    "source_dataset": "parlaspeech-pl",
                     "source_revision": revision,
                     "source_item_id": f"synthetic-{index:02d}",
                     "source_url": "https://example.invalid/audio",
                     "reference_url": "https://example.invalid/reference",
-                    "audio_license": "CC0-1.0",
-                    "reference_license": "CC0-1.0",
+                    "audio_license": "CC-BY-SA-4.0",
+                    "reference_license": "CC-BY-SA-4.0",
                     "attribution": "Synthetic test fixture",
-                    "speaker_id": f"speaker-{(index - 1) % 3 + 1}",
+                    "speaker_id": f"speaker-{(index - 1) % 5 + 1}",
                     "duration_ms": 15000,
                     "categories": [categories[(index - 1) % len(categories)]],
                     "purpose": "quality",
@@ -375,9 +390,9 @@ class RealDictationBenchmarkTests(unittest.TestCase):
                     "name": "Synthetic natural corpus",
                     "language": "pl",
                     "selection": "Synthetic validator fixture",
-                    "source_revisions": {"voxpopuli-pl": revision},
+                    "source_revisions": {"parlaspeech-pl": revision},
                     "conversion": "Synthetic mono PCM",
-                    "minimum_speakers": 3,
+                    "minimum_speakers": 5,
                     "clip_duration_ms": {"minimum": 10000, "maximum": 20000},
                     "total_duration_ms": {"minimum": 180000, "maximum": 300000},
                     "coverage_gaps": [],
@@ -393,9 +408,9 @@ class RealDictationBenchmarkTests(unittest.TestCase):
             completed = subprocess.run(command, capture_output=True, text=True)
             self.assertEqual(0, completed.returncode, completed.stderr)
             report = json.loads(completed.stdout)
-            self.assertEqual(12, report["samples"])
-            self.assertEqual(3, report["speakers"])
-            self.assertEqual(180000, report["duration_ms"])
+            self.assertEqual(15, report["samples"])
+            self.assertEqual(5, report["speakers"])
+            self.assertEqual(225000, report["duration_ms"])
 
             for sample in document["samples"]:
                 sample["speaker_id"] = "speaker-1"

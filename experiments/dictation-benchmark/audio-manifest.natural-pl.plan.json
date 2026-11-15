@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "status": "blocked-before-audio",
+  "version": 2,
+  "status": "selected-head-verified-no-audio",
   "language": "pl",
   "target": {
     "samples": 15,
@@ -11,31 +11,47 @@
     "maximum_download_bytes": 25000000
   },
   "primary_source": {
-    "id": "voxpopuli-pl",
-    "dataset": "facebook/voxpopuli",
-    "revision": "5ab868a7cddb87d84224ebfc8112ebd0905fc5bd",
-    "config": "pl",
-    "split": "test",
-    "audio_license": "CC0-1.0",
-    "reference_license": "CC0-1.0",
-    "attribution": "VoxPopuli; European Parliament source recordings; Wang et al., ACL-IJCNLP 2021",
-    "dataset_url": "https://huggingface.co/datasets/facebook/voxpopuli",
-    "upstream_url": "https://github.com/facebookresearch/voxpopuli",
-    "full_polish_download_bytes": 20600000000,
-    "selection_access": "Blocked: Dataset Viewer cannot scan the 519677114-byte row group under its 300000000-byte limit; never download the full Polish parquet set"
+    "id": "parlaspeech-pl",
+    "dataset": "classla/ParlaSpeech-PL",
+    "revision": "88887ee82cdb7e3f20e7b29d4c1740d0bc630f41",
+    "config": "default",
+    "split": "train",
+    "audio_license": "CC-BY-SA-4.0",
+    "reference_license": "CC-BY-SA-4.0",
+    "attribution": "ParlaSpeech-PL 1.0; Danijel Korzinek and Nikola Ljubesic; Jozef Stefan Institute CLARIN.SI; ParlaMint 4.0 transcripts; Polish Parliament recordings",
+    "dataset_url": "https://huggingface.co/datasets/classla/ParlaSpeech-PL",
+    "upstream_url": "https://hdl.handle.net/11356/1686",
+    "full_download_bytes": 60791222740,
+    "selection_access": "Hugging Face Dataset Viewer bounded metadata pages and per-row cached FLAC assets pinned in the URL to the approved revision; never download the full dataset"
   },
   "verification": {
     "pinned_revision_available": true,
-    "current_revision": "42f01879c780b4a2e90ec0b4f616c2ece526e4f1",
-    "polish_tree_identical": true,
-    "test_parquet_oid": "7139cfca3efa5f25d3f69b8b99d4144d84134a78",
-    "test_parquet_bytes": 946977412,
-    "dataset_viewer_status": "blocked-scan-size-limit",
-    "attempted_scan_bytes": 519677114,
-    "service_scan_limit_bytes": 300000000,
-    "audio_downloaded": false
+    "metadata_rows_scanned": 420,
+    "dataset_viewer_status": "selective-access-confirmed",
+    "selected_samples": 15,
+    "selected_speakers": 5,
+    "selected_duration_ms": 197420,
+    "selected_source_bytes": 3901424,
+    "head_verified": true,
+    "head_http_status": 200,
+    "redirects_observed": false,
+    "row_media_type": "audio/flac",
+    "head_content_type": "binary/octet-stream",
+    "revision_embedded_in_audio_urls": true,
+    "references_nonempty": 15,
+    "references_with_punctuation": 15,
+    "audio_downloaded": false,
+    "source_sha256_available": false
   },
   "alternatives": [
+    {
+      "id": "voxpopuli-pl",
+      "status": "blocked-selective-access",
+      "license": "CC0-1.0",
+      "speaker_id_available": true,
+      "reason": "The pinned source is verified, but Dataset Viewer cannot scan its 519677114-byte row group within the 300000000-byte service limit.",
+      "url": "https://huggingface.co/datasets/facebook/voxpopuli"
+    },
     {
       "id": "common-voice-27-pl",
       "status": "deferred-too-large",
@@ -57,14 +73,14 @@
   ],
   "selection": {
     "procedure": [
-      "Confirm the pinned dataset revision and CC0 data license before any audio request.",
-      "Enumerate test metadata in bounded pages; retain gold transcripts with non-empty pseudonymous speaker_id and raw_text.",
-      "Do not infer or search for real speaker identities.",
-      "Download only candidate rows, stop at 25 MB, validate duration, and discard candidates outside 10-30 seconds.",
-      "Choose five pseudonymous speakers in lexical speaker_id order and three qualifying clips per speaker.",
-      "Within each speaker choose the lowest stable audio_id satisfying the still-unfilled category slots.",
-      "Record source hashes before conversion and derived WAV hashes after conversion.",
-      "Stop if fewer than five speakers or 180 seconds can be obtained within the cap."
+      "Confirm the pinned dataset revision and the authoritative CLARIN.SI CC-BY-SA-4.0 license before any audio request.",
+      "Enumerate rows from offset zero in bounded pages of at most 100 records; retain 10-20 second FLAC rows with non-empty text, text_normalised, and a speaker label.",
+      "Group labels only in temporary memory, require at least three candidates, order qualifying groups by their lowest row index, and assign speaker-01 through speaker-05 without retaining names.",
+      "Within each selected speaker choose the three lowest qualifying row indices.",
+      "Persist no transcript, real-world speaker label, or temporary signed audio URL in Git.",
+      "Before audio, require HTTPS on datasets-server.huggingface.co, the pinned revision in every URL, no redirect, HTTP 200, FLAC row metadata, and a positive Content-Length.",
+      "Stop if the declared total exceeds 25 MB or if any source check fails.",
+      "After separate download approval, record source hashes before conversion and derived WAV hashes after conversion."
     ],
     "provisional_coverage_gaps": [
       "daily-conversation",
@@ -73,20 +89,20 @@
     ]
   },
   "slots": [
-    {"case_id":"natural-pl-01","speaker_slot":"speaker-01","category":"numbers-dates-times","source_item_id":null},
-    {"case_id":"natural-pl-02","speaker_slot":"speaker-01","category":"proper-names","source_item_id":null},
-    {"case_id":"natural-pl-03","speaker_slot":"speaker-01","category":"punctuation","source_item_id":null},
-    {"case_id":"natural-pl-04","speaker_slot":"speaker-02","category":"natural-long","source_item_id":null},
-    {"case_id":"natural-pl-05","speaker_slot":"speaker-02","category":"pauses-tempo","source_item_id":null},
-    {"case_id":"natural-pl-06","speaker_slot":"speaker-02","category":"numbers-dates-times","source_item_id":null},
-    {"case_id":"natural-pl-07","speaker_slot":"speaker-03","category":"proper-names","source_item_id":null},
-    {"case_id":"natural-pl-08","speaker_slot":"speaker-03","category":"natural-long","source_item_id":null},
-    {"case_id":"natural-pl-09","speaker_slot":"speaker-03","category":"punctuation","source_item_id":null},
-    {"case_id":"natural-pl-10","speaker_slot":"speaker-04","category":"pauses-tempo","source_item_id":null},
-    {"case_id":"natural-pl-11","speaker_slot":"speaker-04","category":"numbers-dates-times","source_item_id":null},
-    {"case_id":"natural-pl-12","speaker_slot":"speaker-04","category":"proper-names","source_item_id":null},
-    {"case_id":"natural-pl-13","speaker_slot":"speaker-05","category":"natural-long","source_item_id":null},
-    {"case_id":"natural-pl-14","speaker_slot":"speaker-05","category":"punctuation","source_item_id":null},
-    {"case_id":"natural-pl-15","speaker_slot":"speaker-05","category":"pauses-tempo","source_item_id":null}
+    {"case_id":"natural-pl-01","speaker_slot":"speaker-01","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u1_1102-1303","source_row_index":8,"duration_ms":13280,"source_bytes":266825,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-02","speaker_slot":"speaker-01","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u1_1846-2007","source_row_index":12,"duration_ms":10100,"source_bytes":204240,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-03","speaker_slot":"speaker-01","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u21_116-417","source_row_index":78,"duration_ms":17580,"source_bytes":354964,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-04","speaker_slot":"speaker-02","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_0-278","source_row_index":96,"duration_ms":17600,"source_bytes":322461,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-05","speaker_slot":"speaker-02","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_282-551","source_row_index":97,"duration_ms":18040,"source_bytes":331961,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-06","speaker_slot":"speaker-02","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_1545-1692","source_row_index":98,"duration_ms":11160,"source_bytes":203454,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-07","speaker_slot":"speaker-03","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u26_133-246","source_row_index":116,"duration_ms":11440,"source_bytes":214567,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-08","speaker_slot":"speaker-03","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u26_357-459","source_row_index":118,"duration_ms":10000,"source_bytes":198634,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-09","speaker_slot":"speaker-03","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u80_496-678","source_row_index":357,"duration_ms":14480,"source_bytes":293534,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-10","speaker_slot":"speaker-04","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u28_166-271","source_row_index":124,"duration_ms":10180,"source_bytes":204922,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-11","speaker_slot":"speaker-04","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u28_472-623","source_row_index":125,"duration_ms":10120,"source_bytes":215031,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-12","speaker_slot":"speaker-04","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u82_345-471","source_row_index":361,"duration_ms":10900,"source_bytes":233645,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-13","speaker_slot":"speaker-05","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u42_431-602","source_row_index":226,"duration_ms":19620,"source_bytes":391985,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-14","speaker_slot":"speaker-05","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u42_647-803","source_row_index":229,"duration_ms":11700,"source_bytes":238067,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-15","speaker_slot":"speaker-05","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u72_133-280","source_row_index":323,"duration_ms":11220,"source_bytes":227134,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"}
   ]
 }
