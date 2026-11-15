@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "status": "downloaded-source-verified-unconverted",
+  "status": "converted-structurally-validated-pending-manual-review",
   "language": "pl",
   "target": {
     "samples": 15,
@@ -43,8 +43,16 @@
     "downloaded_files": 15,
     "audio_downloaded": true,
     "source_sha256_available": true,
-    "audio_decoded": false,
-    "audio_converted": false
+    "audio_decoded": true,
+    "audio_converted": true,
+    "conversion_isolation": "bwrap-no-network",
+    "wav_files": 15,
+    "wav_total_bytes": 6264344,
+    "wav_total_duration_ms": 195740.125,
+    "private_reference_cases_ready": true,
+    "structural_validation_passed": true,
+    "semantic_alignment_reviewed": false,
+    "final_manifest_ready": false
   },
   "alternatives": [
     {

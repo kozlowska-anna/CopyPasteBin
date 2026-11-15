@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "sources-downloaded-no-transcripts",
+  "status": "private-references-ready-pending-manual-review",
   "language": "pl",
   "notice": "This is not benchmark input and contains no transcript. Reference text may be copied from the pinned source only after audio download is separately approved and verified; it must never be inferred from an STT result.",
   "cases": [

@@ -1,6 +1,6 @@
 # CopyPasteBin 1.3 — C4 natural Polish corpus plan
 
-Status: **15 source FLAC files downloaded and verified; not decoded or converted**.
+Status: **15 structurally valid WAV files; pending manual audio-reference review**.
 Reviewed 2026-11-15. The Tatoeba corpus and all earlier results remain unchanged.
 
 ## Source decision
@@ -27,6 +27,15 @@ SHA-256 manifest is mode 0600; sizes, FLAC media type, and hashes were verified
 again locally. No decoder, playback, conversion, or inference was run. The
 transcripts are official and manual, but sentence-to-audio alignment is
 automatic and must be reviewed before producing the final manifest.
+
+FLAC files were decoded inside networkless `bwrap` and converted with
+GStreamer to mono 16-bit PCM WAV at 16 kHz. The 15 WAV files total 6,264,344
+bytes and 195,740.125 ms. A private version-3 manifest passed structural
+validation for count, five speakers, format, permissions, hashes, duration,
+categories, and explicit coverage gaps. One raw reference (`natural-pl-14`)
+contained a parliamentary comment; official `text_normalised` was therefore
+used consistently for all cases and retained punctuation. The manifest remains
+provisional until a human reviews all audio-reference pairs and category labels.
 
 ## Historical VoxPopuli blocker
 
@@ -108,8 +117,7 @@ Vosk `streaming/fast`, Whisper tiny `batch/fast` with Polish selected, three
 performance repetitions, and a separate Vosk `realtime` run on longer clips.
 Quality conclusions use unique utterances, not repeated executions.
 
-No dependency, model, microphone, decoder, conversion, or inference was used
-in this stage. Download and source SHA-256 verification are complete. Decoder
-validation, reference-alignment review, conversion, and the final manifest
-require separate approval. Every later benchmark run also requires separate
-approval.
+No new dependency, model, microphone, audio device, or inference was used.
+Download, source hashing, isolated decoding, conversion, and structural
+validation are complete. Human audio-reference and category review remains
+before finalization. Every later benchmark run still requires separate approval.

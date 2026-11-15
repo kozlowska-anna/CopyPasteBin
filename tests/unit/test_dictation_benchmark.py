@@ -308,11 +308,18 @@ class RealDictationBenchmarkTests(unittest.TestCase):
     def test_natural_corpus_plan_has_fifteen_selected_private_slots(self):
         manifest = json.loads(NATURAL_AUDIO_PLAN.read_text(encoding="utf-8"))
         references = json.loads(NATURAL_CASES_PLAN.read_text(encoding="utf-8"))
-        self.assertEqual("downloaded-source-verified-unconverted",
+        self.assertEqual("converted-structurally-validated-pending-manual-review",
                          manifest["status"])
         self.assertTrue(manifest["verification"]["audio_downloaded"])
-        self.assertFalse(manifest["verification"]["audio_decoded"])
-        self.assertFalse(manifest["verification"]["audio_converted"])
+        self.assertTrue(manifest["verification"]["audio_decoded"])
+        self.assertTrue(manifest["verification"]["audio_converted"])
+        self.assertTrue(manifest["verification"]["structural_validation_passed"])
+        self.assertFalse(manifest["verification"]["semantic_alignment_reviewed"])
+        self.assertFalse(manifest["verification"]["final_manifest_ready"])
+        self.assertEqual(15, manifest["verification"]["wav_files"])
+        self.assertEqual(6_264_344, manifest["verification"]["wav_total_bytes"])
+        self.assertEqual(195_740.125,
+                         manifest["verification"]["wav_total_duration_ms"])
         self.assertTrue(manifest["verification"]["head_verified"])
         self.assertLess(manifest["verification"]["selected_source_bytes"],
                         manifest["target"]["maximum_download_bytes"])

@@ -1,6 +1,6 @@
 # CopyPasteBin 1.3 — C4: plan korpusu naturalnej polskiej mowy
 
-Status: **15 źródłowych plików FLAC pobranych i zweryfikowanych; bez dekodowania i konwersji**.
+Status: **15 WAV poprawnych strukturalnie; oczekują na ręczną kontrolę audio–referencja**.
 Data przeglądu źródeł: 2026-11-15.
 
 Dotychczasowy korpus Tatoeba, jego manifest i wyniki pozostają niezmienione.
@@ -56,9 +56,17 @@ przekierowań dla każdego rekordu; łączny rozmiar wynosi 3 871 015 bajtów.
 
 Pobrano dokładnie te 15 plików FLAC do prywatnego katalogu `0700`; pliki i
 lokalny manifest SHA-256 mają tryb `0600`. Rozmiary, typ `audio/flac` i SHA-256
-zostały ponownie sprawdzone lokalnie. Nie uruchomiono dekodera, odsłuchu,
-konwersji ani inferencji. Ręczna transkrypcja jest oficjalna, lecz automatyczne
-dopasowanie segmentu do audio nadal wymaga kontroli przed finalnym manifestem.
+zostały ponownie sprawdzone lokalnie. FLAC zdekodowano w `bwrap` bez sieci i
+przekonwertowano GStreamerem do mono PCM WAV 16-bit, 16 kHz. Powstało 15 WAV o
+łącznym rozmiarze 6 264 344 bajty i rzeczywistym czasie 195 740,125 ms.
+
+Prywatny manifest przeszedł walidator wersji 3: 15 próbek, pięciu mówców,
+format, uprawnienia, SHA-256, czas i komplet kategorii wraz z jawnymi brakami.
+Jeden surowy tekst (`natural-pl-14`) zawierał komentarz parlamentarny; dla
+całego korpusu konsekwentnie użyto oficjalnego `text_normalised`, który zachował
+interpunkcję. Nie uruchomiono inferencji ani urządzeń audio. Automatyczne
+dopasowanie segmentu do referencji nadal wymaga ludzkiego odsłuchu, więc
+manifest pozostaje prowizoryczny.
 
 ## Historyczna blokada VoxPopuli
 
@@ -162,6 +170,7 @@ format WAV, czas,
 kategorie, katalog `0700`, pliki `0600` i zgodność jeden-do-jednego z
 referencjami.
 
-Pobranie i SHA-256 są zakończone. Osobnej zgody wymaga uruchomienie dekodera,
-kontrola zgodności segmentów z referencjami oraz konwersja do WAV. Późniejsza
-inferencja również wymaga osobnej zgody.
+Pobranie, SHA-256, izolowane dekodowanie, konwersja i walidacja strukturalna są
+zakończone. Do finalizacji pozostaje ręczna kontrola 15 par audio–referencja i
+potwierdzenie rzeczywistego pokrycia planowanych kategorii. Inferencja nadal
+wymaga osobnej zgody.
