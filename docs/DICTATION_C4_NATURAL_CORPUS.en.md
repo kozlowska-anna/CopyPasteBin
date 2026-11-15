@@ -1,6 +1,6 @@
 # CopyPasteBin 1.3 — C4 natural Polish corpus plan
 
-Status: **15 ParlaSpeech-PL records selected and HEAD-verified; no audio downloaded**.
+Status: **15 source FLAC files downloaded and verified; not decoded or converted**.
 Reviewed 2026-11-15. The Tatoeba corpus and all earlier results remain unchanged.
 
 ## Source decision
@@ -16,14 +16,17 @@ Bounded Dataset Viewer pages exposed individual FLAC records whose cached URLs
 contain the exact pinned revision. Scanning 420 metadata rows yielded five
 qualifying speakers with at least three 10–20 second clips. Names were used only
 for temporary grouping; the plan retains `speaker-01` through `speaker-05`.
-The deterministic selection contains 15 unique records totaling 197.42 seconds.
+The deterministic selection contains 15 unique records totaling 195.74 seconds.
 All 15 references are non-empty and contain punctuation.
 
-HEAD returned HTTP 200 without redirects for every selected URL. The declared
-total source size is 3,901,424 bytes. No audio body was downloaded, so source
-SHA-256 values and the final manifest do not yet exist. The transcripts are
-official and manual, but sentence-to-audio alignment is automatic and must be
-checked after any later download.
+The originally selected row 97 became unavailable and, after explicit approval,
+was replaced by row 99 from the same speaker. HEAD returned HTTP 200 without
+redirects for every final URL. Exactly 15 FLAC files totaling 3,871,015 bytes
+were downloaded into a private mode-0700 directory. Every file and the local
+SHA-256 manifest is mode 0600; sizes, FLAC media type, and hashes were verified
+again locally. No decoder, playback, conversion, or inference was run. The
+transcripts are official and manual, but sentence-to-audio alignment is
+automatic and must be reviewed before producing the final manifest.
 
 ## Historical VoxPopuli blocker
 
@@ -105,9 +108,8 @@ Vosk `streaming/fast`, Whisper tiny `batch/fast` with Polish selected, three
 performance repetitions, and a separate Vosk `realtime` run on longer clips.
 Quality conclusions use unique utterances, not repeated executions.
 
-No audio, dependency, model, microphone, or inference was used in this stage.
-Downloading the 15 selected FLAC files, with a declared total of 3,901,424
-bytes, requires separate approval. Only after download may source hashes,
-decoder validation, reference alignment review, conversion, and the final
-manifest be completed. Conversion and every later benchmark run also require
-separate approval.
+No dependency, model, microphone, decoder, conversion, or inference was used
+in this stage. Download and source SHA-256 verification are complete. Decoder
+validation, reference-alignment review, conversion, and the final manifest
+require separate approval. Every later benchmark run also requires separate
+approval.

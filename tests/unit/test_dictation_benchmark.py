@@ -7,6 +7,7 @@ import wave
 import hashlib
 import importlib.util
 import os
+import re
 import shutil
 import time
 from pathlib import Path
@@ -307,8 +308,11 @@ class RealDictationBenchmarkTests(unittest.TestCase):
     def test_natural_corpus_plan_has_fifteen_selected_private_slots(self):
         manifest = json.loads(NATURAL_AUDIO_PLAN.read_text(encoding="utf-8"))
         references = json.loads(NATURAL_CASES_PLAN.read_text(encoding="utf-8"))
-        self.assertEqual("selected-head-verified-no-audio", manifest["status"])
-        self.assertFalse(manifest["verification"]["audio_downloaded"])
+        self.assertEqual("downloaded-source-verified-unconverted",
+                         manifest["status"])
+        self.assertTrue(manifest["verification"]["audio_downloaded"])
+        self.assertFalse(manifest["verification"]["audio_decoded"])
+        self.assertFalse(manifest["verification"]["audio_converted"])
         self.assertTrue(manifest["verification"]["head_verified"])
         self.assertLess(manifest["verification"]["selected_source_bytes"],
                         manifest["target"]["maximum_download_bytes"])
@@ -325,10 +329,15 @@ class RealDictationBenchmarkTests(unittest.TestCase):
                                 for slot in manifest["slots"]) == 3
                             for speaker in {slot["speaker_slot"]
                                             for slot in manifest["slots"]}))
-        self.assertEqual(3_901_424, sum(slot["source_bytes"]
+        self.assertEqual(3_871_015, sum(slot["source_bytes"]
                                       for slot in manifest["slots"]))
-        self.assertEqual(197_420, sum(slot["duration_ms"]
+        self.assertEqual(195_740, sum(slot["duration_ms"]
                                     for slot in manifest["slots"]))
+        self.assertTrue(all(re.fullmatch(r"[0-9a-f]{64}",
+                                         slot["source_sha256"])
+                            for slot in manifest["slots"]))
+        self.assertTrue(all(slot["source_file"] == f"{slot['case_id']}.flac"
+                            for slot in manifest["slots"]))
         self.assertTrue(all(slot["source_item_id"]
                             for slot in manifest["slots"]))
         self.assertTrue(all(case["text"] is None and case["source_item_id"]

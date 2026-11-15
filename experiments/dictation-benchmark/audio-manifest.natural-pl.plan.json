@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "status": "selected-head-verified-no-audio",
+  "status": "downloaded-source-verified-unconverted",
   "language": "pl",
   "target": {
     "samples": 15,
@@ -30,8 +30,8 @@
     "dataset_viewer_status": "selective-access-confirmed",
     "selected_samples": 15,
     "selected_speakers": 5,
-    "selected_duration_ms": 197420,
-    "selected_source_bytes": 3901424,
+    "selected_duration_ms": 195740,
+    "selected_source_bytes": 3871015,
     "head_verified": true,
     "head_http_status": 200,
     "redirects_observed": false,
@@ -40,8 +40,11 @@
     "revision_embedded_in_audio_urls": true,
     "references_nonempty": 15,
     "references_with_punctuation": 15,
-    "audio_downloaded": false,
-    "source_sha256_available": false
+    "downloaded_files": 15,
+    "audio_downloaded": true,
+    "source_sha256_available": true,
+    "audio_decoded": false,
+    "audio_converted": false
   },
   "alternatives": [
     {
@@ -89,20 +92,20 @@
     ]
   },
   "slots": [
-    {"case_id":"natural-pl-01","speaker_slot":"speaker-01","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u1_1102-1303","source_row_index":8,"duration_ms":13280,"source_bytes":266825,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-02","speaker_slot":"speaker-01","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u1_1846-2007","source_row_index":12,"duration_ms":10100,"source_bytes":204240,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-03","speaker_slot":"speaker-01","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u21_116-417","source_row_index":78,"duration_ms":17580,"source_bytes":354964,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-04","speaker_slot":"speaker-02","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_0-278","source_row_index":96,"duration_ms":17600,"source_bytes":322461,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-05","speaker_slot":"speaker-02","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_282-551","source_row_index":97,"duration_ms":18040,"source_bytes":331961,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-06","speaker_slot":"speaker-02","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_1545-1692","source_row_index":98,"duration_ms":11160,"source_bytes":203454,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-07","speaker_slot":"speaker-03","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u26_133-246","source_row_index":116,"duration_ms":11440,"source_bytes":214567,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-08","speaker_slot":"speaker-03","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u26_357-459","source_row_index":118,"duration_ms":10000,"source_bytes":198634,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-09","speaker_slot":"speaker-03","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u80_496-678","source_row_index":357,"duration_ms":14480,"source_bytes":293534,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-10","speaker_slot":"speaker-04","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u28_166-271","source_row_index":124,"duration_ms":10180,"source_bytes":204922,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-11","speaker_slot":"speaker-04","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u28_472-623","source_row_index":125,"duration_ms":10120,"source_bytes":215031,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-12","speaker_slot":"speaker-04","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u82_345-471","source_row_index":361,"duration_ms":10900,"source_bytes":233645,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-13","speaker_slot":"speaker-05","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u42_431-602","source_row_index":226,"duration_ms":19620,"source_bytes":391985,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-14","speaker_slot":"speaker-05","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u42_647-803","source_row_index":229,"duration_ms":11700,"source_bytes":238067,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
-    {"case_id":"natural-pl-15","speaker_slot":"speaker-05","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u72_133-280","source_row_index":323,"duration_ms":11220,"source_bytes":227134,"reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"}
+    {"case_id":"natural-pl-01","speaker_slot":"speaker-01","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u1_1102-1303","source_row_index":8,"duration_ms":13280,"source_file":"natural-pl-01.flac","source_bytes":266825,"source_sha256":"b88adcf31c86d5ed39309ba6db89975ce12e53b4640977c28bad820d0702ed99","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-02","speaker_slot":"speaker-01","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u1_1846-2007","source_row_index":12,"duration_ms":10100,"source_file":"natural-pl-02.flac","source_bytes":204240,"source_sha256":"2d33fb3d15c893a5c77393d63f906765746dbef876e659eec5ecc30b6162e494","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-03","speaker_slot":"speaker-01","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u21_116-417","source_row_index":78,"duration_ms":17580,"source_file":"natural-pl-03.flac","source_bytes":354964,"source_sha256":"1a875cb2e1d43bf29d0d4919f9dbc3496c60ce6da9cb3415f15080d48750a738","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-04","speaker_slot":"speaker-02","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_0-278","source_row_index":96,"duration_ms":17600,"source_file":"natural-pl-04.flac","source_bytes":322461,"source_sha256":"bd85ef518dc2a71549818fd87589b497ae4189924bb4fd1514393ce3778ef4c5","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-05","speaker_slot":"speaker-02","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_1694-1915","source_row_index":99,"duration_ms":16360,"source_file":"natural-pl-05.flac","source_bytes":301552,"source_sha256":"c4fca84cf397926f0b1f975b4411c6fc06e1c79ce51e14a43b727f01f76f0988","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-06","speaker_slot":"speaker-02","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u22_1545-1692","source_row_index":98,"duration_ms":11160,"source_file":"natural-pl-06.flac","source_bytes":203454,"source_sha256":"8cf575f7df8d7c6b7d6632b767057dee18693ad245030e204deeedbd1cc1b599","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-07","speaker_slot":"speaker-03","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u26_133-246","source_row_index":116,"duration_ms":11440,"source_file":"natural-pl-07.flac","source_bytes":214567,"source_sha256":"b18b5eaf04b8f193795961f3b62d108b04cb0b91e0e43b0f317fee39a7f5c96e","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-08","speaker_slot":"speaker-03","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u26_357-459","source_row_index":118,"duration_ms":10000,"source_file":"natural-pl-08.flac","source_bytes":198634,"source_sha256":"1e5646f3966d49249146d828148d68f638eeb5b91201c58a26f25342b1b809c8","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-09","speaker_slot":"speaker-03","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u80_496-678","source_row_index":357,"duration_ms":14480,"source_file":"natural-pl-09.flac","source_bytes":293534,"source_sha256":"7069a7ff1d959985834c07a9052d34b47728bbe862598552a36078f4cb6f05f3","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-10","speaker_slot":"speaker-04","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u28_166-271","source_row_index":124,"duration_ms":10180,"source_file":"natural-pl-10.flac","source_bytes":204922,"source_sha256":"a768ca2af25eae0c81edbda8c9a204b71fa040254297643bbf1b9a12db455413","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-11","speaker_slot":"speaker-04","planned_category":"numbers-dates-times","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u28_472-623","source_row_index":125,"duration_ms":10120,"source_file":"natural-pl-11.flac","source_bytes":215031,"source_sha256":"c2132ff954457b3210ec7428c8bedd4a18a40370b6b578e8b6cdec1857d1cb59","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-12","speaker_slot":"speaker-04","planned_category":"proper-names","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u82_345-471","source_row_index":361,"duration_ms":10900,"source_file":"natural-pl-12.flac","source_bytes":233645,"source_sha256":"6aa33b8506bb9069d2b40f88ef29c48bbecf89ec32ed754c2457d8500e298eb3","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-13","speaker_slot":"speaker-05","planned_category":"natural-long","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u42_431-602","source_row_index":226,"duration_ms":19620,"source_file":"natural-pl-13.flac","source_bytes":391985,"source_sha256":"45648939489145419c85a9d20d8c5f7b01772285855ca49cba859e5bae5985f6","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-14","speaker_slot":"speaker-05","planned_category":"punctuation","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u42_647-803","source_row_index":229,"duration_ms":11700,"source_file":"natural-pl-14.flac","source_bytes":238067,"source_sha256":"5152e469b33c8189b289ed93c42c4b6a375c65a24c8c1c25b34bca9cb8f94885","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"},
+    {"case_id":"natural-pl-15","speaker_slot":"speaker-05","planned_category":"pauses-tempo","source_item_id":"ParlaMint-PL_2017-12-06-sejm-53-1.u72_133-280","source_row_index":323,"duration_ms":11220,"source_file":"natural-pl-15.flac","source_bytes":227134,"source_sha256":"bbb2abefb1ae3375f826bd27e21e337ad423d3bb111621636aca24071c33be0c","reference_available":true,"reference_has_punctuation":true,"punctuation_review":"pending-audio-review"}
   ]
 }

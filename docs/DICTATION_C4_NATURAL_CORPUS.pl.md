@@ -1,6 +1,6 @@
 # CopyPasteBin 1.3 — C4: plan korpusu naturalnej polskiej mowy
 
-Status: **15 rekordów ParlaSpeech-PL wybranych i sprawdzonych przez HEAD; audio nie pobrano**.
+Status: **15 źródłowych plików FLAC pobranych i zweryfikowanych; bez dekodowania i konwersji**.
 Data przeglądu źródeł: 2026-11-15.
 
 Dotychczasowy korpus Tatoeba, jego manifest i wyniki pozostają niezmienione.
@@ -10,7 +10,7 @@ Nowy etap ma sprawdzić dłuższą mowę wielu osób, a nie wyłonić zwycięzc�
 
 | Źródło | Licencja i autorstwo | Przydatność | Decyzja |
 | --- | --- | --- | --- |
-| ParlaSpeech-PL 1.0 | Audio i transkrypcje: CC BY-SA 4.0; autorzy Danijel Koržinek i Nikola Ljubešić; wydawca Jožef Stefan Institute/CLARIN.SI. Źródłem są transkrypcje ParlaMint 4.0 i nagrania polskiego parlamentu. | Naturalna mowa parlamentarna, ręczne oficjalne transkrypcje, automatyczne dopasowanie segmentów, długość, interpunkcja i dane mówcy. HF ma ok. 60,8 GB, lecz udostępnia pojedyncze przypięte rekordy FLAC. | **Źródło podstawowe**, rewizja `88887ee82cdb7e3f20e7b29d4c1740d0bc630f41`, split `train`. Wybrano 15 rekordów; audio nadal nie pobrano. |
+| ParlaSpeech-PL 1.0 | Audio i transkrypcje: CC BY-SA 4.0; autorzy Danijel Koržinek i Nikola Ljubešić; wydawca Jožef Stefan Institute/CLARIN.SI. Źródłem są transkrypcje ParlaMint 4.0 i nagrania polskiego parlamentu. | Naturalna mowa parlamentarna, ręczne oficjalne transkrypcje, automatyczne dopasowanie segmentów, długość, interpunkcja i dane mówcy. HF ma ok. 60,8 GB, lecz udostępnia pojedyncze przypięte rekordy FLAC. | **Źródło podstawowe**, rewizja `88887ee82cdb7e3f20e7b29d4c1740d0bc630f41`, split `train`. Pobrano dokładnie 15 wybranych rekordów. |
 | VoxPopuli, polski ASR | Dane audio i transkrypcje: CC0; źródłowe nagrania Parlamentu Europejskiego. | 111 godzin i 282 mówców, ale Dataset Viewer nie może przeskanować testowej grupy wierszy w swoim limicie. | Źródło zweryfikowane, **selektywny dostęp zablokowany** dla przypiętej rewizji. |
 | Common Voice Scripted Speech 27.0 PL | CC0; zakaz prób ustalania tożsamości mówców i ponownego hostowania zbioru. | 4,49 GB w jednym oficjalnym archiwum; głównie krótkie wypowiedzi czytane. | Odłożone: pobranie całości narusza zasadę minimalizacji dla 15 próbek. |
 | FLEURS `pl_pl` | CC BY 4.0; atrybucja korpusu FLEURS/Google i publikacji. | Selektywny dostęp jest możliwy, lecz schemat publiczny nie zawiera identyfikatora mówcy, a domeną jest mowa czytana. Polski config ma ok. 2,05 GB. | Rezerwa, **nie jest liczona** do minimum różnych mówców. |
@@ -49,12 +49,16 @@ zapisane. Pierwszych pięciu mówców z co najmniej trzema kandydatami otrzymał
 pseudonimy `speaker-01`–`speaker-05`; wybrano trzy rekordy o najniższych
 indeksach każdego mówcy.
 
-Wybrane 15 rekordów ma łącznie 197,42 s. Wszystkie mają niepuste referencje z
-interpunkcją. HEAD zwrócił HTTP 200 bez przekierowań dla każdego rekordu;
-deklarowany łączny rozmiar to 3 901 424 bajty. Nie pobrano treści audio, więc
-nie ma jeszcze SHA-256 ani finalnego manifestu. Ręczna transkrypcja jest
-oficjalna, lecz dopasowanie segmentu do audio jest automatyczne i wymaga
-kontroli po przyszłym pobraniu.
+Pierwotnie wybrany rekord 97 był niedostępny; po jawnej zgodzie zastąpiono go
+rekordem 99 tego samego mówcy. Ostateczne 15 rekordów ma łącznie 195,74 s.
+Wszystkie mają niepuste referencje z interpunkcją. HEAD zwrócił HTTP 200 bez
+przekierowań dla każdego rekordu; łączny rozmiar wynosi 3 871 015 bajtów.
+
+Pobrano dokładnie te 15 plików FLAC do prywatnego katalogu `0700`; pliki i
+lokalny manifest SHA-256 mają tryb `0600`. Rozmiary, typ `audio/flac` i SHA-256
+zostały ponownie sprawdzone lokalnie. Nie uruchomiono dekodera, odsłuchu,
+konwersji ani inferencji. Ręczna transkrypcja jest oficjalna, lecz automatyczne
+dopasowanie segmentu do audio nadal wymaga kontroli przed finalnym manifestem.
 
 ## Historyczna blokada VoxPopuli
 
@@ -83,9 +87,8 @@ Zatwierdzona procedura ParlaSpeech jest następująca:
    zapisywać nazw ani transkrypcji w Git;
 4. przed audio sprawdzić HEAD, host, rewizję w URL, brak przekierowania, typ i
    dodatni rozmiar każdego pliku;
-5. po osobnej zgodzie pobrać dokładnie wybrane pliki, zatrzymując się przy
-   25 MB;
-6. zapisać hash źródła, następnie przekonwertować istniejącym GStreamerem do
+5. pobrać dokładnie wybrane pliki, zatrzymując się przy 25 MB;
+6. zapisać hash źródła, a po kolejnej zgodzie przekonwertować GStreamerem do
    mono PCM WAV 16 kHz i zapisać drugi hash;
 7. skopiować tekst referencyjny z przypiętych metadanych; nigdy z wyniku STT.
 
@@ -159,8 +162,6 @@ format WAV, czas,
 kategorie, katalog `0700`, pliki `0600` i zgodność jeden-do-jednego z
 referencjami.
 
-Selekcja i HEAD są zakończone. Osobnej zgody wymaga pobranie dokładnie 15
-wybranych plików FLAC o deklarowanym rozmiarze 3 901 424 bajty. Dopiero wtedy
-można zapisać SHA-256, sprawdzić dekoder, odsłuchać zgodność segmentów z
-referencjami i przygotować WAV. Konwersja i późniejsza inferencja również
-wymagają osobnej zgody.
+Pobranie i SHA-256 są zakończone. Osobnej zgody wymaga uruchomienie dekodera,
+kontrola zgodności segmentów z referencjami oraz konwersja do WAV. Późniejsza
+inferencja również wymaga osobnej zgody.
