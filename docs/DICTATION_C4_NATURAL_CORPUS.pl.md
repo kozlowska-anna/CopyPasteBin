@@ -1,7 +1,13 @@
 # CopyPasteBin 1.3 — C4: plan korpusu naturalnej polskiej mowy
 
-Status: **15 WAV poprawnych strukturalnie; oczekują na ręczną kontrolę audio–referencja**.
-Data przeglądu źródeł: 2026-11-15.
+Status: **ParlaSpeech odrzucony jako podstawowy wzorzec WER/CER; 15 WAV zachowano
+jako kandydatów do oddzielnego benchmarku trudnych warunków**.
+Data decyzji po ręcznym odsłuchu: 2026-11-16.
+
+Aktualna decyzja, porównanie alternatyw i plan dwóch niezależnych benchmarków
+znajdują się w `DICTATION_C4_CORPUS_STRATEGY.pl.md`. Poniższe sekcje zachowują
+historię selekcji, pobrania i walidacji strukturalnej ParlaSpeech; nie stanowią
+już zatwierdzenia tego źródła do podstawowego benchmarku jakości.
 
 Dotychczasowy korpus Tatoeba, jego manifest i wyniki pozostają niezmienione.
 Nowy etap ma sprawdzić dłuższą mowę wielu osób, a nie wyłonić zwycięzcę STT.
@@ -10,7 +16,7 @@ Nowy etap ma sprawdzić dłuższą mowę wielu osób, a nie wyłonić zwycięzc�
 
 | Źródło | Licencja i autorstwo | Przydatność | Decyzja |
 | --- | --- | --- | --- |
-| ParlaSpeech-PL 1.0 | Audio i transkrypcje: CC BY-SA 4.0; autorzy Danijel Koržinek i Nikola Ljubešić; wydawca Jožef Stefan Institute/CLARIN.SI. Źródłem są transkrypcje ParlaMint 4.0 i nagrania polskiego parlamentu. | Naturalna mowa parlamentarna, ręczne oficjalne transkrypcje, automatyczne dopasowanie segmentów, długość, interpunkcja i dane mówcy. HF ma ok. 60,8 GB, lecz udostępnia pojedyncze przypięte rekordy FLAC. | **Źródło podstawowe**, rewizja `88887ee82cdb7e3f20e7b29d4c1740d0bc630f41`, split `train`. Pobrano dokładnie 15 wybranych rekordów. |
+| ParlaSpeech-PL 1.0 | Audio i transkrypcje: CC BY-SA 4.0; autorzy Danijel Koržinek i Nikola Ljubešić; wydawca Jožef Stefan Institute/CLARIN.SI. Źródłem są transkrypcje ParlaMint 4.0 i nagrania polskiego parlamentu. | Naturalna mowa parlamentarna, oficjalne redagowane transkrypcje i automatyczne dopasowanie segmentów; ręczny odsłuch wykazał rozbieżności słowo w słowo oraz trudną akustykę. | **Nie jest źródłem podstawowym**. Zachowane 15 rekordów pozostaje kandydatem do benchmarku trudnych warunków z referencjami niezweryfikowanymi. |
 | VoxPopuli, polski ASR | Dane audio i transkrypcje: CC0; źródłowe nagrania Parlamentu Europejskiego. | 111 godzin i 282 mówców, ale Dataset Viewer nie może przeskanować testowej grupy wierszy w swoim limicie. | Źródło zweryfikowane, **selektywny dostęp zablokowany** dla przypiętej rewizji. |
 | Common Voice Scripted Speech 27.0 PL | CC0; zakaz prób ustalania tożsamości mówców i ponownego hostowania zbioru. | 4,49 GB w jednym oficjalnym archiwum; głównie krótkie wypowiedzi czytane. | Odłożone: pobranie całości narusza zasadę minimalizacji dla 15 próbek. |
 | FLEURS `pl_pl` | CC BY 4.0; atrybucja korpusu FLEURS/Google i publikacji. | Selektywny dostęp jest możliwy, lecz schemat publiczny nie zawiera identyfikatora mówcy, a domeną jest mowa czytana. Polski config ma ok. 2,05 GB. | Rezerwa, **nie jest liczona** do minimum różnych mówców. |

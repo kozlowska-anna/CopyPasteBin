@@ -1,11 +1,18 @@
 # CopyPasteBin 1.3 — C4 natural Polish corpus plan
 
-Status: **15 structurally valid WAV files; pending manual audio-reference review**.
-Reviewed 2026-11-15. The Tatoeba corpus and all earlier results remain unchanged.
+Status: **ParlaSpeech rejected as the primary WER/CER reference; 15 WAV files
+retained as candidates for a separate acoustic-challenge benchmark**.
+Decision after manual listening: 2026-11-16. The Tatoeba corpus and all earlier
+results remain unchanged.
 
-## Source decision
+The current decision, alternative-source comparison, and two-suite plan are in
+`DICTATION_C4_CORPUS_STRATEGY.en.md`. The sections below preserve the historical
+selection, download, and structural-validation evidence; they no longer approve
+ParlaSpeech for the primary quality benchmark.
 
-The approved primary source is ParlaSpeech-PL 1.0, pinned to Hugging Face
+## Historical source decision
+
+The originally selected source was ParlaSpeech-PL 1.0, pinned to Hugging Face
 revision `88887ee82cdb7e3f20e7b29d4c1740d0bc630f41`. Its authoritative CLARIN.SI
 record licenses audio and transcripts under CC BY-SA 4.0 and attributes Danijel
 Korzinek, Nikola Ljubesic, the Jozef Stefan Institute/CLARIN.SI, ParlaMint 4.0

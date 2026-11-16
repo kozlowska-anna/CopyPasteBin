@@ -92,6 +92,13 @@ CC BY-SA 4.0, SHA-256, mono PCM WAV 16 kHz oraz zgodność z oddzielnymi
 referencjami. Plan nie jest finalnym manifestem; wymaga jeszcze ręcznej kontroli
 dopasowania referencji i rzeczywistego pokrycia kategorii.
 
+Ręczny odsłuch wykazał, że redagowane teksty parlamentarne i automatyczne
+dopasowanie segmentów nie zapewniają referencji słowo w słowo. ParlaSpeech nie
+jest już kandydatem na podstawowy benchmark WER/CER; pliki pozostają
+niezmienione jako kandydaci do oddzielnego benchmarku trudnych warunków.
+Aktualna decyzja, porównanie nowych źródeł i plan pilotażu znajdują się w
+`docs/DICTATION_C4_CORPUS_STRATEGY.pl.md` oraz wersji angielskiej `.en.md`.
+
 `analyze_runs.py` zachowuje historyczne WER/CER, a w raporcie wersji 4 dodaje
 normalizację jakości v2, CER bez i z interpunkcją oraz ocenę znaków na granicach
 słów. Położenie interpunkcji jest oceniane tylko przy zgodnych tokenach
