@@ -99,6 +99,13 @@ niezmienione jako kandydaci do oddzielnego benchmarku trudnych warunków.
 Aktualna decyzja, porównanie nowych źródeł i plan pilotażu znajdują się w
 `docs/DICTATION_C4_CORPUS_STRATEGY.pl.md` oraz wersji angielskiej `.en.md`.
 
+Pilotaż PWr-AZON jest przygotowany technicznie poza Git: 12 źródłowych WAV od
+czterech pseudonimowych mówców, 100,087 s, prywatne hashe źródła i wyniku oraz
+strona do ręcznego odsłuchu. Wszystkie referencje pozostają niezweryfikowane,
+a brak wiarygodnej interpunkcji wyklucza niezależny test interpunkcji. Audio,
+teksty referencyjne i prywatne manifesty nie są częścią repozytorium. Nie
+uruchomiono Vosk ani Whisper.
+
 `analyze_runs.py` zachowuje historyczne WER/CER, a w raporcie wersji 4 dodaje
 normalizację jakości v2, CER bez i z interpunkcją oraz ocenę znaków na granicach
 słów. Położenie interpunkcji jest oceniane tylko przy zgodnych tokenach

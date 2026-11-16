@@ -1,6 +1,7 @@
 # CopyPasteBin 1.3 — C4: organizacja korpusów polskiego STT
 
-Status: **decyzja projektowa i plan pilotażu; bez pobierania nowego audio**.
+Status: **pilotaż PWr-AZON przygotowany technicznie; oczekuje na ręczny
+odsłuch, bez inferencji STT**.
 Data przeglądu: 2026-11-16.
 
 ## Zamknięcie oceny ParlaSpeech
@@ -80,6 +81,45 @@ zatwierdzenie źródła do benchmarku.
 Próbka celowo ma zapas czterech klipów. SHA-256 potwierdzi integralność, ale nie
 zastąpi odsłuchu audio–referencja.
 
+## Wykonanie pilotażu PWr-AZON
+
+Pilotaż przygotowano 2026-11-16 z publicznego repacku
+`czyzi0/pwr-azon-speech-dataset`, przypiętego do rewizji
+`08bd38b589963b9347dc7866f76b328fb9df5848`. Karta repacku i oryginalny rekord
+PWr/AZON wskazują CC BY-SA 4.0. Oryginalny rekord przypisuje zasób Teresie Sas i
+Politechnice Wrocławskiej oraz opisuje osobno mowę nadzorowaną, spontaniczną i
+zakłóconą. Pilotaż używa wyłącznie ścieżek
+`AZON1-nadzorowane/Speakers/<id>`.
+
+Odczytano dwie strony po 100 rekordów metadanych. Kandydat musiał mieć niepustą
+referencję, źródłowy typ WAV, 6–25 słów i jednoznaczny identyfikator mówcy w
+ścieżce nadzorowanej. Mówców uporządkowano według pierwszego kwalifikującego
+wiersza. Wybrano pierwszych czterech, a dla każdego trzy próbki według liczby
+słów: najkrótszą, środkową i najdłuższą, z indeksem wiersza rozstrzygającym
+remisy. Wyniki STT nie były dostępne ani używane.
+
+HEAD potwierdził 12 bezpośrednich adresów HTTPS na
+`datasets-server.huggingface.co`, HTTP 200, brak przekierowań, przypiętą rewizję
+i łączny rozmiar 8 828 188 bajtów. Nie pobrano Parquet ani archiwum. Źródła
+zapisano jako mono PCM 16-bit/44,1 kHz, a następnie przekonwertowano bez sieci w
+`bwrap` do mono PCM 16-bit/16 kHz. Wynik:
+
+| Próbki | Mówcy | Czas | Źródła | WAV 16 kHz | Maks. różnica czasu |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 12 | 4 × 3 | 100,087 s | 8 828 188 B | 3 203 310 B | 0,038 ms |
+
+Źródłowe i wynikowe SHA-256 sprawdzono ponownie. Prywatne katalogi mają `0700`,
+a wszystkie pliki `0600`. Każda referencja jest niepusta i zachowana bez zmian,
+lecz wszystkie 12 tekstów nie ma wiarygodnej interpunkcji. Pilot może zatem
+później służyć WER/CER po ręcznym potwierdzeniu zgodności słowo w słowo, ale nie
+niezależnej ocenie interpunkcji.
+
+Próbki `pwr-azon-01`–`pwr-azon-12` mają status `manual_review: pending`.
+Prywatna strona odsłuchowa pozwala zaakceptować lub odrzucić klip oraz oznaczyć
+rozbieżność tekstu, hałas, pogłos, przesterowanie, muzykę/oklaski, wiele głosów
+i uwagi. Zaznaczenia nie są automatycznym dowodem odsłuchu i nie zmieniają
+manifestu. Żadnej próbki nie włączono do `natural-dictation-pl-v1`.
+
 ## Dwa niezależne benchmarki
 
 ### `natural-dictation-pl-v1`
@@ -149,6 +189,6 @@ zamknięta lista rekordów, limit 10 MB, HEAD bez przekierowań, SHA-256, katalo
 `0700`, pliki `0600`, brak nazw w Git, konwersja bez sieci w `bwrap`, ręczny
 odsłuch przed inferencją i brak wysyłania audio do usług chmurowych.
 
-**Mniejszy zakres:** obecny etap kończy się na raporcie. Nie pobrano nowego
-audio, nie użyto tokenu ani konta, nie zmieniono implementacji benchmarku i nie
-uruchomiono inferencji.
+**Mniejszy zakres:** pobrano tylko 12 zatwierdzonych plików audio o łącznym
+rozmiarze poniżej 10 MB. Nie użyto tokenu ani konta, nie zmieniono implementacji
+benchmarku i nie uruchomiono inferencji.

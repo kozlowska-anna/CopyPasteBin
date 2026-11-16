@@ -1,6 +1,7 @@
 # CopyPasteBin 1.3 — C4 Polish STT corpus organization
 
-Status: **project decision and pilot plan; no new audio download**.
+Status: **PWr-AZON pilot technically prepared; pending manual listening, with
+no STT inference**.
 Reviewed 2026-11-16.
 
 ## Closing the ParlaSpeech assessment
@@ -75,6 +76,45 @@ approval of the source.
    speakers. Fewer passes reject the source instead of editing references to
    fit the benchmark.
 
+## PWr-AZON pilot execution
+
+The pilot was prepared on 2026-11-16 from the public
+`czyzi0/pwr-azon-speech-dataset` repack pinned to revision
+`08bd38b589963b9347dc7866f76b328fb9df5848`. Both the repack card and the
+original PWr/AZON record state CC BY-SA 4.0. The original record attributes the
+resource to Teresa Sas and Wroclaw University of Science and Technology and
+separates supervised, spontaneous, and acoustically disturbed recordings. This
+pilot uses only `AZON1-nadzorowane/Speakers/<id>` paths.
+
+Two metadata pages of 100 rows were read. A candidate required a non-empty
+reference, source WAV type, 6–25 words, and an unambiguous supervised-path
+speaker identifier. Speakers were ordered by their first qualifying row. The
+first four were selected, then the shortest, middle, and longest transcript by
+word count for each speaker, with row index breaking ties. No STT result was
+available or used.
+
+HEAD verified 12 direct HTTPS assets on `datasets-server.huggingface.co`, HTTP
+200, no redirects, the pinned revision, and a total payload of 8,828,188 bytes.
+No Parquet file or archive was downloaded. Sources are mono 16-bit PCM WAV at
+44.1 kHz and were converted in networkless `bwrap` to mono 16-bit PCM WAV at
+16 kHz.
+
+| Samples | Speakers | Duration | Sources | 16 kHz WAV | Maximum duration delta |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 12 | 4 × 3 | 100.087 s | 8,828,188 B | 3,203,310 B | 0.038 ms |
+
+Source and derived SHA-256 values were rechecked. Private directories are mode
+0700 and every file is mode 0600. All source references are non-empty and
+preserved unchanged, but none of the 12 texts has reliable punctuation. After
+word-for-word listening verification the pilot may support WER/CER, but not an
+independent punctuation benchmark.
+
+Samples `pwr-azon-01` through `pwr-azon-12` remain `manual_review: pending`.
+The private review page offers accept/reject controls and checkboxes for text
+mismatch, noise, reverberation, clipping, music/applause, multiple voices, and
+notes. Marks in that page are not automatic listening evidence and do not
+change the manifest. No sample was added to `natural-dictation-pl-v1`.
+
 ## Two independent benchmark suites
 
 `natural-dictation-pl-v1` is the primary WER, CER, RTF, and latency suite. It
@@ -133,6 +173,6 @@ list, 10 MB cap, redirect-free HEAD checks, SHA-256, mode-0700 directory,
 mode-0600 files, no names in Git, networkless `bwrap` conversion, listening
 before inference, and no cloud STT.
 
-**Least-privilege result:** this stage ends with the report. No new audio,
-account, token, dependency, benchmark implementation change, or inference was
-used.
+**Least-privilege result:** only 12 approved audio files totaling less than
+10 MB were downloaded. No account, token, dependency, benchmark implementation
+change, or inference was used.
