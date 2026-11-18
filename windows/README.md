@@ -6,9 +6,11 @@ Windows, zanim zapadnie jakakolwiek decyzja o architekturze produkcyjnej.
 Narzędzia nie wykrywają danych wrażliwych, nie ostrzegają i niczego nie
 chronią.
 
-Stan: kod został napisany w kontenerze Linux i **nigdy nie był kompilowany ani
-uruchamiany na Windows**. Pierwsza kompilacja i wszystkie testy odbywają się
-ręcznie według [TEST-PROTOCOL.md](TEST-PROTOCOL.md).
+Stan: kod został napisany w kontenerze Linux, a następnie skompilowany i
+częściowo przetestowany ręcznie na Windows 11 według
+[TEST-PROTOCOL.md](TEST-PROTOCOL.md). Wyniki wykonanych scenariuszy (obecnie
+S5c i S6) są w [TEST-RESULTS.md](TEST-RESULTS.md); pozostałe scenariusze nie
+mają jeszcze udokumentowanych wyników.
 
 ## Co zawiera katalog
 
@@ -22,6 +24,7 @@ ręcznie według [TEST-PROTOCOL.md](TEST-PROTOCOL.md).
 | `build.cmd` | kompilacja kompilatorem wbudowanym w Windows |
 | `checks/test_stage0_sources.py` | statyczne kontrole źródeł (dowolny system) |
 | `TEST-PROTOCOL.md` | protokół ręcznych testów na Windows 11 |
+| `TEST-RESULTS.md` | datowane podsumowania wykonanych scenariuszy |
 
 ## Granice sondy
 
@@ -85,14 +88,17 @@ ani pobierać — skrypt używa kompilatora C# z .NET Framework 4.x, który jest
 składnikiem systemu.
 
 1. Pobierz repozytorium na komputer z Windows (gałąź `claude-windows`).
-2. Otwórz „Wiersz polecenia" (nie jako administrator) w katalogu `windows`.
-3. Uruchom:
+2. Otwórz PowerShell (nie jako administrator). Wszystkie polecenia — także
+   kompilację — wykonuje się z jednego katalogu roboczego `windows\build`:
 
-   ```bat
-   build.cmd
+   ```powershell
+   cd <repozytorium>\windows
+   New-Item -ItemType Directory -Force build, wyniki | Out-Null
+   cd build
+   ..\build.cmd
    ```
 
-4. Pliki `.exe` pojawią się w `windows\build`. Katalog `build` jest ignorowany
+3. Pliki `.exe` pojawią się w `windows\build`. Katalog `build` jest ignorowany
    przez Git.
 
 Jeżeli kompilator zgłosi błąd lub ostrzeżenie, skopiuj komunikaty do raportu z
@@ -103,15 +109,18 @@ przesądza technologii wersji produkcyjnej.
 
 ## Uruchomienie
 
-Sondę uruchamia się w osobnym oknie wiersza polecenia i zostawia włączoną:
+Sondę uruchamia się w osobnym oknie PowerShella, z katalogu `windows\build`,
+tylko na czas jednej próby:
 
-```bat
-build\CpbClipboardProbe.exe --log wyniki\sonda-01.log
+```powershell
+.\CpbClipboardProbe.exe --log ..\wyniki\sonda-01.log
 ```
 
 Katalog `wyniki` trzeba wcześniej utworzyć, a plik nie może istnieć. Sondę
 kończy `Ctrl+C`. Zamknięcie okna krzyżykiem kończy ją bez wiersza
-podsumowania.
+podsumowania. Dzienniki z `wyniki` nie trafiają do repozytorium. Obowiązkowy
+przebieg próby i zakaz kopiowania poleceń oraz identyfikatorów podczas pomiaru
+opisuje [TEST-PROTOCOL.md](TEST-PROTOCOL.md).
 
 Przykładowy wiersz:
 
