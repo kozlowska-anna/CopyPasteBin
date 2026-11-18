@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -67,7 +68,10 @@ namespace CopyPasteBin.Stage0
             if (plan.Delayed && Native.GetClipboardOwner() == windowHandle)
             {
                 bool emptied = false;
-                if (Open())
+                int openError;
+                int openAttempts;
+                TimeSpan openTime;
+                if (Open(out openError, out openAttempts, out openTime))
                 {
                     emptied = Native.EmptyClipboard();
                     Native.CloseClipboard();
@@ -103,10 +107,18 @@ namespace CopyPasteBin.Stage0
 
         public bool Publish(int index)
         {
-            if (!Open())
+            int openError;
+            int openAttempts;
+            TimeSpan openTime;
+            if (!Open(out openError, out openAttempts, out openTime))
             {
+                // The original fields stay first and unchanged; the diagnostic
+                // fields are appended so existing log readers keep working.
                 log.Write("publish",
-                    "index=" + Fmt.Number(index) + " open=failed text_published=false");
+                    "index=" + Fmt.Number(index) + " open=failed text_published=false" +
+                    " open_error=" + Fmt.Number(openError) +
+                    " open_attempts=" + Fmt.Number(openAttempts) +
+                    " open_time=" + Fmt.Bucket(openTime));
                 return false;
             }
             StringBuilder details = new StringBuilder();
@@ -177,12 +189,15 @@ namespace CopyPasteBin.Stage0
                 // Re-open immediately so that a monitor reacting to the update
                 // finds the clipboard busy for a controlled time.
                 bool held = Native.OpenClipboard(windowHandle);
+                int holdError = held ? 0 : Marshal.GetLastWin32Error();
                 if (held)
                 {
                     Thread.Sleep(plan.HoldAfterMs);
                     Native.CloseClipboard();
                 }
                 details.Append(" hold_after=").Append(held ? "ok" : "failed");
+                if (!held)
+                    details.Append(" hold_after_error=").Append(Fmt.Number(holdError));
             }
             details.Append(" text_published=").Append(Fmt.Flag(textPublished));
             details.Append(" seq=").Append(Fmt.Number(Native.GetClipboardSequenceNumber()));
@@ -211,14 +226,31 @@ namespace CopyPasteBin.Stage0
             log.Write("render_result", "format=" + name + " data=" + result);
         }
 
-        private bool Open()
+        /// <summary>
+        /// Tries to open the clipboard. On failure, error is the Win32 code read
+        /// right after the last failed OpenClipboard call (before any sleep), so
+        /// no other call can overwrite it. Only the code is read, never data.
+        /// </summary>
+        private bool Open(out int error, out int attempts, out TimeSpan elapsed)
         {
-            for (int attempt = 0; attempt < OpenAttempts; attempt++)
+            error = 0;
+            attempts = 0;
+            Stopwatch clock = Stopwatch.StartNew();
+            while (attempts < OpenAttempts)
             {
+                attempts++;
                 if (Native.OpenClipboard(windowHandle))
+                {
+                    clock.Stop();
+                    elapsed = clock.Elapsed;
                     return true;
-                Thread.Sleep(OpenDelayMs);
+                }
+                error = Marshal.GetLastWin32Error();
+                if (attempts < OpenAttempts)
+                    Thread.Sleep(OpenDelayMs);
             }
+            clock.Stop();
+            elapsed = clock.Elapsed;
             return false;
         }
 
@@ -301,6 +333,8 @@ namespace CopyPasteBin.Stage0
 
     internal static class OwnerProgram
     {
+        private const int ExitPublishFailed = 3;
+
         private const string Usage =
             "CpbSyntheticOwner - CopyPasteBin stage 0 synthetic clipboard owner\r\n" +
             "\r\n" +
@@ -330,7 +364,11 @@ namespace CopyPasteBin.Stage0
             "  --stay-seconds <n>        with delayed rendering: exit after n seconds,\r\n" +
             "                            1-3600 (default: wait for Ctrl+C)\r\n" +
             "  --log <path>              also write metadata lines to a NEW file\r\n" +
-            "  --help                    show this text";
+            "  --help                    show this text\r\n" +
+            "\r\n" +
+            "Exit codes: 0 every transaction opened the clipboard, 2 invalid\r\n" +
+            "options or log file, 3 at least one transaction could not open the\r\n" +
+            "clipboard (see open_error in the publish line).";
 
         [STAThread]
         private static int Main(string[] args)
@@ -406,6 +444,7 @@ namespace CopyPasteBin.Stage0
                 return 2;
             }
 
+            int failedPublishes = 0;
             using (log)
             {
                 log.Write(
@@ -419,7 +458,8 @@ namespace CopyPasteBin.Stage0
                     window.Start();
                     for (int index = 1; index <= plan.Count; index++)
                     {
-                        window.Publish(index);
+                        if (!window.Publish(index))
+                            failedPublishes++;
                         if (index < plan.Count && plan.IntervalMs > 0)
                             Thread.Sleep(plan.IntervalMs);
                     }
@@ -455,7 +495,8 @@ namespace CopyPasteBin.Stage0
                 }
                 log.Write("owner_stop", "");
             }
-            return 0;
+            // Exit code 3: at least one transaction could not open the clipboard.
+            return failedPublishes > 0 ? ExitPublishFailed : 0;
         }
 
         private static bool ValidFlagMode(string mode)

@@ -201,6 +201,46 @@ class Stage0SourceTests(unittest.TestCase):
         owner = read("SyntheticOwner.cs")
         self.assertIn("plan.CanaryId != null ? plan.CanaryId : CanaryText", owner)
 
+    def test_owner_reads_open_error_right_after_the_failed_call(self):
+        owner = strip_comments_and_strings(read("SyntheticOwner.cs"))
+        body = owner[owner.index("private bool Open("):owner.index("private byte[] TextBytes(")]
+        call = body.index("Native.OpenClipboard(windowHandle)")
+        error = body.index("Marshal.GetLastWin32Error()")
+        sleep = body.index("Thread.Sleep(OpenDelayMs)")
+        self.assertLess(call, error)
+        self.assertLess(error, sleep)
+        # Nothing but the success branch may run between the call and the read.
+        between = body[call:error]
+        self.assertNotIn("Native.", between.replace("Native.OpenClipboard(windowHandle)", ""))
+        self.assertNotIn("Thread.", between)
+        self.assertEqual(body.count("Marshal.GetLastWin32Error()"), 1)
+        self.assertIn("Stopwatch.StartNew()", body)
+        self.assertIn("attempts++", body)
+
+    def test_owner_publish_failure_line_keeps_old_fields_first(self):
+        owner = read("SyntheticOwner.cs")
+        self.assertIn(
+            '" open=failed text_published=false" +\n'
+            '                    " open_error=" + Fmt.Number(openError) +\n'
+            '                    " open_attempts=" + Fmt.Number(openAttempts) +\n'
+            '                    " open_time=" + Fmt.Bucket(openTime));',
+            owner,
+        )
+        self.assertIn('details.Append(" open=ok");', owner)
+        self.assertIn('" hold_after_error="', owner)
+        self.assertIn('log.Write("owner_stop", "");', owner)
+
+    def test_owner_returns_nonzero_when_a_publish_fails(self):
+        owner = strip_comments_and_strings(read("SyntheticOwner.cs"))
+        self.assertIn("private const int ExitPublishFailed = 3;", owner)
+        self.assertIn("if (!window.Publish(index))", owner)
+        self.assertIn("failedPublishes++;", owner)
+        self.assertIn("return failedPublishes > 0 ? ExitPublishFailed : 0;", owner)
+        raw = read("SyntheticOwner.cs")
+        tail = raw[raw.index('log.Write("owner_stop", "");'):]
+        self.assertNotIn("return 0;", tail)
+        self.assertNotIn("window.Publish(index);", owner)
+
 
 if __name__ == "__main__":
     unittest.main()
