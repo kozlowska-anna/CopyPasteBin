@@ -4,6 +4,28 @@ All notable CopyPasteBin changes are recorded in this file.
 
 [Polski](CHANGELOG.md) | **English**
 
+## [Unreleased]
+
+### Removed
+
+- removed the polling `wl-paste` watcher, its `cpb watch` and `cpb service`
+  commands, `copypastebin-watcher.service`, and the former
+  `copypastebin-start.desktop` launcher; the event-driven GNOME extension
+  remains the current path;
+- users who previously enabled the old service or launcher can remove the
+  remnants manually:
+
+  ```sh
+  systemctl --user disable --now copypastebin-watcher.service
+  rm -f ~/.config/systemd/user/copypastebin-watcher.service
+  systemctl --user daemon-reload
+  rm -f ~/.local/share/applications/copypastebin-start.desktop
+  ```
+
+  Custom `XDG_CONFIG_HOME` or `XDG_DATA_HOME` values change the corresponding
+  paths. The installer and DEB package do not remove files from the user's
+  home directory.
+
 ## [1.2.1] - 2026-11-08
 
 ### Security

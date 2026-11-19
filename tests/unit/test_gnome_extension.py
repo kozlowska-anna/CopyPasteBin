@@ -1074,7 +1074,7 @@ class GnomeExtensionTests(unittest.TestCase):
             launcher,
         )
         self.assertIn("Terminal=false", launcher)
-        for forbidden in ("service start", "watch start", "wl-paste", "sudo", "sh -c"):
+        for forbidden in ("sudo", "sh -c"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, launcher)
 

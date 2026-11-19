@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import hmac
 import json
-import os
 import sys
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
@@ -30,9 +29,7 @@ from .history import HistoryError, HistoryStore
 from .history_settings import HistorySettingsError, HistorySettingsStore
 from .input_sources import InputError, read_stream, read_text_file
 from .language import LANGUAGE_CHOICES, LanguageError, LanguageStore
-from .launcher import LauncherController, LauncherError
 from .models import Category
-from .notifications import DesktopNotifier, NotificationError
 from .pause import (
     PAUSE_1_HOUR,
     PAUSE_30_MINUTES,
@@ -54,18 +51,6 @@ from .ui import (
     history_settings_json,
     redacted_suggestion,
 )
-from .service import (
-    AutostartStatus,
-    ServiceController,
-    ServiceError,
-    ServiceStatus,
-)
-from .watcher import (
-    BackendStartupFailureCode,
-    ClipboardWatcher,
-    WatcherError,
-    WlPastePollingBackend,
-)
 
 
 PURPOSES = ("chat", "email", "drive", "terminal", "other")
@@ -84,29 +69,6 @@ def _parser() -> SafeArgumentParser:
     show = subparsers.add_parser("show")
     show.add_argument("operation_id")
     show.set_defaults(command="show")
-    watch = subparsers.add_parser("watch")
-    watch_actions = watch.add_subparsers(dest="watch_action", required=True)
-    watch_actions.add_parser("start")
-    watch.set_defaults(command="watch")
-    service = subparsers.add_parser("service")
-    service_actions = service.add_subparsers(dest="service_action", required=True)
-    for action in (
-        "setup",
-        "start",
-        "stop",
-        "status",
-        "enable",
-        "disable",
-        "autostart",
-    ):
-        service_actions.add_parser(action)
-    service.set_defaults(command="service")
-    launcher = subparsers.add_parser("launcher")
-    launcher_actions = launcher.add_subparsers(
-        dest="launcher_action", required=True
-    )
-    launcher_actions.add_parser("setup")
-    launcher.set_defaults(command="launcher")
     pause = subparsers.add_parser("pause")
     pause_actions = pause.add_subparsers(dest="pause_action", required=True)
     for action in ("30m", "1h", "until-resumed", "resume", "status"):
@@ -189,89 +151,6 @@ def _show_output(store: HistoryStore, operation_id: str, output: TextIO) -> int:
     summary = ",".join(f"{name}:{count}" for name, count in entry.category_counts) or "none"
     output.write(f"id={entry.operation_id}\ntime={entry.created_at}\nsource={entry.source_kind}\nfrom={entry.source_application}\nto={entry.destination_application}\npurpose={entry.purpose}\nrisk={entry.highest_risk}\ncategories={summary}\nstatus={entry.status}\nruleset={entry.ruleset_version}\n")
     return 0
-
-
-def _journal_context_present() -> bool:
-    return bool(os.environ.get("INVOCATION_ID")) and bool(
-        os.environ.get("JOURNAL_STREAM")
-    )
-
-
-def _emit_backend_startup_failure(
-    code: BackendStartupFailureCode, output: TextIO
-) -> None:
-    if type(code) is not BackendStartupFailureCode:
-        raise TypeError("code must be BackendStartupFailureCode")
-    if _journal_context_present():
-        output.write(f"CopyPasteBin diagnostic code: {code.value}\n")
-
-
-def _run_foreground_watcher(
-    args, store: HistoryStore, output: TextIO, diagnostic_output: TextIO
-) -> int:
-    custom_rules, custom_exclusions = load_customizations(args.config)
-    watcher = ClipboardWatcher(
-        WlPastePollingBackend(),
-        DesktopNotifier(),
-        store,
-        custom_rules=custom_rules,
-        custom_exclusions=custom_exclusions,
-        purpose=args.purpose,
-    )
-    output.write(
-        "Watcher uruchamia się w trybie pierwszoplanowym. "
-        "Zatrzymaj go przez Ctrl+C.\n"
-    )
-    try:
-        watcher.run_forever(
-            startup_backend_failure=lambda code: _emit_backend_startup_failure(
-                code, diagnostic_output
-            )
-        )
-    except KeyboardInterrupt:
-        output.write("Watcher zatrzymany.\n")
-    return 0
-
-
-def _run_service(args, output: TextIO) -> int:
-    controller = ServiceController()
-    if args.service_action == "setup":
-        controller.setup()
-        output.write("CopyPasteBin service: CONFIGURED\n")
-        return 0
-    if args.service_action == "enable":
-        status = controller.enable()
-        output.write(f"CopyPasteBin autostart: {status.value}\n")
-        return 0
-    if args.service_action == "disable":
-        status = controller.disable()
-        output.write(f"CopyPasteBin autostart: {status.value}\n")
-        return 0
-    if args.service_action == "autostart":
-        status = controller.autostart()
-        output.write(f"CopyPasteBin autostart: {status.value}\n")
-        if status is AutostartStatus.UNKNOWN:
-            return 1
-        return 0
-    if args.service_action == "start":
-        status = controller.start()
-    elif args.service_action == "stop":
-        status = controller.stop()
-    else:
-        status = controller.status()
-    output.write(f"CopyPasteBin service: {status.value}\n")
-    if args.service_action == "status" and status is not ServiceStatus.RUNNING:
-        return 1
-    return 0
-
-
-def _run_launcher(args, output: TextIO) -> int:
-    controller = LauncherController()
-    if args.launcher_action == "setup":
-        controller.setup()
-        output.write("CopyPasteBin launcher: CONFIGURED\n")
-        return 0
-    raise LauncherError()
 
 
 def _pause_output(status, output: TextIO) -> None:
@@ -470,12 +349,6 @@ def main(argv: Sequence[str] | None = None, *, stdin: TextIO = sys.stdin, stdout
             return 0
         if args.command == "show":
             return _show_output(store, args.operation_id, stdout)
-        if args.command == "watch":
-            return _run_foreground_watcher(args, store, stdout, stderr)
-        if args.command == "service":
-            return _run_service(args, stdout)
-        if args.command == "launcher":
-            return _run_launcher(args, stdout)
         if args.command == "pause":
             return _run_pause(args, stdout)
         if args.command == "bridge":
@@ -513,17 +386,6 @@ def main(argv: Sequence[str] | None = None, *, stdin: TextIO = sys.stdin, stdout
             raise
         store.set_outcome(result.operation_id, "copied_original", exception_used=requires_high_risk_confirmation(result.analysis))
         return 0
-    except WatcherError as exc:
-        if (
-            exc.lifecycle_reason is not None
-            and _journal_context_present()
-        ):
-            stderr.write(
-                "CopyPasteBin diagnostic code: "
-                f"LIFECYCLE_{exc.lifecycle_reason.value}\n"
-            )
-        stderr.write("Operacja nie powiodła się bez ujawniania danych wejściowych.\n")
-        return 1
     except (
         InputError,
         ClipboardError,
@@ -531,9 +393,6 @@ def main(argv: Sequence[str] | None = None, *, stdin: TextIO = sys.stdin, stdout
         HistoryError,
         HistorySettingsError,
         Bip39ResourceError,
-        NotificationError,
-        ServiceError,
-        LauncherError,
         PauseError,
         FilterError,
         LanguageError,

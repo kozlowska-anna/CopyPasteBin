@@ -102,7 +102,7 @@ class BridgeCliTests(unittest.TestCase):
         self.assertNotIn(canary.encode(), HistoryStore(self.state).database_path.read_bytes())
 
     def test_warning_returns_safe_banner_shape_without_system_notifier(self):
-        with patch("copypastebin.cli.DesktopNotifier") as notifier_type:
+        with patch("copypastebin.notifications.DesktopNotifier") as notifier_type:
             code, stdout, stderr = self.run_cli(frame("app.one", "1234 PLN"))
         self.assertEqual(0, code)
         self.assertEqual("", stderr)

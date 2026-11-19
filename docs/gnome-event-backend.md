@@ -5,8 +5,8 @@
 Sekundowy polling `wl-paste` został zastąpiony komponentem dla GNOME Shell 50,
 który reaguje na zmianę schowka bez tworzenia powierzchni Wayland i bez
 zakłócania fokusu. Backend działa jako rozszerzenie GNOME i wewnętrzny most
-stdin do rdzenia Pythona. Stary watcher pozostaje osobnym kodem legacy, ale
-nie może być uruchamiany równolegle ani używany w codziennej sesji GNOME.
+stdin do rdzenia Pythona. Stary watcher, jego usługa systemd i dawny launcher
+usługi zostały usunięte.
 
 ## Minimalny podział odpowiedzialności
 

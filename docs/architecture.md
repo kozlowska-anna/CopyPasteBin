@@ -4,8 +4,7 @@
 
 Aktualnym interfejsem pulpitu jest lekkie rozszerzenie GNOME Shell 50 w
 `gnome-extension/copypastebin@kozlowska-anna.github.io`. Pollingowy watcher
-`wl-paste`, jego usługa systemd oraz dawny launcher są kodem legacy i nie
-należą do codziennej ścieżki GNOME.
+`wl-paste`, jego usługa systemd oraz dawny launcher usługi zostały usunięte.
 
 ```text
 GNOME Meta.Selection owner-changed
@@ -32,22 +31,16 @@ GNOME Meta.Selection owner-changed
 - `filters.py` — prywatny stan włączonych kategorii wykrywania;
 - `language.py` — prywatny wybór języka GUI: systemowy, polski lub angielski;
 - `bridge.py` — ograniczony most zdarzenia GNOME przez stdin;
+- `clipboard.py` — jawny adapter `wl-paste`/`wl-copy` dla operacji CLI
+  wykonywanych na żądanie;
+- `notifications.py` — beztreściowy model notyfikacji używany przez most;
 - `ui.py` — ograniczone JSON-y historii, filtrów, reguł i pozycji detekcji
   oraz sugestia anonimizacji;
 - `cli.py` — jawne CLI oraz zamknięte protokoły wewnętrzne.
 
-Moduły legacy:
-
-- `clipboard.py` — jawny adapter `wl-paste`/`wl-copy` dla CLI;
-- `watcher.py` — odrzucony dla GNOME pollingowy watcher foreground;
-- `lifecycle.py` — preflight i blokada starego watchera;
-- `service.py` — kontroler dawnej usługi `systemd --user`;
-- `launcher.py` — instalator dawnego launchera usługi;
-- `notifications.py` — beztreściowa notyfikacja starego watchera;
-- `executables.py` — walidacja entry pointu używana przez legacy lifecycle.
-
-Kod legacy pozostaje pokryty testami, ale nie może być uruchamiany równolegle
-z rozszerzeniem i nie powinien być instalowany jako produkt GNOME.
+Usunięto moduły legacy `watcher.py`, `lifecycle.py`, `service.py` i
+`launcher.py` oraz ich dedykowane testy. `executables.py` nie jest ścieżką
+uruchomieniową produktu.
 
 ## Rozszerzenie GNOME
 
@@ -311,19 +304,14 @@ albo jednorazowy schowek. `--copy redacted` zapisuje anonimizację, a
 `--copy original` podlega polityce ryzyka. Oryginał wysokiego ryzyka wymaga
 jednorazowego `COPY <operation_id>` w bieżącym procesie.
 
-## Legacy watcher
+## Usunięty watcher legacy
 
-Pollingowy `WlPastePollingBackend` ma zamknięty, fail-closed kontrakt oraz
-ograniczony startup grace 1/2/4/8 s, ale live test GNOME Shell 50.1 wykazał
-kradzież fokusu przez tymczasową powierzchnię Wayland. Z tego powodu:
-
-- stara usługa i dawny launcher mają pozostać nieaktywne;
-- nie zwiększamy interwału ani liczby prób;
-- nie parsujemy stderr i nie zgadujemy po exit code;
-- nie traktujemy legacy lifecycle jako alternatywnej ścieżki produktu.
-
-Powód wyłączenia tej architektury jest opisany powyżej, a jej zamknięty
-kontrakt pozostaje pokryty testami.
+Pollingowy `WlPastePollingBackend`, jego lifecycle, usługa systemd, dawny
+launcher usługi i polecenia CLI zostały usunięte. Live test GNOME Shell 50.1
+wykazał, że tymczasowa powierzchnia Wayland używana przez polling `wl-paste`
+kradła fokus i zamykała menu kontekstowe. Dłuższy interwał, dodatkowe próby,
+parsowanie stderr ani zgadywanie po exit code nie naprawiłyby tej granicy
+architektonicznej.
 
 ## Granice produktu
 

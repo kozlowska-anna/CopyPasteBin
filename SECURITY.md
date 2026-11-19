@@ -12,8 +12,8 @@ memory while history saving is enabled. Terminal
 preview neutralizes ANSI, C0/C1, and bidirectional control characters.
 
 The current desktop path is the event-driven GNOME Shell 50 extension. The old
-`wl-paste` watcher, systemd service, and former launcher are legacy code and
-must remain inactive.
+`wl-paste` watcher, systemd service, and former service launcher have been
+removed.
 
 ## Technical boundaries
 
@@ -352,20 +352,16 @@ Explicit clipboard reading and writing in the CLI use fixed argv,
 stdin. A high-risk original requires a one-time constant-time comparison with
 `COPY <operation_id>`; refusal and failure update only status metadata.
 
-## Legacy code
+## Removed legacy code
 
-`cpb watch start`, `cpb service ...`, and `cpb launcher setup` are an
-earlier architecture covered by tests. Polling `wl-paste` on GNOME Shell 50.1
-used a temporary Wayland surface, stole focus, and closed context menus. It is
-therefore not a current product mode.
+`cpb watch start`, `cpb service ...`, and `cpb launcher setup`, together with
+the polling watcher, its lifecycle code, systemd service controller, former
+service launcher, and their dedicated tests, have been removed. Polling
+`wl-paste` on GNOME Shell 50.1 used a temporary Wayland surface, stole focus,
+and closed context menus.
 
-The legacy watcher retains fail-closed behavior, fixed argv, bounded startup
-grace, a private `flock`, redacted errors, and `Restart=no`, but it must not
-run in parallel or be restored by the former launcher. The old service must
-remain stopped and absent. This path is not repaired by a longer interval,
-more retries, parsing stderr, or guessing exit codes.
-
-The historical lifecycle contract remains in code and tests but is not an
+A longer interval, more retries, stderr parsing, or exit-code guessing would
+not repair that architectural boundary. The removed path is not an
 alternative mode of the current product.
 
 ## Publication
