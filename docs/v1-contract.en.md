@@ -7,7 +7,7 @@
 CopyPasteBin V1 consists of a local analysis core and a lightweight GNOME
 Shell 50 interface. The current UX is event-driven and does not poll the
 clipboard. The old `wl-paste` watcher, service, and service launcher are
-removed.
+have been removed.
 
 The application warns and helps the user explicitly correct text. Detection
 alone does not block, delete, or modify the clipboard. An optional separate

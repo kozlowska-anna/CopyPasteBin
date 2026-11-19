@@ -38,9 +38,8 @@ GNOME Meta.Selection owner-changed
   oraz sugestia anonimizacji;
 - `cli.py` — jawne CLI oraz zamknięte protokoły wewnętrzne.
 
-Usunięto moduły legacy `watcher.py`, `lifecycle.py`, `service.py` i
-`launcher.py` oraz ich dedykowane testy. `executables.py` nie jest ścieżką
-uruchomieniową produktu.
+Usunięto moduły legacy `watcher.py`, `lifecycle.py`, `service.py`, `launcher.py`
+i `executables.py` oraz ich dedykowane testy.
 
 ## Rozszerzenie GNOME
 

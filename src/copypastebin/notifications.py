@@ -1,13 +1,8 @@
 from __future__ import annotations
 
-import shutil
-import subprocess
 from dataclasses import dataclass
 
 from .models import Category, RiskLevel
-
-
-NOTIFICATION_TIMEOUT_SECONDS = 5.0
 
 
 class NotificationError(Exception):
@@ -50,32 +45,3 @@ class SafeNotification:
             f"{self.risk.value!r}, categories={len(self.category_counts)}, "
             "content_redacted=True)"
         )
-
-
-class DesktopNotifier:
-    def notify(self, notification: SafeNotification) -> None:
-        if type(notification) is not SafeNotification:
-            raise NotificationError()
-        executable = shutil.which("notify-send")
-        if executable is None:
-            raise NotificationError()
-        title = f"CopyPasteBin: ryzyko {notification.risk.value}"
-        count = sum(value for _, value in notification.category_counts)
-        body = (
-            f"Wykryte kategorie: {len(notification.category_counts)}; "
-            f"trafienia: {count}. Sprawdź bieżący schowek jawnie w CopyPasteBin."
-        )
-        try:
-            result = subprocess.run(
-                [executable, "--app-name", "CopyPasteBin", title, body],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                check=False,
-                timeout=NOTIFICATION_TIMEOUT_SECONDS,
-                shell=False,
-            )
-        except (OSError, subprocess.SubprocessError) as exc:
-            raise NotificationError() from exc
-        if result.returncode != 0:
-            raise NotificationError()
