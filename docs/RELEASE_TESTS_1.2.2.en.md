@@ -2,9 +2,9 @@
 
 [Polski](RELEASE_TESTS_1.2.2.md) | **English**
 
-This document records preparation of candidate 1.2.2 after removal of the
-former polling watcher. It does not broaden the declared compatibility range
-and does not replace LIVE testing in a physical GNOME session.
+This document records preparation and testing of candidate 1.2.2 after
+removal of the former polling watcher. It does not broaden the declared
+compatibility range.
 
 ## Candidate identity
 
@@ -12,6 +12,8 @@ and does not replace LIVE testing in a physical GNOME session.
   `415e2264dbeb23faf44d4a2b1cf68662675221bf`;
 - application version: `1.2.2`;
 - Debian package version: `1.2.2-1`;
+- version tested from the PPA: `1.2.2-1~test1`, from upload commit
+  `603e3ae2452f5c4f9318062f93cf7ebf8f11df7c`;
 - GNOME extension version: `8` (no extension-code change requiring a new
   metadata version);
 - local branch: `codex/cpb-1.2.2-release`.
@@ -63,23 +65,41 @@ The test used only a synthetic home directory and synthetic state:
 Inspection of the archive and DEB payloads found no watcher, service, former
 launcher, audio file, or model payload.
 
-## LIVE test — PENDING
+## LIVE test from the test PPA — PASS
 
-No test has yet been performed in a physical GNOME Wayland session, and no
-upgrade from the published 1.2.1 release has been performed. Before
-publication, at minimum confirm:
+On 22 November 2026, the user performed a controlled upgrade on Ubuntu
+Resolute, GNOME Shell 50.1, and Wayland. The test PPA supplied exactly matched
+`1.2.2-1~test1` versions of `copypastebin`, `copypastebin-backend`, and
+`gnome-shell-extension-copypastebin`. Absence of a user-local tar.gz
+installation was confirmed before the upgrade.
 
-- upgrade from 1.2.1 to one exactly matched 1.2.2 package set;
-- extension activation after logging back in;
-- menu, pause, resume, history, and editor behavior with synthetic content;
-- absence of the former polling process, service, and launcher;
-- manual cleanup of any legacy remnants according to the changelog.
+After logging back in, the following were confirmed:
+
+- the system extension under `/usr/share/gnome-shell/extensions` reported
+  version `8`, was enabled, and had state `ACTIVE`;
+- the backend reported product version `1.2.2` and protocol version `2`;
+- the former service was inactive and unknown to systemd, and neither its
+  unit file nor the former launcher file existed;
+- no `wl-paste`, watcher, or `cpb watch` process was running, while
+  `cpb watch start` exited with the ordinary argument error code `2`;
+- the menu remained open without flicker, focus theft, or spontaneous closing;
+- pause and resume worked;
+- ordinary synthetic content entered history;
+- a synthetic password assignment produced a warning and did not enter
+  history, while the previous ordinary entry remained;
+- safely canceling the disable-history action preserved history;
+- the editor worked with synthetic text, and the About window reported
+  version `1.2.2`.
+
+No manual cleanup of legacy remnants was needed because none were present.
 
 ## Evidence boundaries
 
-- no push, tag, GitHub Release, or PPA publication was performed;
-- the user's stable installation was not changed;
+- no push, tag, GitHub Release, or stable-PPA publication was performed;
+- test package `1.2.2-1~test1` was published only in the test PPA;
+- the test computer was intentionally upgraded from stable `1.2.1-1` to the
+  test-PPA candidate;
 - no real clipboard, history, or private data was read;
-- automated PASS is not presented as LIVE PASS;
+- GNOME interaction results are LIVE evidence reported by the user;
 - a matching SHA-256 confirms file identity but does not by itself prove that
   the file originated from the declared commit.
