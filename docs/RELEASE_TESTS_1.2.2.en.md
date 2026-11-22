@@ -119,7 +119,11 @@ After logging back in, the final smoke test confirmed:
 
 ## Evidence boundaries
 
-- no tag or GitHub Release was created;
+- tag `v1.2.2` points to commit
+  `18d10b560716af1a17fadd38bfa2532e5e4a59e3`, and the public GitHub Release
+  contains the tar.gz archive, three DEB packages, and `SHA256SUMS`;
+- every public GitHub Release asset passed `SHA256SUMS` verification and was
+  byte-identical to the local final-release set;
 - stable package `1.2.2-1` was published in the stable PPA;
 - test package `1.2.2-1~test1` remained confined to the test PPA, which was
   removed from the test computer's configuration after the stable upgrade;

@@ -4,7 +4,7 @@ All notable CopyPasteBin changes are recorded in this file.
 
 [Polski](CHANGELOG.md) | **English**
 
-## [1.2.2] - Unreleased
+## [1.2.2] - 2026-11-22
 
 ### Removed
 

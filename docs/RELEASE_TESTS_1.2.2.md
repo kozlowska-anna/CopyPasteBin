@@ -119,7 +119,11 @@ Po ponownym zalogowaniu końcowy smoke test potwierdził:
 
 ## Granice dowodów
 
-- nie wykonano tagu ani GitHub Release;
+- tag `v1.2.2` wskazuje commit
+  `18d10b560716af1a17fadd38bfa2532e5e4a59e3`, a publiczny GitHub Release
+  zawiera archiwum tar.gz, trzy pakiety DEB i `SHA256SUMS`;
+- wszystkie publiczne assety GitHub Release przeszły kontrolę `SHA256SUMS` i
+  były bajtowo identyczne z lokalnym zestawem finalnego wydania;
 - stabilny pakiet `1.2.2-1` opublikowano w stabilnym PPA;
 - testowy pakiet `1.2.2-1~test1` pozostał wyłącznie w testowym PPA, które po
   przejściu na wersję stabilną usunięto z konfiguracji komputera testowego;
