@@ -13,6 +13,8 @@ dawnego watchera pollingowego. Nie rozszerza deklarowanej kompatybilności.
 - wersja pakietów Debiana: `1.2.2-1`;
 - wersja przetestowana z PPA: `1.2.2-1~test1`, z commita uploadowego
   `603e3ae2452f5c4f9318062f93cf7ebf8f11df7c`;
+- stabilne źródło PPA zbudowano ze scalonego commita `main`
+  `7653fa317b72336695ce03f39c35fa74f28f50fb`;
 - wersja rozszerzenia GNOME: `8` (bez zmian kodu rozszerzenia wymagających
   nowej wersji metadanych);
 - gałąź lokalna: `codex/cpb-1.2.2-release`.
@@ -94,12 +96,35 @@ Po ponownym zalogowaniu potwierdzono:
 Test nie wymagał ręcznego sprzątania pozostałości legacy, ponieważ nie były
 obecne.
 
+## Stabilne PPA — PASS
+
+22 listopada 2026 źródło i wszystkie trzy pakiety `1.2.2-1` uzyskały status
+`Published` w stabilnym PPA dla Ubuntu Resolute. Dwie niezależne budowy
+źródłowe były bajtowo identyczne. Lokalnie zbudowane pakiety binarne miały te
+same SHA-256 co kandydat zweryfikowany przed testem LIVE.
+
+Użytkowniczka wykonała kontrolowane przejście ze wszystkich trzech pakietów
+`1.2.2-1~test1` na dokładnie zgodny zestaw `1.2.2-1`, a następnie usunęła
+testowe PPA. `apt-cache policy` wskazywał stabilne PPA jako jedyne źródło
+zainstalowanej i kandydującej wersji `1.2.2-1`.
+
+Po ponownym zalogowaniu końcowy smoke test potwierdził:
+
+- systemowe rozszerzenie w `/usr/share` miało wersję `8` i stan `ACTIVE`;
+- backend zgłaszał wersję produktu `1.2.2` i protokołu `2`;
+- nie działał proces `wl-paste`, watcher ani `cpb watch`;
+- menu pozostawało otwarte bez migania i samoczynnego zamykania;
+- pauza i wznowienie działały;
+- zwykły syntetyczny tekst trafiał do historii.
+
 ## Granice dowodów
 
-- nie wykonano push, tagu, GitHub Release ani publikacji w stabilnym PPA;
-- testowy pakiet `1.2.2-1~test1` opublikowano wyłącznie w testowym PPA;
+- nie wykonano tagu ani GitHub Release;
+- stabilny pakiet `1.2.2-1` opublikowano w stabilnym PPA;
+- testowy pakiet `1.2.2-1~test1` pozostał wyłącznie w testowym PPA, które po
+  przejściu na wersję stabilną usunięto z konfiguracji komputera testowego;
 - komputer testowy został świadomie zaktualizowany ze stabilnego `1.2.1-1` do
-  kandydata z testowego PPA;
+  kandydata z testowego PPA, a następnie do stabilnego `1.2.2-1`;
 - nie odczytywano prawdziwego schowka, historii ani prywatnych danych;
 - wyniki interakcji z GNOME są dowodem LIVE zgłoszonym przez użytkowniczkę;
 - zgodność SHA-256 potwierdza tożsamość pliku, ale sama nie dowodzi jego
