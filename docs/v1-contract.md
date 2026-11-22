@@ -283,7 +283,7 @@ kopiowania, auto-paste, auto-send, globalny hook klawiatury oraz gwarancja
 wykrycia wszystkich danych. Ręczny edytor lokalnych plików PNG i JPEG jest
 częścią V1, ale uruchamia się wyłącznie na polecenie i nie monitoruje schowka.
 
-Wersja 1.2.1 jest przygotowana do dystrybucji przez stabilne PPA dla Ubuntu
+Wersja 1.2.2 jest przygotowana do dystrybucji przez stabilne PPA dla Ubuntu
 26.04 i GitHub Release, z lokalnym archiwum tar.gz jako alternatywą. Publikacja
 w GNOME Extensions oraz Snap rdzenia są późniejszym etapem. Rozszerzenie ma
 stabilny publiczny UUID i angielski interfejs bazowy z polskim tłumaczeniem.

@@ -31,12 +31,12 @@ rozbudowane, trwałe archiwum schowka.
 
 ## Przygotowane wydanie naprawcze
 
-CopyPasteBin 1.2.1 jest przygotowanym wydaniem naprawczym dla GNOME Shell 50
+CopyPasteBin 1.2.2 jest przygotowanym wydaniem naprawczym dla GNOME Shell 50
 na Waylandzie. Zapewnia lokalne wykrywanie danych wrażliwych, ostrzeżenia,
 anonimizację tekstu i obrazów, dokładne wykluczenia niskiego i średniego ryzyka
 oraz pauzę. Sesyjna historia tekstowa pomija rozpoznane sekrety i treści
 wysokiego ryzyka niezależnie od ustawień filtrów ostrzeżeń, a zapisywanie
-historii można wyłączyć bez zatrzymywania analizy ani edytora. Wersja 1.2.1 jest
+historii można wyłączyć bez zatrzymywania analizy ani edytora. Wersja 1.2.2 jest
 przygotowana do dystrybucji przez PPA Ubuntu jako trzy zgodne pakiety Debiana
 oraz przez GitHub Release jako te same pakiety albo lokalne dla użytkownika
 archiwum tar.gz.

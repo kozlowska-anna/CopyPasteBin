@@ -65,7 +65,7 @@ class OfflineInstallerTests(unittest.TestCase):
             page = (ROOT / filename).read_text(encoding="utf-8")
             self.assertIn(f"<code>{readme}</code>", page)
             self.assertIn(f"<code>{install}</code>", page)
-            self.assertIn("https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/", page)
+            self.assertIn("https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.2/", page)
 
 
     def test_installer_is_user_local_offline_and_fail_closed(self):
@@ -208,7 +208,7 @@ class OfflineInstallerTests(unittest.TestCase):
                 self.assertNotIn(forbidden, source)
 
     def test_release_version_is_consistent(self):
-        expected = "1.2.1"
+        expected = "1.2.2"
         self.assertIn(f'version = "{expected}"', PYPROJECT.read_text(encoding="utf-8"))
         self.assertIn(
             f'__version__ = "{expected}"',

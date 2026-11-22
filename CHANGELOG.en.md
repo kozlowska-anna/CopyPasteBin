@@ -4,7 +4,7 @@ All notable CopyPasteBin changes are recorded in this file.
 
 [Polski](CHANGELOG.md) | **English**
 
-## [Unreleased]
+## [1.2.2] - Unreleased
 
 ### Removed
 

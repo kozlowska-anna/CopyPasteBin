@@ -4,7 +4,7 @@
 
 **[Open the CopyPasteBin website](https://kozlowska-anna.github.io/CopyPasteBin/en/)**
 
-[Download version 1.2.1](#install-version-121) · [Documentation](#documentation) · [Security model](SECURITY.md)
+[Download version 1.2.2](#install-version-122) · [Documentation](#documentation) · [Security model](SECURITY.md)
 
 ## More control before you paste
 
@@ -137,7 +137,7 @@ HMAC but no clipboard text.
 
 ## Compatibility
 
-Version 1.2.1 supports the following environment:
+Version 1.2.2 supports the following environment:
 
 | Component | Requirement |
 | --- | --- |
@@ -148,9 +148,9 @@ Version 1.2.1 supports the following environment:
 | Additional components | GJS, GTK 4, GioUnix, GNOME Extensions, `sha256sum` |
 
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in
-version 1.2.1. The installer stops safely when GNOME Shell is unavailable.
+version 1.2.2. The installer stops safely when GNOME Shell is unavailable.
 
-## Install version 1.2.1
+## Install version 1.2.2
 
 Choose one installation method:
 
@@ -167,10 +167,10 @@ Choose one installation method:
 
 - Alternatively, download the three exactly matching Debian packages—`copypastebin-backend`,
   `gnome-shell-extension-copypastebin`, and `copypastebin`—from the
-  [v1.2.1 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2.1)
+  [v1.2.2 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2.2)
   for a system installation managed by APT.
-- [⬇ Download the tar.gz archive](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/CopyPasteBin-linux-1.2.1.tar.gz) for a user-local installation without `sudo`.
-- [Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/SHA256SUMS) and verify the selected files before opening them:
+- [⬇ Download the tar.gz archive](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.2/CopyPasteBin-linux-1.2.2.tar.gz) for a user-local installation without `sudo`.
+- [Download `SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.2/SHA256SUMS) and verify the selected files before opening them:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
@@ -251,8 +251,8 @@ CopyPasteBin in a sensitive workflow.
 - [Model bezpieczeństwa (Polish)](docs/security.pl.md)
 - [Version 1 contract (English)](docs/v1-contract.en.md)
 - [Kontrakt wersji 1 (Polish)](docs/v1-contract.md)
-- [Release 1.2.1 test evidence (English)](docs/RELEASE_TESTS_1.2.1.en.md)
-- [Testy wydania 1.2.1 (Polish)](docs/RELEASE_TESTS_1.2.1.md)
+- [Release 1.2.2 test evidence (English)](docs/RELEASE_TESTS_1.2.2.en.md)
+- [Testy wydania 1.2.2 (Polish)](docs/RELEASE_TESTS_1.2.2.md)
 - [Architecture (Polish)](docs/architecture.md)
 - [GNOME event backend (Polish)](docs/gnome-event-backend.md)
 - [Third-party data (Polish)](docs/third-party-data.md)

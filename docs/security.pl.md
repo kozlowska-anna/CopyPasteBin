@@ -348,7 +348,7 @@ alternatywnym trybem aktualnego produktu.
 ## Publikacja
 
 Rozszerzenie ma stabilny publiczny UUID oraz angielską bazę komunikatów z
-polskim tłumaczeniem. Wersja 1.2.1 jest przygotowana do dystrybucji przez PPA
+polskim tłumaczeniem. Wersja 1.2.2 jest przygotowana do dystrybucji przez PPA
 Ubuntu i GitHub Release jako trzy zgodne pakiety Debiana, a alternatywą jest
 lokalne dla użytkownika archiwum tar.gz. Artefakty GitHub Release mają
 zewnętrzne sumy SHA-256. Publikacja w GNOME Extensions i osobne, izolowane

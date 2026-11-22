@@ -253,7 +253,7 @@ auto-paste, auto-send, a global keyboard hook, and any guarantee of detecting
 all sensitive data. The manual local PNG/JPEG editor is part of V1 but runs
 only on request and does not monitor the clipboard.
 
-Version 1.2.1 is prepared for distribution through the stable PPA for Ubuntu
+Version 1.2.2 is prepared for distribution through the stable PPA for Ubuntu
 26.04 and GitHub Release, with a user-local tar.gz archive as an alternative.
 GNOME Extensions publication and a separately confined core package require
 later review. The extension has a stable public UUID and an English base

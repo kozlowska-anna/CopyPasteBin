@@ -133,9 +133,9 @@ ponownym zalogowaniu; testy automatyczne nie stanowią LIVE PASS.
 
 ## Instalacja na komputerze
 
-Wersję 1.2.1 można zainstalować ze stabilnego PPA dla Ubuntu 26.04, z trzech
+Wersję 1.2.2 można zainstalować ze stabilnego PPA dla Ubuntu 26.04, z trzech
 zgodnych pakietów DEB wydania GitHub albo lokalnie dla jednego użytkownika z
-`CopyPasteBin-linux-1.2.1.tar.gz`. Wariant tar.gz nie wymaga `sudo`, nie
+`CopyPasteBin-linux-1.2.2.tar.gz`. Wariant tar.gz nie wymaga `sudo`, nie
 korzysta z sieci i nie przenosi konfiguracji, historii ani zawartości schowka
 z komputera, na którym został zbudowany. Pełne procedury i granice metod
 instalacji opisuje [instrukcja instalacji](offline-installation.md).
