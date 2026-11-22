@@ -1,13 +1,13 @@
-# Instalacja CopyPasteBin 1.2.1
+# Instalacja CopyPasteBin 1.2.2
 
-CopyPasteBin 1.2.1 ma trzy metody instalacji z tego samego zestawu źródeł:
+CopyPasteBin 1.2.2 ma trzy metody instalacji z tego samego zestawu źródeł:
 
 - stabilne PPA `ppa:annakozlowska/copypastebin` dla Ubuntu 26.04 (Resolute) —
   instalacja systemowa i aktualizacje zarządzane przez APT;
-- trzy pakiety Debiana w dokładnie tej samej wersji z [wydania v1.2.1](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2.1): `copypastebin-backend_1.2.1-1_all.deb`, `gnome-shell-extension-copypastebin_1.2.1-1_all.deb` i `copypastebin_1.2.1-1_all.deb` — instalacja systemowa zarządzana przez APT;
-- [archiwum `CopyPasteBin-linux-1.2.1.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/CopyPasteBin-linux-1.2.1.tar.gz) — instalacja lokalna dla jednego użytkownika.
+- trzy pakiety Debiana w dokładnie tej samej wersji z [wydania v1.2.2](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2.2): `copypastebin-backend_1.2.2-1_all.deb`, `gnome-shell-extension-copypastebin_1.2.2-1_all.deb` i `copypastebin_1.2.2-1_all.deb` — instalacja systemowa zarządzana przez APT;
+- [archiwum `CopyPasteBin-linux-1.2.2.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.2/CopyPasteBin-linux-1.2.2.tar.gz) — instalacja lokalna dla jednego użytkownika.
 
-Pobierz również [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/SHA256SUMS) i sprawdź wybrane pliki przed ich otwarciem. Nie łącz instalacji systemowej z PPA/DEB z lokalną instalacją tar.gz.
+Pobierz również [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.2/SHA256SUMS) i sprawdź wybrane pliki przed ich otwarciem. Nie łącz instalacji systemowej z PPA/DEB z lokalną instalacją tar.gz.
 
 Obsługiwany zakres to GNOME Shell 50, Wayland oraz Python 3.11 lub nowszy.
 KDE Plasma, Cinnamon i Xfce nie mają potwierdzonej integracji. Projekt nie ma
@@ -148,18 +148,18 @@ Przed instalacją sprawdź sumę oraz metadane pobranego pliku:
 
 ```text
 sha256sum --check --ignore-missing SHA256SUMS
-dpkg-deb --info copypastebin-backend_1.2.1-1_all.deb
-dpkg-deb --info gnome-shell-extension-copypastebin_1.2.1-1_all.deb
-dpkg-deb --info copypastebin_1.2.1-1_all.deb
+dpkg-deb --info copypastebin-backend_1.2.2-1_all.deb
+dpkg-deb --info gnome-shell-extension-copypastebin_1.2.2-1_all.deb
+dpkg-deb --info copypastebin_1.2.2-1_all.deb
 ```
 
 Instalacja systemowa wymaga zatwierdzenia uprawnień administratora:
 
 ```text
 sudo apt install \
-  ./copypastebin-backend_1.2.1-1_all.deb \
-  ./gnome-shell-extension-copypastebin_1.2.1-1_all.deb \
-  ./copypastebin_1.2.1-1_all.deb
+  ./copypastebin-backend_1.2.2-1_all.deb \
+  ./gnome-shell-extension-copypastebin_1.2.2-1_all.deb \
+  ./copypastebin_1.2.2-1_all.deb
 ```
 
 Pakiet nie uruchamia CopyPasteBin jako root, nie ma skryptów maintainer i nie

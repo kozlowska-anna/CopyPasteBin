@@ -6,8 +6,8 @@ readonly ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)"
 readonly CHANNEL="${CPB_BUNDLE_CHANNEL:-release}"
 case "$CHANNEL" in
     release)
-        VERSION="1.2.1"
-        PYTHON_PROJECT_VERSION="1.2.1"
+        VERSION="1.2.2"
+        PYTHON_PROJECT_VERSION="1.2.2"
         EXTENSION_VERSION="8"
         ;;
     development)
@@ -74,8 +74,8 @@ package_init = Path(sys.argv[2])
 version = sys.argv[3]
 
 for path, old, new in (
-    (pyproject, 'version = "1.2.1"', f'version = "{version}"'),
-    (package_init, '__version__ = "1.2.1"', f'__version__ = "{version}"'),
+    (pyproject, 'version = "1.2.2"', f'version = "{version}"'),
+    (package_init, '__version__ = "1.2.2"', f'__version__ = "{version}"'),
 ):
     source = path.read_text(encoding="utf-8")
     if source.count(old) != 1:
@@ -105,7 +105,7 @@ display_version = sys.argv[3]
 extension_version = int(sys.argv[4])
 
 about = about_path.read_text(encoding="utf-8")
-old = "const VERSION = '1.2.1';"
+old = "const VERSION = '1.2.2';"
 if about.count(old) != 1:
     raise SystemExit("unexpected About version marker")
 about_path.write_text(

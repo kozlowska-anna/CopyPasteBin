@@ -367,7 +367,7 @@ alternative mode of the current product.
 ## Publication
 
 The extension has a stable public UUID and English base messages with a Polish
-translation. Version 1.2.1 is prepared for distribution through an Ubuntu PPA
+translation. Version 1.2.2 is prepared for distribution through an Ubuntu PPA
 and GitHub Release as three matching Debian packages, with a user-local tar.gz
 archive as an alternative. GitHub Release assets have external SHA-256 checksums.
 Publication on GNOME Extensions and separate confined packaging of the core

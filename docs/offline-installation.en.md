@@ -1,13 +1,13 @@
-# Installing CopyPasteBin 1.2.1
+# Installing CopyPasteBin 1.2.2
 
-CopyPasteBin 1.2.1 has three installation methods from the same source set:
+CopyPasteBin 1.2.2 has three installation methods from the same source set:
 
 - stable PPA `ppa:annakozlowska/copypastebin` for Ubuntu 26.04 (Resolute),
   providing a system installation and updates managed by APT;
-- three exactly matching Debian packages from the [v1.2.1 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2.1)—`copypastebin-backend_1.2.1-1_all.deb`, `gnome-shell-extension-copypastebin_1.2.1-1_all.deb`, and `copypastebin_1.2.1-1_all.deb`—for a system installation managed by APT;
-- [archive `CopyPasteBin-linux-1.2.1.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/CopyPasteBin-linux-1.2.1.tar.gz) for a user-local installation.
+- three exactly matching Debian packages from the [v1.2.2 release](https://github.com/kozlowska-anna/CopyPasteBin/releases/tag/v1.2.2)—`copypastebin-backend_1.2.2-1_all.deb`, `gnome-shell-extension-copypastebin_1.2.2-1_all.deb`, and `copypastebin_1.2.2-1_all.deb`—for a system installation managed by APT;
+- [archive `CopyPasteBin-linux-1.2.2.tar.gz`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.2/CopyPasteBin-linux-1.2.2.tar.gz) for a user-local installation.
 
-Also download [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.1/SHA256SUMS) and verify the selected files before opening them. Do not mix a system PPA/DEB installation with the user-local tar.gz installation.
+Also download [`SHA256SUMS`](https://github.com/kozlowska-anna/CopyPasteBin/releases/download/v1.2.2/SHA256SUMS) and verify the selected files before opening them. Do not mix a system PPA/DEB installation with the user-local tar.gz installation.
 
 The supported scope is GNOME Shell 50 on Wayland with Python 3.11 or newer.
 KDE Plasma, Cinnamon, and Xfce integration has not been verified. There is no
@@ -64,14 +64,14 @@ sha256sum --check --ignore-missing SHA256SUMS
 Continue only if the command reports:
 
 ```text
-CopyPasteBin-linux-1.2.1.tar.gz: OK
+CopyPasteBin-linux-1.2.2.tar.gz: OK
 ```
 
 Extract the verified archive and enter its directory:
 
 ```sh
-tar -xzf CopyPasteBin-linux-1.2.1.tar.gz
-cd CopyPasteBin-linux-1.2.1
+tar -xzf CopyPasteBin-linux-1.2.2.tar.gz
+cd CopyPasteBin-linux-1.2.2
 ```
 
 ## Check compatibility and install
@@ -156,7 +156,7 @@ settings and history.
 
 ## Supported environment
 
-Version 1.2.1 supports GNOME Shell 50 on Wayland with Python 3.11 or newer,
+Version 1.2.2 supports GNOME Shell 50 on Wayland with Python 3.11 or newer,
 including `venv`, GJS, GTK 4, GioUnix, GNOME Extensions, and `sha256sum`.
 Cinnamon, KDE Plasma, and Xfce desktop integrations are not supported in this
 release. The installer stops safely when GNOME Shell is unavailable.
@@ -167,18 +167,18 @@ Verify the checksum and inspect the downloaded package:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
-dpkg-deb --info copypastebin-backend_1.2.1-1_all.deb
-dpkg-deb --info gnome-shell-extension-copypastebin_1.2.1-1_all.deb
-dpkg-deb --info copypastebin_1.2.1-1_all.deb
+dpkg-deb --info copypastebin-backend_1.2.2-1_all.deb
+dpkg-deb --info gnome-shell-extension-copypastebin_1.2.2-1_all.deb
+dpkg-deb --info copypastebin_1.2.2-1_all.deb
 ```
 
 Install it after explicitly approving administrative access:
 
 ```sh
 sudo apt install \
-  ./copypastebin-backend_1.2.1-1_all.deb \
-  ./gnome-shell-extension-copypastebin_1.2.1-1_all.deb \
-  ./copypastebin_1.2.1-1_all.deb
+  ./copypastebin-backend_1.2.2-1_all.deb \
+  ./gnome-shell-extension-copypastebin_1.2.2-1_all.deb \
+  ./copypastebin_1.2.2-1_all.deb
 ```
 
 The package does not start CopyPasteBin as root, has no maintainer scripts,
