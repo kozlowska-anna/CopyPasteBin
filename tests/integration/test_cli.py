@@ -111,6 +111,18 @@ class CliTests(unittest.TestCase):
         self.assertNotIn("private-canary", stderr)
         self.assertNotIn("\x1b", stderr)
 
+    def test_removed_legacy_commands_are_rejected_by_argument_parser(self):
+        for argv in (
+            ["watch", "start"],
+            ["service", "status"],
+            ["launcher", "setup"],
+        ):
+            with self.subTest(argv=argv):
+                code, stdout, stderr = self.run_cli(argv)
+                self.assertEqual(2, code)
+                self.assertEqual("", stdout)
+                self.assertIn("cpb: niepoprawne użycie.", stderr)
+
     def test_file_high_risk_original_can_only_use_exact_phrase(self):
         path = Path(self.temporary.name) / "input.txt"
         path.write_text("password=synthetic-secret", encoding="utf-8")

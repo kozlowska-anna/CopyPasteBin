@@ -6,8 +6,8 @@
 
 CopyPasteBin V1 consists of a local analysis core and a lightweight GNOME
 Shell 50 interface. The current UX is event-driven and does not poll the
-clipboard. The old `wl-paste` watcher, service, and service launcher are
-legacy code.
+clipboard. The old `wl-paste` watcher, service, and service launcher have
+been removed.
 
 The application warns and helps the user explicitly correct text. Detection
 alone does not block, delete, or modify the clipboard. An optional separate
@@ -236,14 +236,14 @@ send text, or guess the destination. It does not protect against root, another
 process running as the same user, a clipboard manager, screen observation, a
 compromised destination application, or false negatives.
 
-## Legacy watcher and lifecycle
+## Removed watcher and lifecycle
 
-`cpb watch start`, `cpb service ...`, and `cpb launcher setup` are
-fail-closed legacy code covered by tests. Polling `wl-paste` on GNOME Shell
-50.1 used a temporary Wayland surface, stole focus, and closed context menus.
-The legacy service must remain inactive and its former launcher absent. This
-path is not repaired by a longer interval, retries, stderr parsing, or exit
-code guessing.
+`cpb watch start`, `cpb service ...`, and `cpb launcher setup`, together with
+the watcher, lifecycle, systemd service, and former service-launcher modules,
+have been removed. Polling `wl-paste` on GNOME Shell 50.1 used a temporary
+Wayland surface, stole focus, and closed context menus. A longer interval,
+retries, stderr parsing, or exit-code guessing would not repair that boundary;
+the removed architecture is not an alternative product mode.
 
 ## Outside V1
 

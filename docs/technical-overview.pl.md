@@ -164,14 +164,13 @@ stan techniczny GNOME i niczego nie zmienia. `./uninstall.sh` usuwa kod,
 rozszerzenie i launcher, ale zachowuje prywatne ustawienia oraz historię.
 Szczegóły i granice opisuje [`offline-installation.md`](offline-installation.md).
 
-## Kod legacy
+## Usunięty kod legacy
 
-`cpb watch start`, `cpb service ...` i `cpb launcher setup` pozostają w
-repozytorium jako wcześniejsza, przetestowana ścieżka techniczna. Nie stanowią
-aktualnego UX GNOME i nie powinny być używane w codziennej sesji. Polling
-`wl-paste` na GNOME Shell 50.1 odbierał fokus i zamykał menu kontekstowe.
-Zwiększenie interwału nie naprawia tej granicy. Stara usługa i dawny launcher
-powinny pozostać nieaktywne; historię decyzji opisuje logbook.
+`cpb watch start`, `cpb service ...` i `cpb launcher setup` oraz odpowiadające
+im moduły watchera, lifecycle, usługi systemd i dawnego launchera zostały
+usunięte. Polling `wl-paste` na GNOME Shell 50.1 odbierał fokus i zamykał menu
+kontekstowe. Zwiększenie interwału nie naprawiłoby tej granicy; historię
+decyzji opisuje logbook.
 
 Opcjonalny `${XDG_CONFIG_HOME:-~/.config}/copypastebin/config.toml` może
 dodać najwyżej 32 dosłowne wzorce `CUSTOM_RULE` o jednym z czterech poziomów

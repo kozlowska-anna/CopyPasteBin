@@ -102,14 +102,12 @@ class BridgeCliTests(unittest.TestCase):
         self.assertNotIn(canary.encode(), HistoryStore(self.state).database_path.read_bytes())
 
     def test_warning_returns_safe_banner_shape_without_system_notifier(self):
-        with patch("copypastebin.cli.DesktopNotifier") as notifier_type:
-            code, stdout, stderr = self.run_cli(frame("app.one", "1234 PLN"))
+        code, stdout, stderr = self.run_cli(frame("app.one", "1234 PLN"))
         self.assertEqual(0, code)
         self.assertEqual("", stderr)
         self.assertIn('"risk":"low"', stdout)
         self.assertIn('"MONEY_AMOUNT_PLN_USD"', stdout)
         self.assertNotIn("1234", stdout)
-        notifier_type.assert_not_called()
 
     def test_long_numeric_identifier_does_not_create_phone_warning(self):
         code, stdout, stderr = self.run_cli(

@@ -6,7 +6,7 @@
 
 CopyPasteBin V1 składa się z lokalnego rdzenia analizy oraz lekkiego interfejsu
 GNOME Shell 50. Aktualny UX jest zdarzeniowy i nie korzysta z pollingu
-schowka. Stary watcher `wl-paste`, service i launcher usługi są legacy.
+schowka. Stary watcher `wl-paste`, usługa i launcher usługi zostały usunięte.
 
 Program ostrzega i pomaga jawnie poprawić tekst. Domyślnie samo wykrycie nie
 blokuje, nie usuwa ani nie zmienia schowka; osobną opcją jest czasowe
@@ -264,18 +264,16 @@ wysyła tekstu i nie zgaduje celu. Nie chroni przed rootem, innym procesem tej
 samego użytkownika, clipboard managerem, obserwacją ekranu, przejętą
 aplikacją docelową ani false negatives.
 
-## Legacy watcher i lifecycle
+## Usunięty watcher i lifecycle
 
-`cpb watch start`, `cpb service ...` i `cpb launcher setup` pozostają kodem
-legacy. Są fail-closed i pokryte testami, lecz polling `wl-paste` na GNOME
-Shell 50.1 kradł fokus przez tymczasową powierzchnię Wayland i zamykał menu
-kontekstowe.
+`cpb watch start`, `cpb service ...` i `cpb launcher setup` oraz odpowiadające
+im moduły watchera, lifecycle, usługi systemd i dawnego launchera zostały
+usunięte. Polling `wl-paste` na GNOME Shell 50.1 kradł fokus przez tymczasową
+powierzchnię Wayland i zamykał menu kontekstowe.
 
-Legacy service ma pozostać nieaktywny, a dawny launcher nieobecny. Nie wolno
-uznawać dłuższego interwału, dodatkowych prób, parsowania stderr ani zgadywania
-po exit code za naprawę. Historyczny kontrakt pięciu prób, systemd i launchera
-jest zachowany w kodzie i testach, ale nie jest alternatywnym trybem aktualnego
-produktu.
+Dłuższy interwał, dodatkowe próby, parsowanie stderr ani zgadywanie po exit
+code nie naprawiłyby tej granicy. Usunięta architektura nie jest alternatywnym
+trybem aktualnego produktu.
 
 ## Poza V1
 

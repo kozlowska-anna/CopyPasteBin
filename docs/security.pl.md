@@ -12,8 +12,7 @@ historii jest włączone. Podgląd
 terminalowy neutralizuje ANSI, C0/C1 i znaki bidi.
 
 Aktualną ścieżką pulpitu jest zdarzeniowe rozszerzenie GNOME Shell 50. Stary
-watcher `wl-paste`, usługa systemd i dawny launcher są kodem legacy i mają
-pozostać nieaktywne.
+watcher `wl-paste`, usługa systemd i dawny launcher usługi zostały usunięte.
 
 ## Granice techniczne
 
@@ -334,21 +333,17 @@ ograniczonego stdout i tekstu przekazywanego do zapisu tylko przez stdin.
 Oryginał wysokiego ryzyka wymaga jednorazowego porównania stałoczasowego z
 `COPY <operation_id>`; odmowa i awaria aktualizują tylko metadane statusu.
 
-## Kod legacy
+## Usunięty kod legacy
 
-`cpb watch start`, `cpb service ...` i `cpb launcher setup` są wcześniejszą,
-pokrytą testami architekturą. Pollingowy odczyt `wl-paste` na GNOME Shell 50.1
-używał tymczasowej powierzchni Wayland, odbierał fokus i zamykał menu
-kontekstowe. Dlatego nie jest aktualnym trybem produktu.
+`cpb watch start`, `cpb service ...` i `cpb launcher setup` oraz pollingowy
+watcher, jego lifecycle, kontroler usługi systemd, dawny launcher usługi i ich
+dedykowane testy zostały usunięte. Pollingowy odczyt `wl-paste` na GNOME Shell
+50.1 używał tymczasowej powierzchni Wayland, odbierał fokus i zamykał menu
+kontekstowe.
 
-Legacy watcher zachowuje fail-closed, stałe argv, ograniczony startup grace,
-prywatny `flock`, zredagowane błędy i `Restart=no`, ale nie wolno go
-uruchamiać równolegle ani przywracać przez dawny launcher. Stara usługa ma
-pozostać zatrzymana i nieobecna. Nie naprawiamy tej ścieżki przez dłuższy
-interwał, więcej prób, parsowanie stderr albo zgadywanie exit code.
-
-Kontrakt historycznego lifecycle jest zachowany w kodzie i testach, ale nie
-stanowi alternatywnego trybu aktualnego produktu.
+Dłuższy interwał, więcej prób, parsowanie stderr ani zgadywanie po exit code
+nie naprawiłyby tej granicy architektonicznej. Usunięta ścieżka nie jest
+alternatywnym trybem aktualnego produktu.
 
 ## Publikacja
 
