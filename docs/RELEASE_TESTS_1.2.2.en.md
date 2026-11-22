@@ -14,6 +14,8 @@ compatibility range.
 - Debian package version: `1.2.2-1`;
 - version tested from the PPA: `1.2.2-1~test1`, from upload commit
   `603e3ae2452f5c4f9318062f93cf7ebf8f11df7c`;
+- the stable PPA source was built from merged `main` commit
+  `7653fa317b72336695ce03f39c35fa74f28f50fb`;
 - GNOME extension version: `8` (no extension-code change requiring a new
   metadata version);
 - local branch: `codex/cpb-1.2.2-release`.
@@ -93,12 +95,36 @@ After logging back in, the following were confirmed:
 
 No manual cleanup of legacy remnants was needed because none were present.
 
+## Stable PPA — PASS
+
+On 22 November 2026, the source and all three `1.2.2-1` packages reached
+`Published` status in the stable PPA for Ubuntu Resolute. Two independent
+source builds were byte-for-byte identical. The locally built binary packages
+had the same SHA-256 values as the candidate verified before LIVE testing.
+
+The user performed a controlled transition of all three packages from
+`1.2.2-1~test1` to one exactly matched `1.2.2-1` set, then removed the test
+PPA. `apt-cache policy` showed the stable PPA as the only source of the
+installed and candidate `1.2.2-1` version.
+
+After logging back in, the final smoke test confirmed:
+
+- the system extension under `/usr/share` reported version `8` and state
+  `ACTIVE`;
+- the backend reported product version `1.2.2` and protocol version `2`;
+- no `wl-paste`, watcher, or `cpb watch` process was running;
+- the menu remained open without flicker or spontaneous closing;
+- pause and resume worked;
+- ordinary synthetic text entered history.
+
 ## Evidence boundaries
 
-- no push, tag, GitHub Release, or stable-PPA publication was performed;
-- test package `1.2.2-1~test1` was published only in the test PPA;
+- no tag or GitHub Release was created;
+- stable package `1.2.2-1` was published in the stable PPA;
+- test package `1.2.2-1~test1` remained confined to the test PPA, which was
+  removed from the test computer's configuration after the stable upgrade;
 - the test computer was intentionally upgraded from stable `1.2.1-1` to the
-  test-PPA candidate;
+  test-PPA candidate and then to stable `1.2.2-1`;
 - no real clipboard, history, or private data was read;
 - GNOME interaction results are LIVE evidence reported by the user;
 - a matching SHA-256 confirms file identity but does not by itself prove that
