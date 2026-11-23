@@ -149,3 +149,117 @@ spośród przetestowanych wariantów wpis był ukryty tylko przy poprawnym DWORD
   `Win+V` jest dla nich oczekiwana i nie mówi nic o obsłudze
   `CanUploadToCloudClipboard` przez Windows; synchronizacji w chmurze nie
   sprawdzano.
+
+---
+
+## S7 — zajęty schowek (22–23.11.2026)
+
+**Ocena: PASS** (z odstępstwami i ograniczeniami poniżej).
+
+Sonda „zwykła" — domyślna, jedna próba otwarcia (dziennik `s07-`); sonda „z
+ponawianiem" — `--open-attempts 10 --open-delay-ms 50` (dziennik `s07b-`).
+Wszystkie dzienniki zamknięte (`probe_summary`, `probe_stop`), `elevated=false`;
+po każdej próbie żaden program testowy nie działał; w żadnym dzienniku nie
+występuje `CPB-STAGE0-CANARY`.
+
+**Odstępstwa od protokołu:**
+
+- Próba 6 (przerwanie blokady): blokadę przerwano poleceniem
+  `Stop-Process -Name CpbClipboardBlocker` z trzeciego okna zamiast `Ctrl+C`
+  — patrz „Ograniczenia dowodowe".
+- Wykonano dwie dodatkowe, nieplanowane próby z blokadą właściciela 10 000 ms
+  (pomyłka w poleceniu); jeden z tych dzienników ma mylącą nazwę (tabela).
+- Właściciela uruchamiano zwykle bez dopisku `; "EXIT=$LASTEXITCODE"`.
+- Próbę 12 (blokada okresowa ze 100 cyklami) pominięto, bo wynik próby 11
+  jest jednoznaczny.
+
+### Fakty z dzienników
+
+Blokada właściciela (`--hold-after-ms`). We wszystkich próbach wiersz
+`publish` właściciela: `open=ok`, `text_published=true`, `hold_after=ok`
+(poza próbą 1, która nie ma blokady), a `seq` zgadza się z `seq_before`
+zdarzenia sondy. Każda próba ma dokładnie jedno zdarzenie z
+`synthetic_fmt=present` na jedną publikację i żadnego obcego zdarzenia.
+
+| Nr | Dziennik | Blokada | Sonda | `open` | `open_error` | `open_attempts` | `open_time` | EXIT |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `s07-k0-20261123-001811` | brak (3 publikacje) | zwykła | ok (3×) | 0 | 1 | lt1ms | 0 (odczytany po 3. uruchomieniu) |
+| 2 | `s07-h50-20261123-002913` | 50 ms | zwykła | failed | 5 | 1 | lt1ms | wywnioskowany: 0 |
+| 2 (powt.) | `s07-h50-20261123-003630` | 50 ms | zwykła | failed | 5 | 1 | lt1ms | wywnioskowany: 0 |
+| 3 | `s07b-h50-20261123-004437` | 50 ms | z ponawianiem | ok | 0 | 2 | 50to250ms | wywnioskowany: 0 |
+| 4 | `s07-h250-20261123-004437` | 250 ms | zwykła | failed | 5 | 1 | lt1ms | wywnioskowany: 0 |
+| 5 | `s07b-h250-20261123-004854` | 250 ms | z ponawianiem | ok | 0 | 6 | 250msto1s | wywnioskowany: 0 |
+| 7 | `s07-h1000-20261123-010705` | 1000 ms | zwykła | failed | 5 | 1 | lt1ms | wywnioskowany: 0 |
+| 8 | `s07b-h1000-20261123-013404` | 1000 ms | z ponawianiem | failed | 5 | 10 | 250msto1s | wywnioskowany: 0 |
+| 9 | `s07-h5000-20261123-013530` | 5000 ms | zwykła | failed | 5 | 1 | lt1ms | wywnioskowany: 0 |
+| 10 | `s07b-h5000-20261123-013629` | 5000 ms | z ponawianiem | failed | 5 | 10 | 250msto1s | wywnioskowany: 0 |
+| dod. | `s07-int-20261123-005030` | 10 000 ms | zwykła | failed | 5 | 1 | lt1ms | 0 |
+| dod. | `s07-h1000-20261123-010542` (**nazwa myląca** — faktycznie 10 000 ms) | 10 000 ms | zwykła | failed | 5 | 1 | lt1ms | wywnioskowany: 0 |
+
+„Wywnioskowany: 0" — kod nie został wypisany; właściciel zwraca `3` wyłącznie
+przy publikacji z `open=failed` (`SyntheticOwner.cs`), a wszystkie te
+publikacje mają `open=ok`.
+
+Przerwanie blokady (próba 6):
+
+| Dziennik | Przebieg w oknie blokady | EXIT blokady | Właściciel po blokadzie | Sonda |
+|---|---|---|---|---|
+| `s07-int-20261123-005255` | `hold_start`, `hold_end` po 10 s — **nie przerwano** | 0 | `open=ok`, `text_published=true` | `open=ok`, 1 próba |
+| `s07-int-20261123-005633` | jak wyżej — **nie przerwano** | 0 | `open=ok`, `text_published=true` | `open=ok`, 1 próba |
+| `s07-int-20261123-010058` | `hold_start`, brak `hold_end` i `blocker_stop` — przerwano przez `Stop-Process` | −1 | `open=ok`, `text_published=true`, `seq=563` | `open=ok`, 1 próba, `seq_before=563` |
+
+Wiążący jest trzeci wiersz; dwa pierwsze dokumentują zwolnienie schowka po
+naturalnym końcu blokady.
+
+Blokada okresowa (próba 11): dzienniki `s07-per25-20261123-013859` (sonda
+zwykła) i `s07-blocker-20261123-013900` (blokada).
+
+- Blokada: 25 z 25 cykli `hold_start`/`hold_end` (po około 200 ms, przerwy
+  około 30 ms), żadnego `hold open=failed`, wiersz `blocker_stop`.
+- Właściciel (`--count 10 --interval-ms 300 --vary`): 10 z 10 publikacji z
+  `open=ok` i `text_published=true`, `EXIT=0`; kolejne publikacje co około
+  470 ms zamiast co 300 ms.
+- Sonda: 10 zdarzeń z `synthetic_fmt=present`, `seq_before` zgodne z 10
+  wartościami `seq` właściciela (774–828), wszystkie `open=ok` przy 1 próbie,
+  `failed_opens=0`, brak obcych zdarzeń.
+
+Nieudane wywołania (dzienniki bez publikacji testowej, nie są wynikami):
+`s07-k0-20261122-233943`, `s07-k0-20261122-233953`, `s07-k0-20261122-234330`,
+`s07-k0-20261122-234411`, `s07b-h50-20261123-003253`,
+`s07b-h50-20261123-004249` (sonda działała, właściciela nie uruchomiono) oraz
+`s07b-h50-20261123-003256` (sonda omyłkowo uruchomiona w oknie właściciela;
+jedno obce zdarzenie, najpewniej kopiowanie wyników).
+
+Obserwacja uboczna: wiersz `render_all_request` pojawia się przy każdym
+zakończeniu właściciela, także bez opóźnionego renderowania.
+
+### Wniosek
+
+Gdy schowek jest zajęty, sonda dostaje `open=failed` z kodem `5` (odmowa
+dostępu). Krótkie ponawianie (do 10 × 50 ms) pozwoliło otworzyć schowek przy
+blokadzie 50 i 250 ms; przy blokadzie 1000 ms i dłuższej nie wystarczyło.
+Liczba prób rosła z długością blokady (2 przy 50 ms, 6 przy 250 ms). Sonda
+nie zgubiła żadnego zdarzenia — w każdej próbie jedno zdarzenie na jedną
+publikację — i nie ponawiała zdarzenia po czasie. Po zabiciu programu, który
+trzymał schowek, Windows od razu go zwolnił. Przy blokadzie okresowej (około
+87% czasu zajętości) sonda z jedną próbą otwarcia ani razu nie trafiła na
+blokadę, choć właściciel był przez nią spowalniany.
+
+### Ograniczenia dowodowe
+
+- `Ctrl+C` w dwóch podejściach nie przerwało blokady (blokada doszła do
+  `hold_end`). Nie ustalono, czy klawisze nie trafiły do okna, czy zostały
+  naciśnięte za późno, czy program nie reaguje; zwolnienie po `Ctrl+C` **nie**
+  zostało więc potwierdzone — potwierdzone jest tylko zwolnienie po
+  `Stop-Process`.
+- Wyjaśnienie wyniku blokady okresowej (powiadomienie dociera do sondy, zanim
+  blokada odzyska schowek) jest hipotezą; wynik dotyczy tych parametrów
+  blokady i jednej serii.
+- Kody `EXIT` w większości prób są wywnioskowane z kodu, nie odczytane.
+- Wiersz `publish` z `open=ok` nie podaje liczby prób ani czasu otwarcia,
+  więc nie wiadomo, jak długo właściciel czekał na schowek w próbie 11.
+- Każdy wariant wykonano raz (50 ms z sondą zwykłą i 10 000 ms — dwa razy).
+- Przedziały `open_time` są zgrubne; liczba prób w sondzie z ponawianiem
+  zależy także od rozdzielczości zegara systemu.
+- Zmiany schowka między uruchomieniami sondy (widoczne jako skoki numeru
+  sekwencji, np. 313→357, 742→768) nie są rejestrowane ani przypisane.
