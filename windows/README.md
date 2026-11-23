@@ -9,7 +9,7 @@ chronią.
 Stan: kod został napisany w kontenerze Linux, a następnie skompilowany i
 częściowo przetestowany ręcznie na Windows 11 według
 [TEST-PROTOCOL.md](TEST-PROTOCOL.md). Wyniki wykonanych scenariuszy (obecnie
-S5c i S6) są w [TEST-RESULTS.md](TEST-RESULTS.md); pozostałe scenariusze nie
+S5c, S6 i S7) są w [TEST-RESULTS.md](TEST-RESULTS.md); pozostałe scenariusze nie
 mają jeszcze udokumentowanych wyników.
 
 ## Co zawiera katalog
